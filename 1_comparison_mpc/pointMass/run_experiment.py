@@ -4,6 +4,7 @@ import csv
 import datetime
 import time
 import os
+from shutil import copyfile
 
 from fabricsExperiments.infrastructure.expSetup import ExpSetup
 from fabrics.planner import FabricPlanner
@@ -12,6 +13,8 @@ from mpc.planner import MPCPlanner
 class Experiment(object):
 
     def __init__(self, planner, setupFile, plannerSetup):
+        self._setupFile = setupFile
+        self._plannerSetup = plannerSetup
         self._setup = ExpSetup(setupFile)
         self._env = self._setup.makeEnv()
         if planner == 'fabric':
@@ -63,6 +66,8 @@ class Experiment(object):
                 writer.writerow(res)
         for i, o in enumerate(self._obsts):
             o.toCSV(obstFile + '_' + str(i) + '.csv')
+        copyfile(self._setupFile, folderPath + "/exp.yaml")
+        copyfile(self._plannerSetup, folderPath + "/planner.yaml")
 
 def main():
     parser = argparse.ArgumentParser("Run motion planning experiment")
