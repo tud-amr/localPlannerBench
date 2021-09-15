@@ -28,14 +28,14 @@ def getParameters(n, m, nbObst):
     nPar += m
     pm['obst'] = list(range(nPar, nPar + 3 * nbObst))
     nPar += 3 * nbObst
-    dt = 0.05
+    dt = 0.10
     nx = n * 2
     nu = n
     ns = 1
     return pm, nPar, nx, nu, dt, ns
 
 paramMap, npar, nx, nu, dt, ns = getParameters(n, m, nbObst)
-N = 80
+N = 20
 dt_str = str(dt).replace('.', '')
 
 # file names

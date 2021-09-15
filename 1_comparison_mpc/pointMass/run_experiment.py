@@ -11,13 +11,13 @@ from mpc.planner import MPCPlanner
 
 class Experiment(object):
 
-    def __init__(self, planner, setupFile):
+    def __init__(self, planner, setupFile, plannerSetup):
         self._setup = ExpSetup(setupFile)
         self._env = self._setup.makeEnv()
         if planner == 'fabric':
-            self._planner = FabricPlanner()
+            self._planner = FabricPlanner(plannerSetup)
         elif planner == 'mpc':
-            self._planner = MPCPlanner()
+            self._planner = MPCPlanner(plannerSetup)
         self._obsts = self._setup.obstacles()
         self._planner.addObstacles(self._obsts)
         self._planner.addGoal(self._setup.goal())
@@ -68,12 +68,12 @@ def main():
     parser = argparse.ArgumentParser("Run motion planning experiment")
     parser.add_argument('setupFile', metavar="setup", type=str, help='setup file')
     parser.add_argument('planner', metavar="planner", type=str, help='planner (fabric, mpc)')
-    # parser.add_argument('-o', metavar='output_file', type=str, help='output_file', default="output")
+    parser.add_argument('plannerSetup', metavar="plannerSetup", type=str, help='planner setup')
     parser.add_argument('--output-file', '-o', type=str, default='output', help='Output filename without suffix', metavar='output')
     parser.add_argument('--no-stamp', dest='stamp', action='store_false')
     parser.set_defaults(stamp=True)
     args = parser.parse_args()
-    thisExp = Experiment(args.planner, args.setupFile)
+    thisExp = Experiment(args.planner, args.setupFile, args.plannerSetup)
     thisExp.run()
     if args.stamp:
         timeStamp = "{:%Y%m%d_%H%M%S}".format(datetime.datetime.now())

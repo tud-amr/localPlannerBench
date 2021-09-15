@@ -1,5 +1,7 @@
 set term postscript eps color size 5, 5
 exp_name="mpc"
+exp_name=system("ls -t ../results | head -n 1")
+print exp_name
 resFolder="../results/".exp_name
 inFile=resFolder."/res.csv"
 outFile="trajectories_".exp_name.".eps"
@@ -20,7 +22,7 @@ set title "MPC"
 plot inFile using q0:q1 with lines lw 2 notitle, \
   for [file in list] file w lines lc rgb "black" lw 10 notitle
 
-exp_name="fabric"
+exp_name="fabric_20210915_091526"
 resFolder="../results/".exp_name
 inFile=resFolder."/res.csv"
 outFile="trajectories_".exp_name.".eps"

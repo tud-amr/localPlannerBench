@@ -2,6 +2,7 @@ import time
 import numpy as np
 from numpy import sin, cos
 import casadi as ca
+import yaml
 
 import forcespro.nlp
 
@@ -21,21 +22,22 @@ from splineFunctions import project
 
 class MPCPlanner(object):
 
-    def __init__(self, nbObst=5, wx=0.5, wvel=1, wu=1, ws=1e8, N=80, dt=0.05, interval=1):
-        self._H = N
-        self._nbObst = nbObst
+    def __init__(self, setupFile):
+        # nbObst=5, wx=0.5, wvel=1, wu=1, ws=1e8, N=80, dt=0.05, interval=1):
+        self.parseSetup(setupFile)
+        self._H = self._params['H']
+        self._nbObst = self._params['obst']['nbObst']
         self._m = 2
         self._n = 2
-        self._paramMap, self._npar, self._nx, self._nu, _, self._ns = getParameters(2, 2, nbObst)
-        self._dt = dt
-        self._interval = interval
-        self._wx = wx
-        self._wvel = wvel
-        self._ws = ws
-        self._wu = wu
-        self._dynamic = False
-        dt_str = str(dt).replace('.', '')
-        mpcFileName = 'mpc/solver_' + dt_str + '_N' + str(N)
+        self._paramMap, self._npar, self._nx, self._nu, _, self._ns = getParameters(2, 2, self._nbObst)
+        self._dt = self._params['dt']
+        self._interval = self._params['interval']
+        self._wx = self._params['weights']['wx']
+        self._wvel = self._params['weights']['wvel']
+        self._ws = self._params['weights']['ws']
+        self._wu = self._params['weights']['wu']
+        dt_str = str(self._dt).replace('.', '')
+        mpcFileName = 'mpc/solver_' + dt_str + '_N' + str(self._H)
         self._mpcSolver = forcespro.nlp.Solver.from_directory(mpcFileName)
         self._x0 = np.zeros(shape=(self._H, self._nx+self._nu+self._ns))
         self._xinit = np.zeros(self._nx)
@@ -55,6 +57,10 @@ class MPCPlanner(object):
             self._params[
                 [self._npar * i + val for val in self._paramMap["ws"]]
             ] = self._ws
+
+    def parseSetup(self, setupFile):
+        with open(setupFile, 'r') as stream:
+            self._params = yaml.safe_load(stream)
 
     def addGoal(self, goal):
         for i in range(self._H):
@@ -87,8 +93,6 @@ class MPCPlanner(object):
     def solve(self, ob):
         #print("Observation : " , ob[0:self._nx])
         self._xinit = ob[0:self._nx]
-        if self._dynamic:
-            self.setSplineGoal()
         action = np.zeros(self._nu)
         problem = {}
         #problem["ToleranceStationarity"] = 1e-7
