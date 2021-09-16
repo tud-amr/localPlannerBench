@@ -12,21 +12,27 @@ from mpc.planner import MPCPlanner
 
 class Experiment(object):
 
-    def __init__(self, planner, setupFile, plannerSetup):
-        self._setupFile = setupFile
-        self._plannerSetup = plannerSetup
-        self._setup = ExpSetup(setupFile)
+    def __init__(self, setup, mpcSetup, fabricSetup):
+        self._mpcSetup = mpcSetup
+        self._fabricSetup = fabricSetup
+        self._setup = setup
         self._env = self._setup.makeEnv()
-        if planner == 'fabric':
-            self._planner = FabricPlanner(plannerSetup)
-        elif planner == 'mpc':
-            self._planner = MPCPlanner(plannerSetup)
+        self._mpcPlanner = MPCPlanner(mpcSetup)
+        self._fabricPlanner = FabricPlanner(fabricSetup)
         self._obsts = self._setup.obstacles()
-        self._planner.addObstacles(self._obsts)
-        self._planner.addGoal(self._setup.goal())
+        self._mpcPlanner.addObstacles(self._obsts)
+        self._fabricPlanner.addObstacles(self._obsts)
+        self._mpcPlanner.addGoal(self._setup.goal())
+        self._fabricPlanner.addGoal(self._setup.goal())
 
-    def run(self):
-        self._planner.concretize()
+    def run(self, planner='mpc'):
+        if not self._setup.checkFeasibility():
+            print("Case not feasible")
+            return -1
+        if planner == 'mpc':
+            self._mpcPlanner.concretize()
+        elif planner == 'fabric':
+            self._fabricPlanner.concretize()
         q0, qdot0 = self._setup.initialState()
         ob = self._env.reset(q0, qdot0)
         t = 0.0
@@ -37,7 +43,10 @@ class Experiment(object):
             q = ob[0:n]
             qdot = ob[n:2*n]
             t_before = time.time()
-            a = self._planner.computeAction(q, qdot)
+            if planner == 'mpc':
+                a = self._mpcPlanner.computeAction(q, qdot)
+            elif planner == 'fabric':
+                a = self._fabricPlanner.computeAction(q, qdot)
             t_planning = time.time() - t_before
             resDict = {'t': t, 't_planning': t_planning}
             for n_i in range(n):
@@ -47,44 +56,50 @@ class Experiment(object):
             self._res.append(resDict)
             ob, _, _, _ = self._env.step(a)
             t += self._env._dt
+        return 0
 
-    def save(self, name, timeStamp):
+    def save(self, timeStamp, errFlag, planner='mpc'):
         curPath = os.path.dirname(os.path.abspath(__file__)) + "/results"
         if timeStamp == "":
-            folderPath = curPath + "/" + name
+            folderPath = curPath + "/" + planner
         else:
-            folderPath = curPath + "/" + name + "_" + timeStamp
+            folderPath = curPath + "/" + planner + "_" + timeStamp
         print("Saving results to : %s" % folderPath)
         os.mkdir(folderPath)
-        resFile = folderPath + "/res.csv"
-        obstFile = folderPath + "/obst"
-        colNames = [*self._res[0]]
-        with open(resFile, 'w') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=colNames)
-            writer.writeheader()
-            for res in self._res:
-                writer.writerow(res)
-        for i, o in enumerate(self._obsts):
-            o.toCSV(obstFile + '_' + str(i) + '.csv')
-        copyfile(self._setupFile, folderPath + "/exp.yaml")
-        copyfile(self._plannerSetup, folderPath + "/planner.yaml")
+        if errFlag >= 0:
+            resFile = folderPath + "/res.csv"
+            colNames = [*self._res[0]]
+            with open(resFile, 'w') as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=colNames)
+                writer.writeheader()
+                for res in self._res:
+                    writer.writerow(res)
+        self._setup.save(folderPath)
+        copyfile(self._fabricSetup, folderPath + "/planner.yaml")
 
 def main():
     parser = argparse.ArgumentParser("Run motion planning experiment")
     parser.add_argument('setupFile', metavar="setup", type=str, help='setup file')
-    parser.add_argument('planner', metavar="planner", type=str, help='planner (fabric, mpc)')
-    parser.add_argument('plannerSetup', metavar="plannerSetup", type=str, help='planner setup')
+    parser.add_argument('mpcSetup', metavar="mpcSetup", type=str, help='mpc setup')
+    parser.add_argument('fabricSetup', metavar="fabricSetup", type=str, help='fabric setup')
     parser.add_argument('--output-file', '-o', type=str, default='output', help='Output filename without suffix', metavar='output')
     parser.add_argument('--no-stamp', dest='stamp', action='store_false')
+    parser.add_argument('--random-goal', dest='random_goal', action='store_true')
+    parser.add_argument('--random-obst', dest='random_obst', action='store_true')
     parser.set_defaults(stamp=True)
+    parser.set_defaults(random_goal=False)
+    parser.set_defaults(random_obst=False)
     args = parser.parse_args()
-    thisExp = Experiment(args.planner, args.setupFile, args.plannerSetup)
-    thisExp.run()
     if args.stamp:
         timeStamp = "{:%Y%m%d_%H%M%S}".format(datetime.datetime.now())
     else:
         timeStamp = ""
-    thisExp.save(args.output_file, timeStamp)
+    setup = ExpSetup(args.setupFile, randomGoal=args.random_goal, randomObst=args.random_obst)
+    thisExp = Experiment(setup, args.mpcSetup, args.fabricSetup)
+    errFlag = thisExp.run(planner='mpc')
+    thisExp.save(timeStamp, errFlag, planner='mpc')
+    errFlag = thisExp.run(planner='fabric')
+    thisExp.save(timeStamp, errFlag, planner='fabric')
 
 if __name__ == "__main__":
     main()

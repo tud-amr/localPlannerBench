@@ -1,7 +1,7 @@
 m_base: 1.0
 obst:
   exp: 1.0
-  lam: 10.0
+  lam: 2.0
 goal:
   k_psi: 5.0
 speed:

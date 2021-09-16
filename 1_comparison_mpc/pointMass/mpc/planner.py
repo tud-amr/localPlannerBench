@@ -38,7 +38,11 @@ class MPCPlanner(object):
         self._wu = self._params['weights']['wu']
         dt_str = str(self._dt).replace('.', '')
         mpcFileName = 'mpc/solver_' + dt_str + '_N' + str(self._H)
-        self._mpcSolver = forcespro.nlp.Solver.from_directory(mpcFileName)
+        try:
+            self._mpcSolver = forcespro.nlp.Solver.from_directory(mpcFileName)
+        except:
+            print("Solver has not been generated, exiting....")
+            return
         self._x0 = np.zeros(shape=(self._H, self._nx+self._nu+self._ns))
         self._xinit = np.zeros(self._nx)
         self._slack = 0.0
