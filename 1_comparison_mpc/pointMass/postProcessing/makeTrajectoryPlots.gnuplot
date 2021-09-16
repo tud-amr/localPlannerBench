@@ -28,7 +28,6 @@ n_obst = 1
 list=system("ls -1B ".resFolderMpc."/obst_*")
 print list
 
-set title "MPC"
 plot inFileMpc using q0:q1 with lines lw 2 notitle, \
   for [file in list] file w lines lc rgb "black" lw 10 notitle, \
   goalFileMpc using 1:2 with points title "goal", \
@@ -49,7 +48,6 @@ n_obst = 1
 list=system("ls -1B ".resFolderFabric."/obst_*")
 print list
 
-set title "Fabric"
 plot inFileFabric using q0:q1 with lines lw 2 notitle, \
   for [file in list] file w lines lc rgb "black" lw 10 notitle, \
   goalFileFabric using 1:2 with points title "goal", \

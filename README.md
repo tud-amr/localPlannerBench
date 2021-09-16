@@ -9,6 +9,10 @@ The first experiment should highlight the computational advantage of fabrics ove
 predictive control.
 
 ### point mass
+<p align="left">
+  <img src="./assets/1_comparison_mpc/fabric_trajectory-1.png" width="450" title="hover text">
+</p>
+
 ### planar robotic arm(s)
 ### real robotic arm
 ### real mobile manipulator(s)
