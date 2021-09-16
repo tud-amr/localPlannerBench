@@ -1,0 +1,25 @@
+T: 5000
+dt: 0.05
+env: point-robot-acc-v0
+goal:
+- -2.0
+- -0.0
+n: 2
+obstacles:
+- obst1: obst1
+  r: 1.5
+  x:
+  - 0.0
+  - 0.0
+- obst3: obst3
+  r: 1.0
+  x:
+  - 1.0
+  - 2.0
+planner: fabrics
+q0:
+- 2.2
+- 1.3
+q0dot:
+- 0.0
+- 0.0

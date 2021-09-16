@@ -10,10 +10,13 @@ predictive control.
 
 ### point mass
 <p align="left">
-  <img src="./assets/1_comparison_mpc/fabric_trajectory-1.png" width="450" title="hover text">
+  <img src="./assets/1_comparison_mpc/pointMass/fabric_trajectory-1.png" width="450" title="hover text">
 </p>
 
 ### planar robotic arm(s)
+<p align="left">
+  <img src="./assets/1_comparison_mpc/planarArm/fabric_trajectory-1.png" width="450" title="hover text">
+</p>
 ### real robotic arm
 ### real mobile manipulator(s)
 

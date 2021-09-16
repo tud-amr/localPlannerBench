@@ -7,13 +7,18 @@ from optFabrics.planner.default_energies import CollisionLagrangian, ExecutionLa
 from optFabrics.planner.default_maps import CollisionMap
 from optFabrics.planner.default_leaves import defaultAttractor
 
+from casadiFk import casadiFk
+
 
 class FabricPlanner(object):
     def __init__(self, setupFile):
         self.parseSetup(setupFile)
-        self._planner = DefaultFabricPlanner(2, m_base=self._params['m_base'])
+        self._n = 3
+        self._planner = DefaultFabricPlanner(self._n, m_base=self._params['m_base'])
         self._q, self._qdot = self._planner.var()
-        self._fks = [self._q]
+        self._fks = []
+        for i in range(1, self._n + 1):
+            self._fks.append(ca.SX(casadiFk(self._q, i)[0:2]))
 
     def parseSetup(self, setupFile):
         with open(setupFile, "r") as stream:
@@ -34,7 +39,7 @@ class FabricPlanner(object):
                 self._planner.addGeometry(dm_col, lag_col, geo_col)
 
     def addGoal(self, goal):
-        fk = self._q
+        fk = self._fks[-1]
         self._dm_psi, lag_psi, _, self._x_psi, self._xdot_psi = defaultAttractor(
             self._q, self._qdot, goal, fk
         )
