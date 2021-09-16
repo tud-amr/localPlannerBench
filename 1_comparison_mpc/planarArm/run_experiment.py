@@ -19,8 +19,8 @@ class Experiment(object):
         self._fabricSetup = fabricSetup
         self._setup = setup
         self._env = self._setup.makeEnv()
-        self._mpcPlanner = MPCPlanner(mpcSetup)
-        self._fabricPlanner = FabricPlanner(fabricSetup)
+        self._mpcPlanner = MPCPlanner(mpcSetup, self._setup.n())
+        self._fabricPlanner = FabricPlanner(fabricSetup, self._setup.n())
         self._obsts = self._setup.obstacles()
         self._mpcPlanner.addObstacles(self._obsts)
         self._fabricPlanner.addObstacles(self._obsts)

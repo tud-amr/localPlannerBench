@@ -22,13 +22,13 @@ from splineFunctions import project
 
 class MPCPlanner(object):
 
-    def __init__(self, setupFile):
+    def __init__(self, setupFile, n):
         # nbObst=5, wx=0.5, wvel=1, wu=1, ws=1e8, N=80, dt=0.05, interval=1):
         self.parseSetup(setupFile)
         self._H = self._params['H']
         self._nbObst = self._params['obst']['nbObst']
         self._m = 2
-        self._n = 3
+        self._n = n
         self._paramMap, self._npar, self._nx, self._nu, _, self._ns = getParameters(self._n, self._m, self._nbObst)
         self._dt = self._params['dt']
         self._interval = self._params['interval']

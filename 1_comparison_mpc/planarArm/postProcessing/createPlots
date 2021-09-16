@@ -25,5 +25,5 @@ if test -f "${fabricFile}/fk_first.csv"; then
 else
   ./extractFks $fabricFile "${fabricFile}/fk"
 fi
-gnuplot -c makeTrajectoryPlots.gnuplot $mpcFile $timeStampMpc $fabricFile $timeStampFabric
+gnuplot -c makeTrajectoryPlots.gnuplot $mpcFile $timeStampMpc $fabricFile $timeStampFabric "10" "11"
 gnuplot -c makeSolverTimePlot.gnuplot $mpcFile $fabricFile $intervals

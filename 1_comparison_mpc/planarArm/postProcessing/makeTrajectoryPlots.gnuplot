@@ -26,12 +26,8 @@ set yrange [-5: 5]
 set size ratio -1
 set grid
 
-ee_x = 18
-ee_y = 19
-fk0_x = 6
-fk0_y = 7
-fk1_x = 12
-fk1_y = 13
+ee_x = 30
+ee_y = 31
 list=system("ls -1B ".resFolderMpc."/obst_*")
 print list
 

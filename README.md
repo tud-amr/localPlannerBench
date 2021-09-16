@@ -11,6 +11,7 @@ Beside the obvious, some things need to be changed/added?
   - path length
   - clearance
 * Multi test script
+* Dynamic degrees of freedom during post processing
 
 ## Metrics
 
@@ -35,6 +36,9 @@ predictive control.
 ### b) planar robotic arm(s)
 <p align="left">
   <img src="./assets/1_comparison_mpc/planarArm/fabric_trajectory-1.png" width="450" title="hover text">
+</p>
+<p align="left">
+  <img src="./assets/1_comparison_mpc/planarArm/fabric_trajectory2-1.png" width="450" title="hover text">
 </p>
 
 ### c) real robotic arm

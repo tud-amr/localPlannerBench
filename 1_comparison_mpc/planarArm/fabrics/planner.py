@@ -11,9 +11,9 @@ from casadiFk import casadiFk
 
 
 class FabricPlanner(object):
-    def __init__(self, setupFile):
+    def __init__(self, setupFile, n):
         self.parseSetup(setupFile)
-        self._n = 3
+        self._n = n
         self._planner = DefaultFabricPlanner(self._n, m_base=self._params['m_base'])
         self._q, self._qdot = self._planner.var()
         self._fks = []

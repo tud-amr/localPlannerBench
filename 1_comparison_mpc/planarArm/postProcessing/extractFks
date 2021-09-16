@@ -29,11 +29,21 @@ key_fk1_x=$(getPos $header "fk1_x")
 key_fk1_y=$(getPos $header "fk1_y")
 key_fk2_x=$(getPos $header "fk2_x")
 key_fk2_y=$(getPos $header "fk2_y")
+key_fk3_x=$(getPos $header "fk3_x")
+key_fk3_y=$(getPos $header "fk3_y")
+key_fk4_x=$(getPos $header "fk4_x")
+key_fk4_y=$(getPos $header "fk4_y")
+echo $key_fk4_x
+echo $key_fk4_y
 echo "0.0,0.0" >> "${fkFile}_last.csv"
 echo "${lastLine[${key_fk0_x}]},${lastLine[${key_fk0_y}]}" >> "${fkFile}_last.csv"
 echo "${lastLine[${key_fk1_x}]},${lastLine[${key_fk1_y}]}" >> "${fkFile}_last.csv"
 echo "${lastLine[${key_fk2_x}]},${lastLine[${key_fk2_y}]}" >> "${fkFile}_last.csv"
+echo "${lastLine[${key_fk3_x}]},${lastLine[${key_fk3_y}]}" >> "${fkFile}_last.csv"
+echo "${lastLine[${key_fk4_x}]},${lastLine[${key_fk4_y}]}" >> "${fkFile}_last.csv"
 echo "0.0,0.0" >> "${fkFile}_first.csv"
 echo "${firstLine[${key_fk0_x}]},${firstLine[${key_fk0_y}]}" >> "${fkFile}_first.csv"
 echo "${firstLine[${key_fk1_x}]},${firstLine[${key_fk1_y}]}" >> "${fkFile}_first.csv"
 echo "${firstLine[${key_fk2_x}]},${firstLine[${key_fk2_y}]}" >> "${fkFile}_first.csv"
+echo "${firstLine[${key_fk3_x}]},${firstLine[${key_fk3_y}]}" >> "${fkFile}_first.csv"
+echo "${firstLine[${key_fk4_x}]},${firstLine[${key_fk4_y}]}" >> "${fkFile}_first.csv"
