@@ -1,10 +1,11 @@
 import casadi as ca
+import numpy as np
 import yaml
 
 from optFabrics.planner.fabricPlanner import DefaultFabricPlanner
-from optFabrics.planner.default_geometries import CollisionGeometry, GoalGeometry
+from optFabrics.planner.default_geometries import CollisionGeometry, GoalGeometry, LimitGeometry
 from optFabrics.planner.default_energies import CollisionLagrangian, ExecutionLagrangian
-from optFabrics.planner.default_maps import CollisionMap
+from optFabrics.planner.default_maps import CollisionMap, LowerLimitMap, UpperLimitMap
 from optFabrics.planner.default_leaves import defaultAttractor
 
 from casadiFk import casadiFk
@@ -24,6 +25,20 @@ class FabricPlanner(object):
         with open(setupFile, "r") as stream:
             self._params = yaml.safe_load(stream)
 
+    def addJointLimits(self, lower_limits, upper_limits):
+        x = ca.SX.sym("x", 1)
+        xdot = ca.SX.sym("xdot", 1)
+        lag_col = CollisionLagrangian(x, xdot)
+        geo_col = LimitGeometry(
+            x, xdot,
+            lam=self._params["limits"]["lam"]
+        )
+        for i in range(self._n):
+            dm_col = UpperLimitMap(self._q, self._qdot, upper_limits[i], i)
+            self._planner.addGeometry(dm_col, lag_col, geo_col)
+            dm_col = LowerLimitMap(self._q, self._qdot, lower_limits[i], i)
+            self._planner.addGeometry(dm_col, lag_col, geo_col)
+
     def addObstacles(self, obsts):
         x = ca.SX.sym("x", 1)
         xdot = ca.SX.sym("xdot", 1)
@@ -40,7 +55,7 @@ class FabricPlanner(object):
 
     def addGoal(self, goal):
         fk = self._fks[-1]
-        self._dm_psi, lag_psi, _, self._x_psi, self._xdot_psi = defaultAttractor(
+        self._dm_psi, lag_psi, geo_psi, self._x_psi, self._xdot_psi = defaultAttractor(
             self._q, self._qdot, goal, fk
         )
         geo_psi = GoalGeometry(

@@ -15,16 +15,18 @@ from numpyFk import numpyFk
 
 class Experiment(object):
 
-    def __init__(self, setup, mpcSetup, fabricSetup):
+    def __init__(self, setup, mpcSetup, fabricSetup, render=False):
         self._mpcSetup = mpcSetup
         self._fabricSetup = fabricSetup
         self._setup = setup
+        self._render = render
         self._env = self._setup.makeEnv()
         self._mpcPlanner = MPCPlanner(mpcSetup, self._setup.n())
         self._fabricPlanner = FabricPlanner(fabricSetup, self._setup.n())
         self._obsts = self._setup.obstacles()
         self._mpcPlanner.addObstacles(self._obsts)
         self._fabricPlanner.addObstacles(self._obsts)
+        self._fabricPlanner.addJointLimits(self._setup.lowerLimits(), self._setup.upperLimits())
         self._mpcPlanner.addGoal(self._setup.goal())
         self._fabricPlanner.addGoal(self._setup.goal())
 
@@ -62,6 +64,9 @@ class Experiment(object):
                 resDict['fk' + str(n_i) + "_theta"] = fk[2]
             self._res.append(resDict)
             ob, _, _, _ = self._env.step(a)
+            if self._render:
+                time.sleep(self._env._dt)
+                self._env.render()
             t += self._env._dt
         return 0
 
@@ -98,6 +103,8 @@ def main():
     parser.add_argument('--no-stamp', dest='stamp', action='store_false')
     parser.add_argument('--random-goal', dest='random_goal', action='store_true')
     parser.add_argument('--random-obst', dest='random_obst', action='store_true')
+    parser.add_argument('--render', dest='render', action='store_true')
+    parser.set_defaults(render=False)
     parser.set_defaults(stamp=True)
     parser.set_defaults(random_goal=False)
     parser.set_defaults(random_obst=False)
@@ -107,7 +114,7 @@ def main():
     else:
         timeStamp = ""
     setup = ExpSetup(args.setupFile, randomGoal=args.random_goal, randomObst=args.random_obst)
-    thisExp = Experiment(setup, args.mpcSetup, args.fabricSetup)
+    thisExp = Experiment(setup, args.mpcSetup, args.fabricSetup, render=args.render)
     errFlag = thisExp.run(planner='mpc')
     thisExp.save(timeStamp, errFlag, planner='mpc')
     errFlag = thisExp.run(planner='fabric')

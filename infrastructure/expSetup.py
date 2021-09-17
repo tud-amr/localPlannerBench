@@ -53,6 +53,12 @@ class ExpSetup(object):
     def T(self):
         return self._params['T']
 
+    def lowerLimits(self):
+        return self._params['limits']['lower']
+
+    def upperLimits(self):
+        return self._params['limits']['upper']
+
     def checkFeasibility(self):
         for o in self._obsts:
             for i in range(1, self._params['n'] + 1):
