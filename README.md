@@ -15,6 +15,7 @@ Beside the obvious, some things need to be changed/added?
 * Dynamic degrees of freedom during post processing
   - Done by adding argument to createPlot script
 * Joint limits for fabrics (needed to have a fair comparision)
+  - Done according to paper "Optimization fabrics"
 
 ## Metrics
 
