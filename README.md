@@ -8,6 +8,8 @@ Beside the obvious, some things need to be changed/added?
 * Fabrics tend to produce 'nan' values if they are close to the goal for a long time.
   - solved by correcting small values to zeros in fabric planner
 * Self-collision avoidance
+  - done for fabrics by introducing additional geometries
+  - still missing for MPC
 * Postprocessing for
   - path length
   - clearance
@@ -16,6 +18,7 @@ Beside the obvious, some things need to be changed/added?
   - Done by adding argument to createPlot script
 * Joint limits for fabrics (needed to have a fair comparision)
   - Done according to paper "Optimization fabrics"
+* Variable joint limits for mpc
 
 ## Metrics
 

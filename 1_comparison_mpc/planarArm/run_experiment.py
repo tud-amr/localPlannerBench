@@ -27,6 +27,7 @@ class Experiment(object):
         self._mpcPlanner.addObstacles(self._obsts)
         self._fabricPlanner.addObstacles(self._obsts)
         self._fabricPlanner.addJointLimits(self._setup.lowerLimits(), self._setup.upperLimits())
+        self._fabricPlanner.addSelfCollisionAvoidance()
         self._mpcPlanner.addGoal(self._setup.goal())
         self._fabricPlanner.addGoal(self._setup.goal())
 

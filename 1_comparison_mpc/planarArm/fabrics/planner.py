@@ -5,7 +5,7 @@ import yaml
 from optFabrics.planner.fabricPlanner import DefaultFabricPlanner
 from optFabrics.planner.default_geometries import CollisionGeometry, GoalGeometry, LimitGeometry
 from optFabrics.planner.default_energies import CollisionLagrangian, ExecutionLagrangian
-from optFabrics.planner.default_maps import CollisionMap, LowerLimitMap, UpperLimitMap
+from optFabrics.planner.default_maps import CollisionMap, LowerLimitMap, UpperLimitMap, SelfCollisionMap
 from optFabrics.planner.default_leaves import defaultAttractor
 
 from casadiFk import casadiFk
@@ -52,6 +52,22 @@ class FabricPlanner(object):
             for fk in self._fks:
                 dm_col = CollisionMap(self._q, self._qdot, fk, obst.x(), obst.r())
                 self._planner.addGeometry(dm_col, lag_col, geo_col)
+
+    def addSelfCollisionAvoidance(self):
+        x = ca.SX.sym("x", 1)
+        xdot = ca.SX.sym("xdot", 1)
+        lag_selfCol = CollisionLagrangian(x, xdot)
+        geo_selfCol = CollisionGeometry(
+            x, xdot,
+            exp=self._params["selfCol"]["exp"],
+            lam=self._params["selfCol"]["lam"]
+        )
+        fks = [np.zeros(2)] + self._fks
+        for i in range(self._n+1):
+            for j in range(i+2, self._n+1):
+                dm_selfCol = SelfCollisionMap(self._q, self._qdot, fks[i], fks[j], self._params['selfCol']['r'])
+                self._planner.addGeometry(dm_selfCol, lag_selfCol, geo_selfCol)
+
 
     def addGoal(self, goal):
         fk = self._fks[-1]
