@@ -3,27 +3,20 @@ nbArgs=$#
 mpcFile=`ls -t -d ../results/mpc* | head -n 1`
 fabricFile=`ls -t -d ../results/fabric* | head -n 1`
 intervals=1
-if [[ ( "$#" == 3 ) ]]; then
-  mpcFile=$1
-  fabricFile=$2
-  intervals=$3
+n=$1
+if [[ ( "$#" == 4 ) ]]; then
+  mpcFile=$2
+  fabricFile=$3
+  intervals=$4
 fi
-if [[ ( "$#" == 1 ) ]]; then
-  intervals=$1
+if [[ ( "$#" == 2 ) ]]; then
+  intervals=$2
 fi
-echo $mpcFile
-echo $fabricFile
 timeStampFabric=${mpcFile:(-15)}
 timeStampMpc=${fabricFile:(-15)}
-if test -f "${mpcFile}/fk_first.csv"; then
-  echo "Fk already extracted"
-else
-  ./extractFks $mpcFile "${mpcFile}/fk"
-fi
-if test -f "${fabricFile}/fk_first.csv"; then
-  echo "Fk already extracted"
-else
-  ./extractFks $fabricFile "${fabricFile}/fk"
-fi
-gnuplot -c makeTrajectoryPlots.gnuplot $mpcFile $timeStampMpc $fabricFile $timeStampFabric "10" "11"
+IFS="," read -r -a fks <<< $(./extractFks $mpcFile "${mpcFile}/fk" $n)
+fks_x=${fks[0]}
+fks_y=${fks[1]}
+output=$(./extractFks $fabricFile "${fabricFile}/fk" $n)
+gnuplot -c makeTrajectoryPlots.gnuplot $mpcFile $timeStampMpc $fabricFile $timeStampFabric $fks_x $fks_y
 gnuplot -c makeSolverTimePlot.gnuplot $mpcFile $fabricFile $intervals

@@ -4,6 +4,7 @@ import csv
 import datetime
 import time
 import os
+import shutil
 from shutil import copyfile
 
 from fabricsExperiments.infrastructure.expSetup import ExpSetup
@@ -71,7 +72,12 @@ class Experiment(object):
         else:
             folderPath = curPath + "/" + planner + "_" + timeStamp
         print("Saving results to : %s" % folderPath)
-        os.mkdir(folderPath)
+        if not os.path.exists(folderPath):
+            os.mkdir(folderPath)
+        else:
+            print("Overwriting %s" % folderPath)
+            shutil.rmtree(folderPath)
+            os.mkdir(folderPath)
         if errFlag >= 0:
             resFile = folderPath + "/res.csv"
             colNames = [*self._res[0]]

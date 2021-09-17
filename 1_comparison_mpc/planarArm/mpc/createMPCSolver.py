@@ -12,7 +12,7 @@ from scipy.integrate import odeint
 
 from casadiFk import casadiFk
 
-n = 5
+n = 3
 m = 2
 nbObst = 5
 

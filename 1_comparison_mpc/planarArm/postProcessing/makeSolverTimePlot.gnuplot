@@ -9,7 +9,6 @@ inFileFabric=resFolderFabric."/res.csv"
 outFileBox="solvertimes_mpcFabric.eps"
 
 intervals=ARG3
-print intervals
 
 set output outFileBox
 set datafile separator ','

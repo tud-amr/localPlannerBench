@@ -6,12 +6,15 @@ This repository depends on the dynamic fabrics library (and not much else!).
 ## ToDo's
 Beside the obvious, some things need to be changed/added?
 * Fabrics tend to produce 'nan' values if they are close to the goal for a long time.
+  - solved by correcting small values to zeros in fabric planner
 * Self-collision avoidance
 * Postprocessing for
   - path length
   - clearance
 * Multi test script
 * Dynamic degrees of freedom during post processing
+  - Done by adding argument to createPlot script
+* Joint limits for fabrics (needed to have a fair comparision)
 
 ## Metrics
 

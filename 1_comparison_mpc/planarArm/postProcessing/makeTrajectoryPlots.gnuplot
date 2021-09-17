@@ -26,10 +26,9 @@ set yrange [-5: 5]
 set size ratio -1
 set grid
 
-ee_x = 30
-ee_y = 31
+ee_x = ARG5 + 1
+ee_y = ARG6 + 1
 list=system("ls -1B ".resFolderMpc."/obst_*")
-print list
 
 plot inFileMpc using ee_x:ee_y with lines lw 2 notitle, \
   fkStartFileMpc using 1:2 with linespoints pointtype 7 pointsize 2 lc rgb "black" lw 2 title "start config", \
@@ -49,7 +48,6 @@ set output outFileFabric
 # x_col = 19
 # y_col = 20
 list=system("ls -1B ".resFolderFabric."/obst_*")
-print list
 
 plot inFileFabric using ee_x:ee_y with lines lw 2 notitle, \
   fkStartFileFabric using 1:2 with linespoints pointtype 7 pointsize 2 lc rgb "black" lw 2 title "start config", \
