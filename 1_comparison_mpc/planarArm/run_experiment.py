@@ -25,10 +25,11 @@ class Experiment(object):
         self._fabricPlanner = FabricPlanner(fabricSetup, self._setup.n())
         self._obsts = self._setup.obstacles()
         self._mpcPlanner.addObstacles(self._obsts)
+        self._mpcPlanner.addJointLimits(self._setup.lowerLimits(), self._setup.upperLimits())
+        self._mpcPlanner.addGoal(self._setup.goal())
         self._fabricPlanner.addObstacles(self._obsts)
         self._fabricPlanner.addJointLimits(self._setup.lowerLimits(), self._setup.upperLimits())
         self._fabricPlanner.addSelfCollisionAvoidance()
-        self._mpcPlanner.addGoal(self._setup.goal())
         self._fabricPlanner.addGoal(self._setup.goal())
 
     def run(self, planner='mpc'):

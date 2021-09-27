@@ -31,7 +31,8 @@ class FabricPlanner(object):
         lag_col = CollisionLagrangian(x, xdot)
         geo_col = LimitGeometry(
             x, xdot,
-            lam=self._params["limits"]["lam"]
+            lam=self._params["limits"]["lam"],
+            exp=self._params["limits"]["exp"]
         )
         for i in range(self._n):
             dm_col = UpperLimitMap(self._q, self._qdot, upper_limits[i], i)

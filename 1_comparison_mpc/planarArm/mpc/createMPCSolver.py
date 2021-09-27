@@ -30,6 +30,10 @@ def getParameters(n, m, nbObst):
     nPar += m
     pm['obst'] = list(range(nPar, nPar + 3 * nbObst))
     nPar += 3 * nbObst
+    pm['lower_limits'] = list(range(nPar, nPar + n))
+    nPar += n
+    pm['upper_limits'] = list(range(nPar, nPar + n))
+    nPar += n
     dt = 0.5
     nx = n * 2
     nu = n
@@ -120,6 +124,21 @@ def eval_ineq(z, p):
             fk = casadiFk(q, j+1, endlink=0.5)[0:2]
             dist = ca.norm_2(fk - x)
             ineqs.append(dist - r + slack)
+    all_ineqs = ineqs + eval_jointLimits(z, p)
+    print(len(all_ineqs))
+    return all_ineqs
+
+def eval_jointLimits(z, p):
+    q = z[0:n]
+    slack = z[nx]
+    lower_limits = p[paramMap['lower_limits']]
+    upper_limits = p[paramMap['upper_limits']]
+    ineqs = []
+    for j in range(n):
+        dist_lower = q[j] - lower_limits[j]
+        dist_upper = upper_limits[j] - q[j]
+        ineqs.append(dist_lower + slack)
+        ineqs.append(dist_upper + slack)
     return ineqs
 
 def continuous_dynamics(x, u):
@@ -141,39 +160,12 @@ def main():
     model.npar = npar
     model.nvar = nx + nu + ns
     model.neq = nx
-    model.nh = nbObst*n*2
-    model.hu = np.ones(nbObst*n*2) * np.inf
-    model.hl = np.zeros(nbObst*n*2)
+    model.nh = nbObst*n*2 + 2 * n
+    model.hu = np.ones(nbObst*n*2 + 2 * n) * np.inf
+    model.hl = np.zeros(nbObst*n*2 + 2 * n)
     model.ineq = eval_ineq
     model.objectiveN = eval_objN
-    """
-    for i in range(N-1):
-        model.objective[i] = eval_obj
-        if i < (model.N - 2) :
-            model.E[i] = np.concatenate([np.eye(nx), np.zeros((nx, nu))], axis=1)
-        else:
-            model.E[i] = np.eye(nx)
-        model.lb[i] = np.concatenate((xl, ul))
-        model.ub[i] = np.concatenate((xu, uu))
-        model.npar[i] = npar
-        model.nvar[i] = nx + nu
-        model.neq[i] = nx
-        model.nh[i] = nbObst
-        model.hu[i] = np.ones(nbObst) * np.inf
-        model.hl[i] = np.zeros(nbObst)
-        model.ineq[i] = eval_ineq
-    model.lb[-1] = xl
-    model.ub[-1] = xu
-    model.npar[-1] = npar
-    model.nvar[-1] = nx
-    model.nh[-1] = nbObst
-    model.ineq[-1] = eval_ineq
-    model.hu[-1] = np.ones(nbObst) * np.inf
-    model.hl[-1] = np.zeros(nbObst)
-    model.objective[-1] = eval_objN
-    """
     model.xinitidx = range(0, nx)
-
 
     # Get the default solver options
     codeoptions = forcespro.CodeOptions(solverName)
@@ -182,16 +174,16 @@ def main():
     codeoptions.nlp.integrator.type = "ERK2"
     codeoptions.nlp.integrator.Ts = dt
     codeoptions.nlp.integrator.nodes = 5
-    #codeoptions.maxit = 300
-    #codeoptions.solver_timeout = -1
-    #codeoptions.nlp.TolStat = -1 # default 1e-5
-    #codeoptions.nlp.TolEq = -1 # default 1e-6
-    #codeoptions.nlp.TolIneq = -1 # default 1e-6
-    #codeoptions.nlp.integrator.type = "ERK2"
-    #codeoptions.nlp.integrator.Ts = 0.1
-    #codeoptions.nlp.integrator.nodes = 5
+    # codeoptions.maxit = 300
+    # codeoptions.solver_timeout = -1
+    # codeoptions.nlp.TolStat = -1 # default 1e-5
+    # codeoptions.nlp.TolEq = -1 # default 1e-6
+    # codeoptions.nlp.TolIneq = -1 # default 1e-6
+    # codeoptions.nlp.integrator.type = "ERK2"
+    # codeoptions.nlp.integrator.Ts = 0.1
+    # codeoptions.nlp.integrator.nodes = 5
     # Generate solver for previously initialized model
-    solver = model.generate_solver(codeoptions)
+    _ = model.generate_solver(codeoptions)
 
 if __name__ == "__main__":
     main()

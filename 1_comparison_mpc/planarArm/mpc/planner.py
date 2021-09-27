@@ -83,6 +83,13 @@ class MPCPlanner(object):
                 self._params[self._npar * i + self._paramMap["obst"][j*3 + 1]] = obst.x()[1]
                 self._params[self._npar * i + self._paramMap["obst"][j*3 + 2]] = obst.r()
 
+    def addJointLimits(self, lower_limits, upper_limits):
+        for i in range(self._H):
+            for j in range(self._n):
+                self._params[self._npar * i + self._paramMap['lower_limits'][j]] = lower_limits[j]
+                self._params[self._npar * i + self._paramMap['upper_limits'][j]] = upper_limits[j]
+
+
     def shiftHorizon(self, output, ob):
         nvar = self._nx + self._nu + self._ns
         for key in output.keys():

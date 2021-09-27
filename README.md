@@ -19,6 +19,8 @@ Beside the obvious, some things need to be changed/added?
 * Joint limits for fabrics (needed to have a fair comparision)
   - Done according to paper "Optimization fabrics"
 * Variable joint limits for mpc
+  - Done using additional inequality constraints (consider using different slack
+    variabeles)
 
 ## Metrics
 
