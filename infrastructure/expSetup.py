@@ -45,10 +45,10 @@ class ExpSetup(object):
                             high=self._params["randomObstacle"]["pos_high"][j],
                         )
                     )
-                r = np.random.uniform(
+                r = float(np.random.uniform(
                     low=self._params["randomObstacle"]["r_low"],
                     high=self._params["randomObstacle"]["r_high"],
-                )
+                ))
                 obst = {name: name, "x": pos, "r": r}
                 self._params["obstacles"].append(obst)
 
