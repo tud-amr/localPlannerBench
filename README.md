@@ -51,6 +51,9 @@ predictive control.
 </p>
 
 ### c) real robotic arm
+<p align="left">
+  <img src="./assets/1_comparison_mpc/simPanda/fabric_trajectory.gif" width="450" title="hover text">
+</p>
 
 ### d) real mobile manipulator(s)
 

@@ -1,0 +1,32 @@
+#!/bin/bash
+
+getPos () {
+  header=$1
+  key=$2
+  for i in "${!header[@]}"; do
+     if [[ "${header[$i]}" = $2 ]]; then
+         echo "${i}";
+     fi
+  done
+}
+
+startFk=1
+resFolder=$1
+fkFile=$2
+n=$3
+resFile="${resFolder}/res.csv"
+firstLineNb=2
+IFS="," read -a firstLine <<< `sed -n "${firstLineNb}p" $resFile`
+lastLineNb=`wc  -l < $resFile`
+IFS="," read -a lastLine <<< `sed -n "${lastLineNb}p" $resFile`
+IFS="," read -a header <<< `sed -n "1p" $resFile`
+echo "0.0,0.0" > "${fkFile}_last.csv"
+echo "0.0,0.0" > "${fkFile}_first.csv"
+for (( i=0; i<$n; i++ ))
+do
+  key_fk_x=$(getPos $header "fk${i}_x")
+  key_fk_y=$(getPos $header "fk${i}_y")
+  echo "${firstLine[${key_fk_x}]},${firstLine[${key_fk_y}]}" >> "${fkFile}_first.csv"
+  echo "${lastLine[${key_fk_x}]},${lastLine[${key_fk_y}]}" >> "${fkFile}_last.csv"
+done
+echo "${key_fk_x},${key_fk_y}"
