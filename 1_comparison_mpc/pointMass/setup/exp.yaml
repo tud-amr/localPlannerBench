@@ -41,6 +41,6 @@ randomObstacle:
   pos_high:
     - 5.0
     - 5.0
-  r_low: 0.0
+  r_low: 0.2
   r_high: 1.0
 

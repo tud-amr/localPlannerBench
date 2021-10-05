@@ -11,8 +11,11 @@ fi
 if [[ ( "$#" == 1 ) ]]; then
   intervals=$1
 fi
-# echo $mpcFile
-# echo $fabricFile
+if [ -z "$mpcFile" ];
+  then 
+    echo "No files found"
+    exit
+fi
 timeStampFabric=${mpcFile:(-15)}
 timeStampMpc=${fabricFile:(-15)}
 gnuplot -c makeTrajectoryPlots.gnuplot $mpcFile $timeStampMpc $fabricFile $timeStampFabric
