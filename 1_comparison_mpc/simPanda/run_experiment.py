@@ -37,19 +37,13 @@ class Experiment(object):
         self._env.addObstacle(pos=self._setup.goal(), filename="sphere_goal.urdf")
 
     def run(self, planner='mpc'):
-        """
-        if not self._setup.checkFeasibility():
-            print("Case not feasible")
-            return -1
-        """
         if planner == 'mpc':
             self._mpcPlanner.concretize()
         elif planner == 'fabric':
             self._fabricPlanner.concretize()
         q0, qdot0 = self._setup.initialState()
-        ob = self._env.reset(q0=q0)
+        ob = self._env.reset() # q0=q0)
         self.addScene()
-        input("press enter to continue")
         t = 0.0
         n = self._setup.n()
         self._res = []
