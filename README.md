@@ -5,21 +5,21 @@ This repository depends on the dynamic fabrics library (and not much else!).
 
 ## ToDo's
 Beside the obvious, some things need to be changed/added?
-* Fabrics tend to produce 'nan' values if they are close to the goal for a long time.
-  - solved by correcting small values to zeros in fabric planner
-* Self-collision avoidance
-  - done for fabrics by introducing additional geometries
-  - still missing for MPC
-* Postprocessing for
-  - path length
-  - clearance
-* Multi test script
-* Dynamic degrees of freedom during post processing
-  - Done by adding argument to createPlot script
-* Joint limits for fabrics (needed to have a fair comparision)
-  - Done according to paper "Optimization fabrics"
-* Variable joint limits for mpc
-  - Done using additional inequality constraints (consider using different slack
+* [x] Fabrics tend to produce 'nan' values if they are close to the goal for a long time.
+  - [x] solved by correcting small values to zeros in fabric planner
+* [x] Self-collision avoidance
+  - [x] done for fabrics by introducing additional geometries
+  - [x] done for mpc
+* [ ] Postprocessing for
+  - [ ] path length
+  - [ ] clearance
+* [ ] Multi test script
+* [x] Dynamic degrees of freedom during post processing
+  - [x] Done by adding argument to createPlot script
+* [x] Joint limits for fabrics (needed to have a fair comparision)
+  - [x] Done according to paper "Optimization fabrics"
+* [x] Variable joint limits for mpc
+  - [x] Done using additional inequality constraints (consider using different slack
     variabeles)
 
 ## Metrics
