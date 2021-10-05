@@ -11,9 +11,15 @@ fi
 if [[ ( "$#" == 1 ) ]]; then
   intervals=$1
 fi
-echo $mpcFile
-echo $fabricFile
+# echo $mpcFile
+# echo $fabricFile
 timeStampFabric=${mpcFile:(-15)}
 timeStampMpc=${fabricFile:(-15)}
 gnuplot -c makeTrajectoryPlots.gnuplot $mpcFile $timeStampMpc $fabricFile $timeStampFabric
 gnuplot -c makeSolverTimePlot.gnuplot $mpcFile $fabricFile $intervals
+files=`ls -t | head -n 3`
+for file in $files
+do
+  echo "Attempting to open ${file}"
+  xdg-open $file
+done

@@ -26,7 +26,6 @@ q0 = 3
 q1 = 6
 n_obst = 1
 list=system("ls -1B ".resFolderMpc."/obst_*")
-print list
 
 plot inFileMpc using q0:q1 with lines lw 2 notitle, \
   for [file in list] file w lines lc rgb "black" lw 10 notitle, \
@@ -46,10 +45,13 @@ q0 = 3
 q1 = 6
 n_obst = 1
 list=system("ls -1B ".resFolderFabric."/obst_*")
-print list
 
 plot inFileFabric using q0:q1 with lines lw 2 notitle, \
   for [file in list] file w lines lc rgb "black" lw 10 notitle, \
   goalFileFabric using 1:2 with points title "goal", \
   initStateFileFabric using 1:2 with points lc rgb "green" title "initial State", \
 
+print "Done creating trajectory plots"
+print outFileMpc
+print outFileFabric
+print "End file names"

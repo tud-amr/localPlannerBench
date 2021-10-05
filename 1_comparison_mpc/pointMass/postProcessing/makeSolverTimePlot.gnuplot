@@ -9,7 +9,6 @@ inFileFabric=resFolderFabric."/res.csv"
 outFileBox="solvertimes_mpcFabric.eps"
 
 intervals=ARG3
-print intervals
 
 set output outFileBox
 set datafile separator ','
@@ -34,3 +33,7 @@ col=2
 set title "SolverTimes"
 plot inFileMpc every intervals::1 using (1):col, \
   inFileFabric every intervals::1 using (2):col
+
+print "Done creating solver time plot"
+print outFileBox
+print "End file name"
