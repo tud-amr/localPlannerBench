@@ -40,7 +40,7 @@ class FabricPlanner(object):
             dm_col = LowerLimitMap(self._q, self._qdot, lower_limits[i], i)
             self._planner.addGeometry(dm_col, lag_col, geo_col)
 
-    def addObstacles(self, obsts):
+    def addObstacles(self, obsts, r_body):
         x = ca.SX.sym("x", 1)
         xdot = ca.SX.sym("xdot", 1)
         lag_col = CollisionLagrangian(x, xdot)
@@ -51,7 +51,7 @@ class FabricPlanner(object):
         )
         for i, obst in enumerate(obsts):
             for fk in self._fks:
-                dm_col = CollisionMap(self._q, self._qdot, fk, obst.x(), obst.r())
+                dm_col = CollisionMap(self._q, self._qdot, fk, obst.x(), obst.r(), r_body=r_body)
                 self._planner.addGeometry(dm_col, lag_col, geo_col)
 
     def addSelfCollisionAvoidance(self):

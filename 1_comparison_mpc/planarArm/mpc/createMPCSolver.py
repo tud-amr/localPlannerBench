@@ -12,7 +12,7 @@ from scipy.integrate import odeint
 
 from casadiFk import casadiFk
 
-n = 3
+n = 5
 m = 2
 nbObst = 5
 
@@ -30,6 +30,8 @@ def getParameters(n, m, nbObst):
     nPar += m
     pm['obst'] = list(range(nPar, nPar + 3 * nbObst))
     nPar += 3 * nbObst
+    pm['r_body'] = list(range(nPar, nPar + 1))
+    nPar += 1
     pm['lower_limits'] = list(range(nPar, nPar + n))
     nPar += n
     pm['upper_limits'] = list(range(nPar, nPar + n))
@@ -112,6 +114,7 @@ def eval_ineq(z, p):
     slack = z[nx]
     qddot = z[nx+ns:ns+nx+nu]
     obsts = p[paramMap['obst']]
+    r_body = p[paramMap['r_body']]
     ineqs = []
     for j in range(n):
         for i in range(nbObst):
@@ -120,13 +123,23 @@ def eval_ineq(z, p):
             r = obst[2]
             fk = casadiFk(q, j+1)[0:2]
             dist = ca.norm_2(fk - x)
-            ineqs.append(dist - r + slack)
-            fk = casadiFk(q, j+1, endlink=0.5)[0:2]
-            dist = ca.norm_2(fk - x)
-            ineqs.append(dist - r + slack)
+            ineqs.append(dist - r - r_body + slack)
     all_ineqs = ineqs + eval_jointLimits(z, p)
-    print(len(all_ineqs))
     return all_ineqs
+
+def eval_selfCollision(z, p):
+    slack = z[nx]
+    q = z[0:n]
+    r_body = p[paramMap['r_body']]
+    ineqs = []
+    for i in range(n):
+        fk1 = casadiFk(q, i+1)[0:2]
+        for j in range(i+2, n):
+            fk2 = casadiFk(q, j+1)[0:2]
+            dist = ca.norm_2(fk1 - fk2)
+            ineqs.append(dist - (2 * r_body) + slack)
+    return ineqs
+
 
 def eval_jointLimits(z, p):
     q = z[0:n]
@@ -160,9 +173,9 @@ def main():
     model.npar = npar
     model.nvar = nx + nu + ns
     model.neq = nx
-    model.nh = nbObst*n*2 + 2 * n
-    model.hu = np.ones(nbObst*n*2 + 2 * n) * np.inf
-    model.hl = np.zeros(nbObst*n*2 + 2 * n)
+    model.nh = nbObst*n + 2 * n
+    model.hu = np.ones(nbObst*n + 2 * n) * np.inf
+    model.hl = np.zeros(nbObst*n + 2 * n)
     model.ineq = eval_ineq
     model.objectiveN = eval_objN
     model.xinitidx = range(0, nx)

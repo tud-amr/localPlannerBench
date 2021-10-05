@@ -12,13 +12,8 @@ path_name = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(path_name)
 from createMPCSolver import getParameters
 
-from createMPCSolver import eval_obj, eval_objN, eval_ineq, continuous_dynamics
-
-
-from solverPlot import SolverPlot
-from robotPlot import RobotPlot
 from obstacle import Obstacle
-from splineFunctions import project
+
 
 class MPCPlanner(object):
 
@@ -72,8 +67,9 @@ class MPCPlanner(object):
             for j in range(self._m):
                 self._params[self._npar * i + self._paramMap["g"][j]] = goal[j]
 
-    def addObstacles(self, obsts):
+    def addObstacles(self, obsts, r_body):
         for i in range(self._H):
+            self._params[self._npar * i + self._paramMap['r_body'][0]] = r_body
             for j in range(self._nbObst):
                 if j < len(obsts):
                     obst = obsts[j]
