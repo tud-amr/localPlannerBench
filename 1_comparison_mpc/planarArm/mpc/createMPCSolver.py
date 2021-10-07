@@ -133,10 +133,10 @@ def eval_selfCollision(z, p):
     q = z[0:n]
     r_body = p[paramMap['r_body']]
     ineqs = []
-    for i in range(n):
-        fk1 = casadiFk(q, i+1)[0:2]
-        for j in range(i+2, n):
-            fk2 = casadiFk(q, j+1)[0:2]
+    for i in range(n+1):
+        fk1 = casadiFk(q, i)[0:2]
+        for j in range(i+2, n+1):
+            fk2 = casadiFk(q, j)[0:2]
             dist = ca.norm_2(fk1 - fk2)
             ineqs.append(dist - (2 * r_body) + slack)
     return ineqs
@@ -174,7 +174,7 @@ def main():
     model.npar = npar
     model.nvar = nx + nu + ns
     model.neq = nx
-    nself = int(((n-2) * (n-1))/2)
+    nself = int(((n-0) * (n-1))/2)
     model.nh = nbObst*n + 2 * n + nself
     model.hu = np.ones(nbObst*n + 2 * n + nself) * np.inf
     model.hl = np.zeros(nbObst*n + 2 * n + nself)
