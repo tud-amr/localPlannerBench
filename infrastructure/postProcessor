@@ -78,19 +78,32 @@ class PostProcessor(object):
         self._metrices.append(metric)
 
     def evaluate(self):
-        evaluation = {}
+        self._evaluations = {}
         for metric in self._metrices:
             res = metric.computeMetric(self._data)
-            evaluation[metric._name] = res
-        return evaluation
+            self._evaluations[metric._name] = res
 
-    def evaluateSuccess(self, minDistToObst, reachingFlag):
+    def getEval(self):
+        return self._evaluations
+
+    def evaluateSuccess(self):
+        if 'selfClearance' in self._evaluations.keys():
+            minClearance = min(self._evaluations['clearance']['minDist'], self._evaluations['selfClearance']['minDist'])
+        else:
+            minClearance = self._evaluations['clearance']['minDist']
+        reachingFlag = self._evaluations['time2Goal'][0]
         successMetric = SuccessMetric(
             "success",
             [],
-            {'minClearance': minDistToObst, 'reachingFlag': reachingFlag},
+            {'minClearance': minClearance, 'reachingFlag': reachingFlag},
         )
-        return {'success': self.evaluateMetric(successMetric)}
+        self._evaluations['success'] = self.evaluateMetric(successMetric)
+
+    def writeEval2ResultFolder(self):
+        postProcessFile =  self._pathToExp + "/postProcess.yaml"
+        with open(postProcessFile, 'w') as file:
+            yaml.dump(self._evaluations, file)
+
 
 def postProcessPointMass(pathToData):
     pp = PostProcessor(pathToData)
@@ -120,10 +133,10 @@ def postProcessPointMass(pathToData):
     pp.addMetric(timeToReachGoalMetric)
     pp.addMetric(solverTimesMetric)
     pp.addMetric(pathLengthMetric)
-    evaluations = pp.evaluate()
-    successEval = pp.evaluateSuccess(evaluations['clearance']['minDist'], evaluations['time2Goal'][0])
-    pprint.pprint(evaluations)
-    pprint.pprint(successEval)
+    pp.evaluate()
+    pp.evaluateSuccess()
+    pp.writeEval2ResultFolder()
+    pprint.pprint(pp.getEval())
     """
     print("success : ", pp.evaluateMetric(successMetric))
     """
@@ -170,11 +183,10 @@ def postProcessPlanarArm(pathToData):
     pp.addMetric(solverTimesMetric)
     pp.addMetric(pathLengthMetric)
     pp.addMetric(selfClearanceMetric)
-    evaluations = pp.evaluate()
-    minClearance = min(evaluations['clearance']['minDist'], evaluations['selfClearance']['minDist'])
-    successEval = pp.evaluateSuccess(minClearance, evaluations['time2Goal'][0])
-    pprint.pprint(evaluations)
-    pprint.pprint(successEval)
+    pp.evaluate()
+    pp.evaluateSuccess()
+    pprint.pprint(pp.getEval())
+    pp.writeEval2ResultFolder()
 
 def postProcess(folderName):
     if "pointMass" in folderName:

@@ -48,9 +48,9 @@ class TimeToReachGoalMetric(Metric):
         distances =  computeDistances(fks, goal)
         indices = np.where(distances < des_distance)
         if indices[0].size == 0:
-            return -1, 0
+            return [-1, 0]
         else:
-            return 0, t[np.min(indices)]
+            return [0, float(t[np.min(indices)])]
 
 
 class ClearanceMetric(Metric):
@@ -61,18 +61,17 @@ class ClearanceMetric(Metric):
         r_body = self._params['r_body']
         fks = np.stack([data[name] for name in self._measNames]).T.reshape(-1, n+1, m)
         minDistances = []
-        obstLocations = []
-        for obst in obstacles:
+        distanceToObsts = {}
+        for i, obst in enumerate(obstacles):
             for i_fk in range(n+1):
                 distancesToObst = computeDistances(fks[:, i_fk, :], obst['x']) - obst['r'] - r_body
-                minDistToObst = np.min(distancesToObst)
+                minDistToObst = float(np.min(distancesToObst))
                 minDistances.append(minDistToObst)
-                obstLocations.append(obst['x'])
-        return {"minDist": min(minDistances)}
+                distanceToObsts['obst' + str(i) + "_fk" + str(i_fk)] = {'dist': minDistToObst, 'loc': obst['x'].tolist()}
         return {
-            "minDist": min(minDistances),
-            "allMinDist":  minDistances,
-            "obstLoc": obstLocations}
+            "minDist": float(min(minDistances)),
+            "allMinDist":  distanceToObsts
+            }
 
 
 class SelfClearanceMetric(Metric):
@@ -82,18 +81,16 @@ class SelfClearanceMetric(Metric):
         r_body = self._params["r_body"]
         fks = np.stack([data[name] for name in self._measNames]).T.reshape(-1, n+1, m)
         minDistances = []
-        bodies = []
+        distanceToBodies = {}
         for i_fk in range(n+1):
             for j_fk in range(i_fk+2, n+1):
                 distances = computeDistances(fks[:, i_fk, :], fks[:, j_fk, :]) - 2 * r_body
-                minDistance = np.min(distances)
+                minDistance = float(np.min(distances))
                 minDistances.append(minDistance)
-                bodies.append([i_fk, j_fk])
-        return {"minDist": min(minDistances)}
+                distanceToBodies[str(i_fk) + "_" + str(j_fk)] = {'dist': minDistance}
         return {
             "minDist": min(minDistances),
-            "allMinDist":  minDistances,
-            "bodies": bodies}
+            "allMinDist": distanceToBodies}
 
 
 class SolverTimesMetric(Metric):
@@ -101,9 +98,9 @@ class SolverTimesMetric(Metric):
         interval = self._params['interval']
         t_planning = data[self._measNames[0]]
         if interval == 1:
-            return np.mean(t_planning)
+            return float(np.mean(t_planning))
         else:
-            return np.mean(t_planning[:-(interval-1)].reshape(-1, interval), axis=0)[0]
+            return float(np.mean(t_planning[:-(interval-1)].reshape(-1, interval), axis=0)[0])
 
 
 class PathLengthMetric(Metric):
@@ -111,7 +108,7 @@ class PathLengthMetric(Metric):
         pathLength = 0
         fks = np.stack([data[name] for name in self._measNames]).T
         pathLength = [np.linalg.norm(fks[i] - fks[i-1]) for i in range(1,len(fks))]
-        return np.sum(pathLength)
+        return float(np.sum(pathLength))
 
 
 class SuccessMetric(Metric):
@@ -119,7 +116,7 @@ class SuccessMetric(Metric):
         minClearance = self._params['minClearance']
         reachingFlag = self._params['reachingFlag']
         if reachingFlag < 0:
-            return False, "Goal not reached"
+            return [False, "Goal not reached"]
         if minClearance < 0:
-            return False, "Collision"
-        return True, ""
+            return [False, "Collision"]
+        return [True, ""]
