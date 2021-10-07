@@ -24,7 +24,7 @@ Beside the obvious, some things need to be changed/added?
 * [ ] Issue when starting really close to obstacles with fabrics
   -  Note: the issue is really: What happens if a constraints is violated at some point?
 * [x] Correction self collision with mpc for planar robots (body 0 must be avoided)
-* [ ] Add self collision clearenc to clearenc metric
+* [x] Add self collision clearenc to clearenc metric
 
 ## Metrics
 
