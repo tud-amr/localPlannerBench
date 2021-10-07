@@ -9,7 +9,7 @@ goalFileMpc=resFolderMpc."/goal.csv"
 initStateFileMpc=resFolderMpc."/initState.csv"
 fkLastFileMpc=resFolderMpc."/fk_last.csv"
 fkStartFileMpc=resFolderMpc."/fk_first.csv"
-outFileMpc="trajectories_mpc_".timeStampMpc.".eps"
+outFileMpc="plots/trajectories_mpc_".timeStampMpc.".eps"
 
 resFolderFabric=ARG3
 timeStampFabric=ARG4
@@ -18,7 +18,7 @@ goalFileFabric=resFolderFabric."/goal.csv"
 initStateFileFabric=resFolderFabric."/initState.csv"
 fkLastFileFabric=resFolderFabric."/fk_last.csv"
 fkStartFileFabric=resFolderFabric."/fk_first.csv"
-outFileFabric="trajectories_fabric_".timeStampFabric.".eps"
+outFileFabric="plots/trajectories_fabric_".timeStampFabric.".eps"
 set output outFileMpc
 set datafile separator ','
 set xrange [-5: 5]
@@ -55,3 +55,7 @@ plot inFileFabric using ee_x:ee_y with lines lw 2 notitle, \
   for [file in list] file w lines lc rgb "black" lw 10 notitle, \
   goalFileFabric using 1:2 with points pointsize 3 pointtype 6 lc rgb "green" title "goal", \
 
+print "Done creating trajectory plots"
+print outFileMpc
+print outFileFabric
+print "End file names"

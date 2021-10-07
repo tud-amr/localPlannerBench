@@ -3,6 +3,7 @@ n: 2
 m: 2
 env: point-robot-acc-v0
 dt: 0.05
+r_body: 0.0
 q0: 
   - 2.2
   - 1.3

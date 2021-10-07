@@ -15,7 +15,7 @@ class FabricPlanner(object):
     def __init__(self, setupFile, n):
         self.parseSetup(setupFile)
         self._n = n
-        self._planner = DefaultFabricPlanner(self._n, m_base=self._params['m_base'])
+        self._planner = DefaultFabricPlanner(self._n, m_base=self._params['m_base'], debug=True)
         self._q, self._qdot = self._planner.var()
         self._fks = []
         for i in range(1, self._n + 1):
@@ -54,7 +54,7 @@ class FabricPlanner(object):
                 dm_col = CollisionMap(self._q, self._qdot, fk, obst.x(), obst.r(), r_body=r_body)
                 self._planner.addGeometry(dm_col, lag_col, geo_col)
 
-    def addSelfCollisionAvoidance(self):
+    def addSelfCollisionAvoidance(self, r_body):
         x = ca.SX.sym("x", 1)
         xdot = ca.SX.sym("xdot", 1)
         lag_selfCol = CollisionLagrangian(x, xdot)
@@ -66,7 +66,7 @@ class FabricPlanner(object):
         fks = [np.zeros(2)] + self._fks
         for i in range(self._n+1):
             for j in range(i+2, self._n+1):
-                dm_selfCol = SelfCollisionMap(self._q, self._qdot, fks[i], fks[j], self._params['selfCol']['r'])
+                dm_selfCol = SelfCollisionMap(self._q, self._qdot, fks[i], fks[j], r_body)
                 self._planner.addGeometry(dm_selfCol, lag_selfCol, geo_selfCol)
 
 

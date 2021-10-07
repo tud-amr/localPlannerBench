@@ -9,8 +9,18 @@ if [[ ( "$#" == 4 ) ]]; then
   fabricFile=$3
   intervals=$4
 fi
+if [[ ( "$#" == 3 ) ]]; then
+  mpcFile=$2
+  fabricFile="${mpcFile/mpc/fabric}"
+  intervals=$3
+fi
 if [[ ( "$#" == 2 ) ]]; then
   intervals=$2
+fi
+if [ -z "$mpcFile" ];
+  then 
+    echo "No files found"
+    exit
 fi
 timeStampFabric=${mpcFile:(-15)}
 timeStampMpc=${fabricFile:(-15)}
@@ -20,3 +30,10 @@ fks_y=${fks[1]}
 output=$(./extractFks $fabricFile "${fabricFile}/fk" $n)
 gnuplot -c makeTrajectoryPlots.gnuplot $mpcFile $timeStampMpc $fabricFile $timeStampFabric $fks_x $fks_y
 gnuplot -c makeSolverTimePlot.gnuplot $mpcFile $fabricFile $intervals
+files=`ls -t plots | head -n 3`
+cd plots
+for file in $files
+do
+  echo "Attempting to open ${file}"
+  xdg-open $file
+done

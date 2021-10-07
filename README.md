@@ -10,10 +10,10 @@ Beside the obvious, some things need to be changed/added?
 * [x] Self-collision avoidance
   - [x] done for fabrics by introducing additional geometries
   - [x] done for mpc
-* [ ] Postprocessing for
-  - [ ] path length
-  - [ ] clearance
-* [ ] Multi test script
+* [x] Postprocessing for
+  - [x] path length
+  - [x] clearance
+* [x] Multi test script
 * [x] Dynamic degrees of freedom during post processing
   - [x] Done by adding argument to createPlot script
 * [x] Joint limits for fabrics (needed to have a fair comparision)
@@ -21,15 +21,29 @@ Beside the obvious, some things need to be changed/added?
 * [x] Variable joint limits for mpc
   - [x] Done using additional inequality constraints (consider using different slack
     variabeles)
+* [ ] Issue when starting really close to obstacles with fabrics
+  -  Note: the issue is really: What happens if a constraints is violated at some point?
+* [ ] Correction self collision with mpc for planar robots (body 0 must be avoided)
+* [ ] Add self collision clearenc to clearenc metric
 
 ## Metrics
 
 Local motion planning are assessed based on
-* Planning Time: How long does it take to solve the local planning problem?
-* Success Rate: Which percantage of cases lead to reaching the goal?
-* Path Length: How long is the path taken?
-* Clearance: How far away from obstacles does the robot stay? (How fast does it move close
-  to them?)
+* [ ] Planning Time: How long does it take to solve the local planning problem?
+  - [x] mean solving time (`SolverTimesMetric`)
+  - How to process this?
+* [ ] Success Rate: Which percantage of cases lead to reaching the goal?
+  - [x] Evaluate whether the goal is reached (without colliding) (`SuccessMetric`)
+  - Note that this must be done on a series of experiments
+* [ ] Path Length
+  - [ ] How long is the path taken?
+    - [ ] in configuration space (may not make sense as the configuration is not unique?)
+    - [x] in end-effector space (`PathLengthMetric`)
+  - [x] How much time does it take to reach the goal? (`TimeToReachgoalMetric`)
+* [ ] Clearance: 
+  - [x] How far away from obstacles does the robot stay? (`ClearanceMetric`)
+  - [ ] How fast does it move close to them?
+  - [ ] How far from joint limits?
 * (Smoothness): ???
 
 ## Experiment 1: Fabric vs MPC

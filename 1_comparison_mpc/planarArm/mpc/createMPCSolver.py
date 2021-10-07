@@ -124,7 +124,8 @@ def eval_ineq(z, p):
             fk = casadiFk(q, j+1)[0:2]
             dist = ca.norm_2(fk - x)
             ineqs.append(dist - r - r_body + slack)
-    all_ineqs = ineqs + eval_jointLimits(z, p)
+    all_ineqs = ineqs + eval_jointLimits(z, p) + eval_selfCollision(z, p)
+    print(len(all_ineqs))
     return all_ineqs
 
 def eval_selfCollision(z, p):
@@ -173,9 +174,10 @@ def main():
     model.npar = npar
     model.nvar = nx + nu + ns
     model.neq = nx
-    model.nh = nbObst*n + 2 * n
-    model.hu = np.ones(nbObst*n + 2 * n) * np.inf
-    model.hl = np.zeros(nbObst*n + 2 * n)
+    nself = int(((n-2) * (n-1))/2)
+    model.nh = nbObst*n + 2 * n + nself
+    model.hu = np.ones(nbObst*n + 2 * n + nself) * np.inf
+    model.hl = np.zeros(nbObst*n + 2 * n + nself)
     model.ineq = eval_ineq
     model.objectiveN = eval_objN
     model.xinitidx = range(0, nx)

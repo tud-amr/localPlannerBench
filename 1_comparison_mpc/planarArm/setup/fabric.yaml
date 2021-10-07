@@ -5,12 +5,11 @@ obst:
 selfCol:
   exp: 3.0
   lam: 10
-  r: 0.51
 limits:
   lam: 5.00
   exp: 3.0
 goal:
-  k_psi: 1.0
+  k_psi: 5.0
 speed:
   ex_factor: 1.0
 

@@ -6,7 +6,7 @@ inFileMpc=resFolderMpc."/res.csv"
 resFolderFabric=ARG2
 fabric_name="fabric"
 inFileFabric=resFolderFabric."/res.csv"
-outFileBox="solvertimes_mpcFabric.eps"
+outFileBox="plots/solvertimes_mpcFabric.eps"
 
 intervals=ARG3
 

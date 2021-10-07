@@ -8,6 +8,11 @@ if [[ ( "$#" == 3 ) ]]; then
   fabricFile=$2
   intervals=$3
 fi
+if [[ ( "$#" == 2 ) ]]; then
+  mpcFile=$1
+  fabricFile="${mpcFile/mpc/fabric}"
+  intervals=$2
+fi
 if [[ ( "$#" == 1 ) ]]; then
   intervals=$1
 fi
@@ -20,7 +25,8 @@ timeStampFabric=${mpcFile:(-15)}
 timeStampMpc=${fabricFile:(-15)}
 gnuplot -c makeTrajectoryPlots.gnuplot $mpcFile $timeStampMpc $fabricFile $timeStampFabric
 gnuplot -c makeSolverTimePlot.gnuplot $mpcFile $fabricFile $intervals
-files=`ls -t | head -n 3`
+files=`ls -t plots | head -n 3`
+cd plots
 for file in $files
 do
   echo "Attempting to open ${file}"

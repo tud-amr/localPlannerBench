@@ -81,7 +81,10 @@ class Experiment(object):
                 for res in self._res:
                     writer.writerow(res)
         self._setup.save(folderPath)
-        copyfile(self._fabricSetup, folderPath + "/planner.yaml")
+        if planner == 'fabric':
+            copyfile(self._fabricSetup, folderPath + "/planner.yaml")
+        elif planner == 'mpc':
+            copyfile(self._mpcSetup, folderPath + "/planner.yaml")
 
 
 def main():

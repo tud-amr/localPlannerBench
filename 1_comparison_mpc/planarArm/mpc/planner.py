@@ -85,6 +85,10 @@ class MPCPlanner(object):
                 self._params[self._npar * i + self._paramMap['lower_limits'][j]] = lower_limits[j]
                 self._params[self._npar * i + self._paramMap['upper_limits'][j]] = upper_limits[j]
 
+    def addSelfCollisionAvoidance(self, r_body):
+        for i in range(self._H):
+            self._params[self._npar * i + self._paramMap['r_body'][0]] = r_body
+
 
     def shiftHorizon(self, output, ob):
         nvar = self._nx + self._nu + self._ns
