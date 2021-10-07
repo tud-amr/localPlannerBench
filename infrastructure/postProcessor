@@ -11,6 +11,7 @@ from metrics import (
     MinimumDistanceToPointMetric,
     TimeToReachGoalMetric,
     ClearanceMetric,
+    SelfClearanceMetric,
     SolverTimesMetric,
     PathLengthMetric,
     SuccessMetric
@@ -103,7 +104,7 @@ def postProcessPointMass(pathToData):
     clearanceMetric = ClearanceMetric(
         "clearance",
         ["q0", "q1"],
-        {"obstacles": pp._params["obstacles"], "n": 1, "m": 2},
+        {"obstacles": pp._params["obstacles"], "n": 0, "m": 2, "r_body" : 0.0},
     )
     solverTimesMetric = SolverTimesMetric(
         "solvertime",
@@ -132,10 +133,10 @@ def postProcessPlanarArm(pathToData):
     m = 2
     jointNames = ["q" + str(i) for i in range(n)]
     fksNames = []
-    for i in range(n):
+    for i in range(n+1):
         fksNames.append("fk" + str(i) + "_x")
         fksNames.append("fk" + str(i) + "_y")
-    fkNames = ["fk" + str(n-1) + "_x", "fk" + str(n-1) + "_y"]
+    fkNames = ["fk" + str(n) + "_x", "fk" + str(n) + "_y"]
     pp = PostProcessor(pathToData)
     pp.importData()
     pp.importConfig()
@@ -147,7 +148,12 @@ def postProcessPlanarArm(pathToData):
     clearanceMetric = ClearanceMetric(
         "clearance",
         fksNames,
-        {"obstacles": pp._params["obstacles"], "m": m, "n": n},
+        {"obstacles": pp._params["obstacles"], "m": m, "n": n, "r_body": 0.51},
+    )
+    selfClearanceMetric = SelfClearanceMetric(
+        "selfClearance",
+        fksNames,
+        {"m": m, "n": n, "r_body": 0.51},
     )
     solverTimesMetric = SolverTimesMetric(
         "solvertime",
@@ -163,8 +169,10 @@ def postProcessPlanarArm(pathToData):
     pp.addMetric(timeToReachGoalMetric)
     pp.addMetric(solverTimesMetric)
     pp.addMetric(pathLengthMetric)
+    pp.addMetric(selfClearanceMetric)
     evaluations = pp.evaluate()
-    successEval = pp.evaluateSuccess(evaluations['clearance']['minDist'], evaluations['time2Goal'][0])
+    minClearance = min(evaluations['clearance']['minDist'], evaluations['selfClearance']['minDist'])
+    successEval = pp.evaluateSuccess(minClearance, evaluations['time2Goal'][0])
     pprint.pprint(evaluations)
     pprint.pprint(successEval)
 

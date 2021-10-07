@@ -64,18 +64,19 @@ class Experiment(object):
                 a = self._fabricPlanner.computeAction(q, qdot)
             t_planning = time.time() - t_before
             resDict = {'t': t, 't_planning': t_planning}
-            for n_i in range(n):
-                resDict['q' + str(n_i)] = q[n_i]
-                resDict['q' + str(n_i) + 'dot'] = qdot[n_i]
-                resDict['a' + str(n_i)] = q[n_i]
-                fk = numpyFk(q, n_i+1)
+            for n_i in range(n+1):
+                if n_i < n:
+                    resDict['q' + str(n_i)] = q[n_i]
+                    resDict['q' + str(n_i) + 'dot'] = qdot[n_i]
+                    resDict['a' + str(n_i)] = q[n_i]
+                fk = numpyFk(q, n_i)
                 resDict['fk' + str(n_i) + "_x"] = fk[0]
                 resDict['fk' + str(n_i) + "_y"] = fk[1]
                 resDict['fk' + str(n_i) + "_theta"] = fk[2]
             self._res.append(resDict)
             ob, _, _, _ = self._env.step(a)
             if self._render:
-                time.sleep(self._env._dt * 0.1)
+                time.sleep(self._env._dt)
                 self._env.render()
             t += self._env._dt
         return 0

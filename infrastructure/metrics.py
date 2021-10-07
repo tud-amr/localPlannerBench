@@ -58,12 +58,13 @@ class ClearanceMetric(Metric):
         obstacles = self._params['obstacles']
         m = self._params['m']
         n = self._params['n']
-        fks = np.stack([data[name] for name in self._measNames]).T.reshape(-1, n, m)
+        r_body = self._params['r_body']
+        fks = np.stack([data[name] for name in self._measNames]).T.reshape(-1, n+1, m)
         minDistances = []
         obstLocations = []
         for obst in obstacles:
-            for i_fk in range(n):
-                distancesToObst = computeDistances(fks[:, i_fk, :], obst['x']) - obst['r']
+            for i_fk in range(n+1):
+                distancesToObst = computeDistances(fks[:, i_fk, :], obst['x']) - obst['r'] - r_body
                 minDistToObst = np.min(distancesToObst)
                 minDistances.append(minDistToObst)
                 obstLocations.append(obst['x'])
@@ -72,6 +73,27 @@ class ClearanceMetric(Metric):
             "minDist": min(minDistances),
             "allMinDist":  minDistances,
             "obstLoc": obstLocations}
+
+
+class SelfClearanceMetric(Metric):
+    def computeMetric(self, data):
+        m = self._params['m']
+        n = self._params['n']
+        r_body = self._params["r_body"]
+        fks = np.stack([data[name] for name in self._measNames]).T.reshape(-1, n+1, m)
+        minDistances = []
+        bodies = []
+        for i_fk in range(n+1):
+            for j_fk in range(i_fk+2, n+1):
+                distances = computeDistances(fks[:, i_fk, :], fks[:, j_fk, :]) - 2 * r_body
+                minDistance = np.min(distances)
+                minDistances.append(minDistance)
+                bodies.append([i_fk, j_fk])
+        return {"minDist": min(minDistances)}
+        return {
+            "minDist": min(minDistances),
+            "allMinDist":  minDistances,
+            "bodies": bodies}
 
 
 class SolverTimesMetric(Metric):
