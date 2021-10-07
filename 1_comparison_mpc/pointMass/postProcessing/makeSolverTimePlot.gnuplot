@@ -7,6 +7,7 @@ resFolderFabric=ARG2
 fabric_name="fabric"
 inFileFabric=resFolderFabric."/res.csv"
 outFileBox="plots/solvertimes_mpcFabric.eps"
+outFileBox=resFolderMpc."/plots/solverTimes.eps"
 
 intervals=ARG3
 

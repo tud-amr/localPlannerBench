@@ -144,7 +144,6 @@ def postProcessPointMass(pathToData):
 def postProcessPlanarArm(pathToData):
     n = 5
     m = 2
-    jointNames = ["q" + str(i) for i in range(n)]
     fksNames = []
     for i in range(n+1):
         fksNames.append("fk" + str(i) + "_x")
@@ -195,4 +194,6 @@ def postProcess(folderName):
         postProcessPlanarArm(folderName)
 
 if __name__ == "__main__":
-    postProcess(sys.argv[1])
+    folderPaths = sys.argv[1:]
+    for folderPath in folderPaths:
+        postProcess(folderPath)

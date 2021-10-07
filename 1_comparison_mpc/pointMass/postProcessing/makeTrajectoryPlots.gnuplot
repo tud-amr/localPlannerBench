@@ -8,13 +8,15 @@ inFileMpc=resFolderMpc."/res.csv"
 goalFileMpc=resFolderMpc."/goal.csv"
 initStateFileMpc=resFolderMpc."/initState.csv"
 outFileMpc="plots/trajectories_mpc_".timeStampMpc.".eps"
+outFileMpc=resFolderMpc."/plots/trajectory.eps"
 
 resFolderFabric=ARG3
 timeStampFabric=ARG4
 inFileFabric=resFolderFabric."/res.csv"
 goalFileFabric=resFolderFabric."/goal.csv"
 initStateFileFabric=resFolderFabric."/initState.csv"
-outFileFabric="plots/trajectories_fabric_".timeStampFabric.".eps"
+outFileFabric=resFolderFabric."/plots/trajectory.eps"
+#outFileFabric="plots/trajectories_fabric_".timeStampFabric.".eps"
 set output outFileMpc
 set datafile separator ','
 set xrange [-5: 5]
