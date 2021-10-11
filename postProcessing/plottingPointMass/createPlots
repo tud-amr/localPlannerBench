@@ -1,0 +1,34 @@
+#!/bin/bash
+nbArgs=$#
+mpcFile=`ls -t -d ../results/mpc* | head -n 1`
+fabricFile=`ls -t -d ../results/fabric* | head -n 1`
+intervals=1
+if [[ ( "$#" == 3 ) ]]; then
+  mpcFile=$1
+  fabricFile=$2
+  intervals=$3
+fi
+if [[ ( "$#" == 2 ) ]]; then
+  mpcFile=$1
+  fabricFile="${mpcFile/mpc/fabric}"
+  intervals=$2
+fi
+if [[ ( "$#" == 1 ) ]]; then
+  intervals=$1
+fi
+if [ -z "$mpcFile" ];
+  then 
+    echo "No files found"
+    exit
+fi
+plotFolderMpc="$mpcFile/plots"
+plotFolderFabric="$fabricFile/plots"
+mkdir -p $plotFolderMpc
+mkdir -p $plotFolderFabric
+timeStampFabric=${mpcFile:(-15)}
+timeStampMpc=${fabricFile:(-15)}
+gnuplot -c makeTrajectoryPlots.gnuplot $mpcFile $timeStampMpc $fabricFile $timeStampFabric
+gnuplot -c makeSolverTimePlot.gnuplot $mpcFile $fabricFile $intervals
+xdg-open "$plotFolderMpc/trajectory.eps"
+xdg-open "$plotFolderFabric/trajectory.eps"
+cp "$plotFolderMpc/solverTimes.eps" "$plotFolderFabric/"

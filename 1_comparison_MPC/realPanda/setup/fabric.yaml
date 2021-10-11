@@ -1,0 +1,18 @@
+m_base: 0.5
+obst:
+  exp: 3.0
+  lam: 0.5
+selfCol:
+  exp: 3.0
+  lam: 0.5
+  r: 0.10
+limits:
+  lam: 0.5
+  exp: 3.0
+goal:
+  k_psi: 10.0
+speed:
+  ex_factor: 0.6
+damping:
+  r_b: 0.05 # default 0.2
+

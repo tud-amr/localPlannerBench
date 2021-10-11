@@ -1,0 +1,16 @@
+m_base: 1.0
+obst:
+  exp: 3.0
+  lam: 0.5
+selfCol:
+  exp: 3.0
+  lam: 0.5
+  r: 0.10
+limits:
+  lam: 0.5
+  exp: 3.0
+goal:
+  k_psi: 20.0
+speed:
+  ex_factor: 1.0
+
