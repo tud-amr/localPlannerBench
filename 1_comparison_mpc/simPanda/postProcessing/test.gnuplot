@@ -1,2 +1,0 @@
-THIRD=ARG1
-print THIRD

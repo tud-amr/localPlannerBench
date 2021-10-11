@@ -3,6 +3,42 @@
 All experiments related to the dynamic fabrics paper should be here.
 This repository depends on the dynamic fabrics library (and not much else!).
 
+## How to run the experiments
+
+# Single runs
+
+```bash
+cd path/to/experiment-folder
+./run_experiment -case setup/<setup-file> -mpc setup/<mpc-file> -fab setup/<fab-file>
+```
+Postprocessing
+```bash
+cd postProcessing
+./postProcessor path/to/result-folder
+```
+Results will be displayed and added to the result folder of the experiment as markdown
+Plotting trajectories and solvertimes 
+```bash
+cd postProcessing
+cd plotting<robottype>
+./createPlots <ndof> path/to/mpc-result <intervals>
+```
+
+# running a series
+```bash
+cd path/to/experiment-folder
+./run_series results/<series-name>
+```
+Postprocessing
+```bash
+cd postProcessing
+./postProcessor path/to/result-folder/<all-files>
+```
+Postprocessing results will only be added to the results folder; there are no direct
+printouts.
+Plotting trajectories can be done for individual paths.
+
+
 ## ToDo's
 Beside the obvious, some things need to be changed/added?
 * [x] Fabrics tend to produce 'nan' values if they are close to the goal for a long time.
