@@ -71,14 +71,15 @@ class FabricPlanner(object):
 
 
     def addGoal(self, goal):
-        fk = self._fks[-1]
-        self._dm_psi, lag_psi, geo_psi, self._x_psi, self._xdot_psi = defaultAttractor(
-            self._q, self._qdot, goal, fk
-        )
-        geo_psi = GoalGeometry(
-            self._x_psi, self._xdot_psi,
-            k_psi=self._params['goal']['k_psi'])
-        self._planner.addForcingGeometry(self._dm_psi, lag_psi, geo_psi)
+        for subGoal in goal._goals:
+            fk = self._fks[subGoal._child_link-1]
+            self._dm_psi, lag_psi, geo_psi, self._x_psi, self._xdot_psi = defaultAttractor(
+                self._q, self._qdot, subGoal._desired_position, fk
+            )
+            geo_psi = GoalGeometry(
+                self._x_psi, self._xdot_psi,
+                k_psi=self._params['goal']['k_psi'])
+            self._planner.addForcingGeometry(self._dm_psi, lag_psi, geo_psi)
 
     def concretize(self):
         # execution energy

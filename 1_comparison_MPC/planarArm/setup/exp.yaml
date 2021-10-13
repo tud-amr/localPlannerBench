@@ -1,9 +1,44 @@
 T: 3000
 dt: 0.05
 env: nLink-reacher-acc-v0
-goal:
-- -2.0
-- 1.5
+n: 5
+goals:
+  goal1:
+    prime: True
+    m: 2
+    w: 1
+    indices:
+      - 0
+      - 1
+    parent_link: 0
+    child_link: 4
+    desired_position:
+      - 2.0
+      - 1.0
+    low:
+      - -5.0
+      - -5.0
+    high: 
+      - 5.0
+      - 5.0
+  goal2:
+    prime: False
+    m: 2
+    w: 1
+    indices:
+      - 0
+      - 1
+    parent_link: 0
+    child_link: 5
+    desired_position:
+      - 2.0
+      - 2.0
+    low:
+      - -5.0
+      - -5.0
+    high: 
+      - 5.0
+      - 5.0
 limits:
   lower:
   - -2.0
@@ -17,8 +52,6 @@ limits:
   - 2.0
   - 2.0
   - 2.0
-m: 2
-n: 5
 obstacles:
 - obst_0: obst_0
   r: 0.756594932138176
@@ -51,13 +84,6 @@ q0dot:
 - 0.0
 - 0.0
 r_body: 0.5
-randomGoal:
-  high:
-  - 5.0
-  - 5.0
-  low:
-  - -5.0
-  - -5.0
 randomObstacle:
   nb: 5
   pos_high:
