@@ -26,19 +26,17 @@ class Experiment(object):
         self._mpcPlanner.addObstacles(self._obsts)
         self._mpcPlanner.addJointLimits(self._setup.lowerLimits(), self._setup.upperLimits())
         self._mpcPlanner.addGoal(self._setup.goal())
-        #self._fabricPlanner.addObstacles(self._obsts)
+        self._fabricPlanner.addObstacles(self._obsts)
         self._fabricPlanner.addJointLimits(self._setup.lowerLimits(), self._setup.upperLimits())
-        #self._fabricPlanner.addSelfCollisionAvoidance()
+        self._fabricPlanner.addSelfCollisionAvoidance()
         self._fabricPlanner.addGoal(self._setup.goal())
         self._fabricPlanner.concretize()
-        self._rosConverter, self._integratorNode = self._setup.connectRos(self._fabricPlanner)
 
-    def addScene(self):
-        for obst in self._setup.obstacles():
-            self._env.addObstacle(pos=obst.x(), filename='sphere05red_nocol.urdf')
-        self._env.addObstacle(pos=self._setup.goal(), filename="sphere_goal.urdf")
-
-    def run(self, planner='mpc'):
+    def run(self, planner='fabric'):
+        if planner == 'fabric':
+            self._rosConverter = self._setup.connectRos(self._fabricPlanner)
+        elif planner == 'mpc':
+            self._rosConverter = self._setup.connectRos(self._mpcPlanner)
         self._res = self._rosConverter.run()
 
     def save(self, timeStamp, errFlag, planner='mpc'):

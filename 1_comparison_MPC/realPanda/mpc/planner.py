@@ -25,17 +25,17 @@ class MPCPlanner(object):
     def __init__(self, setupFile, n):
         # nbObst=5, wx=0.5, wvel=1, wu=1, ws=1e8, N=80, dt=0.05, interval=1):
         self.parseSetup(setupFile)
-        self._H = self._params['H']
-        self._nbObst = self._params['obst']['nbObst']
+        self._H = self._setup_params['H']
+        self._nbObst = self._setup_params['obst']['nbObst']
         self._m = 3
         self._n = n
         self._paramMap, self._npar, self._nx, self._nu, _, self._ns = getParameters(self._n, self._m, self._nbObst)
-        self._dt = self._params['dt']
-        self._interval = self._params['interval']
-        self._wx = self._params['weights']['wx']
-        self._wvel = self._params['weights']['wvel']
-        self._ws = self._params['weights']['ws']
-        self._wu = self._params['weights']['wu']
+        self._dt = self._setup_params['dt']
+        self._interval = self._setup_params['interval']
+        self._wx = self._setup_params['weights']['wx']
+        self._wvel = self._setup_params['weights']['wvel']
+        self._ws = self._setup_params['weights']['ws']
+        self._wu = self._setup_params['weights']['wu']
         dt_str = str(self._dt).replace('.', '')
         mpcFileName = 'mpc/solver_panda_' + dt_str + '_N' + str(self._H)
         try:
@@ -65,12 +65,17 @@ class MPCPlanner(object):
 
     def parseSetup(self, setupFile):
         with open(setupFile, 'r') as stream:
-            self._params = yaml.safe_load(stream)
+            self._setup_params = yaml.safe_load(stream)
 
     def addGoal(self, goal):
+        if len(goal._goals) > 1:
+            print("WARNING: Only single goal supported in mpc")
+        if not goal._goals[0]._child_link == self._n:
+            print("WARNING: Only endeffector goals supported for mpc")
+            print("WARNING: Assuming a end-effector goal")
         for i in range(self._H):
             for j in range(self._m):
-                self._params[self._npar * i + self._paramMap["g"][j]] = goal[j]
+                self._params[self._npar * i + self._paramMap["g"][j]] = goal._goals[0]._desired_position[j]
 
     def addObstacles(self, obsts):
         for i in range(self._H):

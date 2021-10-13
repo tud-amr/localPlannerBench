@@ -15,15 +15,15 @@ class FabricPlanner(object):
     def __init__(self, setupFile, n):
         self.parseSetup(setupFile)
         self._n = n
-        self._planner = DefaultFabricPlanner(self._n, m_base=self._params['m_base'])
+        self._planner = DefaultFabricPlanner(self._n, m_base=self._setup_params['m_base'])
         self._q, self._qdot = self._planner.var()
         self._fks = []
-        for i in range(2, self._n + 1):
+        for i in range(0, self._n + 3):
             self._fks.append(pandaFk(self._q, i))
 
     def parseSetup(self, setupFile):
         with open(setupFile, "r") as stream:
-            self._params = yaml.safe_load(stream)
+            self._setup_params = yaml.safe_load(stream)
 
     def addJointLimits(self, lower_limits, upper_limits):
         x = ca.SX.sym("x", 1)
@@ -31,8 +31,8 @@ class FabricPlanner(object):
         lag_col = CollisionLagrangian(x, xdot)
         geo_col = LimitGeometry(
             x, xdot,
-            lam=self._params["limits"]["lam"],
-            exp=self._params["limits"]["exp"]
+            lam=self._setup_params["limits"]["lam"],
+            exp=self._setup_params["limits"]["exp"]
         )
         for i in range(self._n):
             dm_col = UpperLimitMap(self._q, self._qdot, upper_limits[i], i)
@@ -46,11 +46,11 @@ class FabricPlanner(object):
         lag_col = CollisionLagrangian(x, xdot)
         geo_col = CollisionGeometry(
             x, xdot,
-            exp=self._params["obst"]["exp"],
-            lam=self._params["obst"]["lam"]
+            exp=self._setup_params["obst"]["exp"],
+            lam=self._setup_params["obst"]["lam"]
         )
         for i, obst in enumerate(obsts):
-            for fk in self._fks:
+            for fk in self._fks[3:]:
                 dm_col = CollisionMap(self._q, self._qdot, fk, obst.x(), obst.r())
                 self._planner.addGeometry(dm_col, lag_col, geo_col)
 
@@ -60,36 +60,40 @@ class FabricPlanner(object):
         lag_selfCol = CollisionLagrangian(x, xdot)
         geo_selfCol = CollisionGeometry(
             x, xdot,
-            exp=self._params["selfCol"]["exp"],
-            lam=self._params["selfCol"]["lam"]
+            exp=self._setup_params["selfCol"]["exp"],
+            lam=self._setup_params["selfCol"]["lam"]
         )
         fks = self._fks
-        for i in range(self._n-1):
-            for j in range(i+2, self._n-1):
-                dm_selfCol = SelfCollisionMap(self._q, self._qdot, fks[i], fks[j], self._params['selfCol']['r'])
+        for i in range(2, self._n+3):
+            for j in range(i+2, self._n+3):
+                dm_selfCol = SelfCollisionMap(self._q, self._qdot, fks[i], fks[j], self._setup_params['selfCol']['r'])
                 self._planner.addGeometry(dm_selfCol, lag_selfCol, geo_selfCol)
 
-
     def addGoal(self, goal):
-        fk = self._fks[-1]
-        self._dm_psi, lag_psi, geo_psi, self._x_psi, self._xdot_psi = defaultAttractor(
-            self._q, self._qdot, goal, fk
-        )
-        geo_psi = GoalGeometry(
-            self._x_psi, self._xdot_psi,
-            k_psi=self._params['goal']['k_psi'])
-        self._planner.addForcingGeometry(self._dm_psi, lag_psi, geo_psi)
+        for subGoal in goal._goals:
+            indices = subGoal.getIndices()
+            fk = self._fks[subGoal._child_link][indices] - self._fks[subGoal._parent_link][indices]
+            dm_psi, lag_psi, geo_psi, x_psi, xdot_psi = defaultAttractor(
+                self._q, self._qdot, subGoal._desired_position, fk
+            )
+            geo_psi = GoalGeometry(
+                x_psi, xdot_psi,
+                k_psi=self._setup_params['goal']['k_psi'] * subGoal._w
+            )
+            self._planner.addForcingGeometry(dm_psi, lag_psi, geo_psi)
+            if subGoal.isPrimeGoal():
+                self._x_psi = x_psi
+                self._xdot_psi = xdot_psi
+                self._dm_psi = dm_psi
 
     def concretize(self):
         # execution energy
         exLag = ExecutionLagrangian(self._q, self._qdot)
         self._planner.setExecutionEnergy(exLag)
         # Speed control
-        ex_factor = self._params['speed']['ex_factor']
+        ex_factor = self._setup_params['speed']['ex_factor']
         self._planner.setDefaultSpeedControl(
-            self._x_psi, self._dm_psi, exLag, ex_factor,
-            b=[0.01, 6.5],
-            r_b=self._params['damping']['r_b']
+            self._x_psi, self._dm_psi, exLag, ex_factor
         )
         self._planner.concretize()
 

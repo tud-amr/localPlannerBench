@@ -47,9 +47,9 @@ goals:
     parent_link: 0
     child_link: 8
     desired_position:
-      - 0.2
-      - -0.3
-      - 0.7
+      - 0.65
+      - 0.0
+      - 0.6
     low:
       - 0.2
       - -0.5

@@ -34,7 +34,7 @@ def getParameters(n, m, nbObst):
     nPar += n
     pm['upper_limits'] = list(range(nPar, nPar + n))
     nPar += n
-    dt = 0.5
+    dt = 0.01
     nx = n * 2
     nu = n
     ns = 1

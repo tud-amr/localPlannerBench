@@ -58,24 +58,6 @@ goals:
       - 0.5
       - 0.5
       - 1.3
-  goal2:
-    prime: False
-    w: 5
-    m: 3
-    indices: 
-      - 0
-      - 1
-    parent_link: 8
-    child_link: 9
-    desired_position:
-      - 0.0
-      - 0.0
-    low:
-      - 0.2
-      - -0.5
-    high: 
-      - 0.5
-      - 0.5
 obstacles:
 - obst_0: obst_0
   r: 0.15
