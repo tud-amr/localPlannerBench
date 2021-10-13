@@ -36,7 +36,7 @@ class FabricPlanner(object):
     def addGoal(self, goal):
         fk = self._q
         self._dm_psi, lag_psi, _, self._x_psi, self._xdot_psi = defaultAttractor(
-            self._q, self._qdot, goal, fk
+            self._q, self._qdot, goal._goals[0]._desired_position, fk
         )
         geo_psi = GoalGeometry(
             self._x_psi, self._xdot_psi,
