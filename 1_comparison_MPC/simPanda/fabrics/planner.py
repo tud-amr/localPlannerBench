@@ -18,7 +18,7 @@ class FabricPlanner(object):
         self._planner = DefaultFabricPlanner(self._n, m_base=self._params['m_base'])
         self._q, self._qdot = self._planner.var()
         self._fks = []
-        for i in range(2, self._n + 1):
+        for i in range(0, self._n + 3):
             self._fks.append(pandaFk(self._q, i))
 
     def parseSetup(self, setupFile):
@@ -50,7 +50,7 @@ class FabricPlanner(object):
             lam=self._params["obst"]["lam"]
         )
         for i, obst in enumerate(obsts):
-            for fk in self._fks:
+            for fk in self._fks[3:]:
                 dm_col = CollisionMap(self._q, self._qdot, fk, obst.x(), obst.r())
                 self._planner.addGeometry(dm_col, lag_col, geo_col)
 
@@ -64,21 +64,27 @@ class FabricPlanner(object):
             lam=self._params["selfCol"]["lam"]
         )
         fks = self._fks
-        for i in range(self._n-1):
-            for j in range(i+2, self._n-1):
+        for i in range(2, self._n+3):
+            for j in range(i+2, self._n+3):
                 dm_selfCol = SelfCollisionMap(self._q, self._qdot, fks[i], fks[j], self._params['selfCol']['r'])
                 self._planner.addGeometry(dm_selfCol, lag_selfCol, geo_selfCol)
 
-
     def addGoal(self, goal):
-        fk = self._fks[-1]
-        self._dm_psi, lag_psi, geo_psi, self._x_psi, self._xdot_psi = defaultAttractor(
-            self._q, self._qdot, goal, fk
-        )
-        geo_psi = GoalGeometry(
-            self._x_psi, self._xdot_psi,
-            k_psi=self._params['goal']['k_psi'])
-        self._planner.addForcingGeometry(self._dm_psi, lag_psi, geo_psi)
+        for subGoal in goal._goals:
+            indices = subGoal.getIndices()
+            fk = self._fks[subGoal._child_link][indices] - self._fks[subGoal._parent_link][indices]
+            dm_psi, lag_psi, geo_psi, x_psi, xdot_psi = defaultAttractor(
+                self._q, self._qdot, subGoal._desired_position, fk
+            )
+            geo_psi = GoalGeometry(
+                x_psi, xdot_psi,
+                k_psi=self._params['goal']['k_psi'] * subGoal._w
+            )
+            self._planner.addForcingGeometry(dm_psi, lag_psi, geo_psi)
+            if subGoal.isPrimeGoal():
+                self._x_psi = x_psi
+                self._xdot_psi = xdot_psi
+                self._dm_psi = dm_psi
 
     def concretize(self):
         # execution energy

@@ -22,7 +22,7 @@ class Experiment(object):
         self._render = render
         self._mpcPlanner = MPCPlanner(mpcSetup, self._setup.n())
         self._fabricPlanner = FabricPlanner(fabricSetup, self._setup.n())
-        self._obsts = self._setup.obstacles()
+        self._obsts = self._setup.getObstacles()
         self._mpcPlanner.addObstacles(self._obsts)
         self._mpcPlanner.addJointLimits(self._setup.lowerLimits(), self._setup.upperLimits())
         self._mpcPlanner.addGoal(self._setup.goal())
@@ -32,9 +32,11 @@ class Experiment(object):
         self._fabricPlanner.addGoal(self._setup.goal())
 
     def addScene(self):
-        for obst in self._setup.obstacles():
+        for obst in self._setup.getObstacles():
             self._env.addObstacle(pos=obst.x(), filename='sphere05red_nocol.urdf')
-        self._env.addObstacle(pos=self._setup.goal(), filename="sphere_goal.urdf")
+        for subGoal in self._setup.goal()._goals:
+            if subGoal.isPrimeGoal():
+                self._env.addObstacle(pos=subGoal._desired_position, filename="sphere_goal.urdf")
 
     def run(self, planner='mpc'):
         if planner == 'mpc':
@@ -96,9 +98,15 @@ class Experiment(object):
 
 def main():
     parser = argparse.ArgumentParser("Run motion planning experiment")
-    parser.add_argument('setupFile', metavar="setup", type=str, help='setup file')
-    parser.add_argument('mpcSetup', metavar="mpcSetup", type=str, help='mpc setup')
-    parser.add_argument('fabricSetup', metavar="fabricSetup", type=str, help='fabric setup')
+    parser.add_argument(
+        "--caseSetup", "-case", type=str, help="setup file"
+    )
+    parser.add_argument(
+        "--mpcSetup", "-mpc", type=str, help="mpc setup"
+    )
+    parser.add_argument(
+        "--fabricSetup", "-fab", type=str, help="fabric setup"
+    )
     parser.add_argument('--output-file', '-o', type=str, default='output', help='Output filename without suffix', metavar='output')
     parser.add_argument('--no-stamp', dest='stamp', action='store_false')
     parser.add_argument('--random-goal', dest='random_goal', action='store_true')
@@ -113,10 +121,10 @@ def main():
         timeStamp = "{:%Y%m%d_%H%M%S}".format(datetime.datetime.now())
     else:
         timeStamp = ""
-    setup = ExpSetup(args.setupFile, randomGoal=args.random_goal, randomObst=args.random_obst)
+    setup = ExpSetup(args.caseSetup, randomGoal=args.random_goal, randomObst=args.random_obst)
     thisExp = Experiment(setup, args.mpcSetup, args.fabricSetup, render=args.render)
-    # errFlag = thisExp.run(planner='mpc')
-    # thisExp.save(timeStamp, errFlag, planner='mpc')
+    errFlag = thisExp.run(planner='mpc')
+    thisExp.save(timeStamp, errFlag, planner='mpc')
     errFlag = thisExp.run(planner='fabric')
     thisExp.save(timeStamp, errFlag, planner='fabric')
 

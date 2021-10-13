@@ -68,9 +68,14 @@ class MPCPlanner(object):
             self._params = yaml.safe_load(stream)
 
     def addGoal(self, goal):
+        if len(goal._goals) > 1:
+            print("WARNING: Only single goal supported in mpc")
+        if not goal._goals[0]._child_link == self._n:
+            print("WARNING: Only endeffector goals supported for mpc")
+            print("WARNING: Assuming a end-effector goal")
         for i in range(self._H):
             for j in range(self._m):
-                self._params[self._npar * i + self._paramMap["g"][j]] = goal[j]
+                self._params[self._npar * i + self._paramMap["g"][j]] = goal._goals[0]._desired_position[j]
 
     def addObstacles(self, obsts):
         for i in range(self._H):
