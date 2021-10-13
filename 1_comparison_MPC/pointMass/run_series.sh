@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 
+nCases=10
+seriesFolder="results"
 if [[ ( "$#" == 1 ) ]]; then
   seriesFolder=$1
-else
-  seriesFolder="results"
 fi
-nCases=10
+if [[ ( "$#" == 2 ) ]]; then
+  seriesFolder=$1
+  nCases=$2
+fi
+echo "Running series with $nCases in folder $seriesFolder"
 nValidCases=0
 while (( $nValidCases < $nCases )); do
   errFlag=`./run_experiment.py -case setup/exp.yaml -mpc setup/mpc.yaml -fab setup/fabric.yaml \
