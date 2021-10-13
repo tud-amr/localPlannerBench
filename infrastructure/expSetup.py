@@ -9,9 +9,11 @@ import numpy as np
 from obstacle import Obstacle
 from numpyFk import numpyFk
 
+from fabricsExperiments.infrastructure.motionPlanningGoal import MotionPlanningGoal
+
+
 class CaseNotFeasibleError(Exception):
     pass
-
 
 
 class ExpSetup(object):
@@ -28,16 +30,10 @@ class ExpSetup(object):
     def processFile(self):
         with open(self._setupFile, "r") as stream:
             self._params = yaml.safe_load(stream)
+        self._goal = MotionPlanningGoal(self._params['goals'])
         if self._randomGoal:
-            goal = []
-            for i in range(self._params["m"]):
-                goal.append(
-                    np.random.uniform(
-                        low=self._params["randomGoal"]["low"][i],
-                        high=self._params["randomGoal"]["high"][i],
-                    )
-                )
-            self._params["goal"] = goal
+            self._goal.generateRandomPosition()
+        self._params['goal'] = self._goal.toDict()
         if self._randomInit:
             q0 = []
             for i in range(self._params["n"]):
@@ -72,16 +68,15 @@ class ExpSetup(object):
 
     def connectRos(self, planner):
         from fabricsExperiments.infrastructure.ros_converter_node import ActionConverterNode
-        from fabricsExperiments.infrastructure.ros_integrator_node import IntegratorNode
         dt = self._params["dt"]
         rate_int = 1/self._params["dt"]
-        return ActionConverterNode(planner, dt, rate_int, self._params["n"]), IntegratorNode()
+        return ActionConverterNode(planner, dt, rate_int, self._params["n"])
 
     def initialState(self):
         return self._params["q0"], self._params["q0dot"]
 
     def goal(self):
-        return self._params["goal"]
+        return self._goal
 
     def setObstacles(self):
         self._obsts = []
@@ -111,9 +106,10 @@ class ExpSetup(object):
                 dist_initState = np.linalg.norm(np.array(o.x()) - fk)
                 if dist_initState < (o.r() + r_body):
                     raise CaseNotFeasibleError("Initial configuration in collision")
-            dist_goal = np.linalg.norm(np.array(o.x()) - np.array(self._params["goal"]))
-            if dist_goal < (o.r() + r_body):
-                raise CaseNotFeasibleError("Goal in collision")
+            for goal in self._goal._goals:
+                dist_goal = np.linalg.norm(np.array(o.x()) - np.array(goal._desired_position))
+                if dist_goal < (o.r() + r_body):
+                    raise CaseNotFeasibleError("Goal in collision")
         for i in range(self._params["n"] + 1):
             for j in range(i+2, self._params["n"] + 1):
                 fk1 = numpyFk(self._params['q0'], i)[0:2]
@@ -122,8 +118,9 @@ class ExpSetup(object):
                 if dist_initState < (2 * r_body):
                     raise CaseNotFeasibleError("Initial configuration in self collision")
         if checkGoalReachible:
-            if np.linalg.norm(np.array(self._params["goal"])) > self._params["n"]:
-                raise CaseNotFeasibleError("Goal unreachible")
+            for goal in self._goal._goals:
+                if np.linalg.norm(np.array(goal._desired_position)) > goal._child_link:
+                    raise CaseNotFeasibleError("Goal unreachible")
 
     def save(self, folderPath):
         expFilename = folderPath + "/exp.yaml"
@@ -136,7 +133,8 @@ class ExpSetup(object):
             o.toCSV(obstFile + "_" + str(i) + ".csv")
         with open(goalFilename, "w") as file:
             csv_writer = csv.writer(file, delimiter=",")
-            csv_writer.writerow(self._params["goal"])
+            for subGoal in self._goal._goals:
+                csv_writer.writerow(subGoal._desired_position)
         with open(initStateFilename, "w") as file:
             csv_writer = csv.writer(file, delimiter=",")
             csv_writer.writerow(self._params["q0"])
