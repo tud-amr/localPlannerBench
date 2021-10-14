@@ -9,7 +9,7 @@ from optFabrics.planner.default_leaves import defaultAttractor
 from optFabrics.planner.default_geometries import CollisionGeometry, GoalGeometry, LimitGeometry
 
 
-from fabricsExperiments.infrastructure.abstractPlanner import AbstractPlanner
+from fabricsExperiments.generic.abstractPlanner import AbstractPlanner
 
 
 class FabricPlanner(AbstractPlanner):

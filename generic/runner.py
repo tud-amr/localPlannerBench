@@ -9,9 +9,9 @@ import warnings
 from shutil import copyfile
 import numpy as np
 
-from fabricsExperiments.infrastructure.experiment import Experiment
-from fabricsExperiments.infrastructure.fabricPlanner import FabricPlanner
-from fabricsExperiments.infrastructure.experimentSaver import ExperimentSaver
+from fabricsExperiments.generic.experiment import Experiment
+from fabricsExperiments.generic.fabricPlanner import FabricPlanner
+from fabricsExperiments.generic.experimentSaver import ExperimentSaver
 
 
 def blockPrint():
