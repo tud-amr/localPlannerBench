@@ -1,58 +1,80 @@
 import numpy as np
+import csv
+
+from fabricsExperiments.infrastructure.subGoal import SubGoal
+
+
+class NoSubgoalsError(Exception):
+    pass
+
+
+class MotionPlanningGoalRandomizeError(Exception):
+    pass
+
 
 class MotionPlanningGoal(object):
     def __init__(self, goalsDict):
-        self._goals = []
+        self._goalsDict = goalsDict
+        self._subGoals = []
         self.parseGoalsDict(goalsDict)
 
     def parseGoalsDict(self, goalsDict):
-        for goal in goalsDict.keys():
-            self._goals.append(PositionGoal(goal, goalsDict[goal]))
+        if not goalsDict.keys():
+            raise NoSubgoalsError("No subgoals defined for the motion planning Goal")
+        for subGoal in goalsDict.keys():
+            self._subGoals.append(SubGoal(subGoal, goalsDict[subGoal]))
 
-    def generateRandomPosition(self):
-        for goal in self._goals:
-            goal.generateRandomPosition()
+    def shuffle(self):
+        for subGoal in self._subGoals:
+            try:
+                subGoal.generateRandomPosition()
+            except Exception as e:
+                raise MotionPlanningGoalRandomizeError(
+                    "Randomize error for %s with error: %s" % (subGoal.name(), str(e))
+                )
 
-    def toDict(self):
+    def subGoalsDict(self):
         goalsDict = {}
-        for goal in self._goals:
-            goalsDict[goal._name] = goal.toDict()
+        for subGoal in self._subGoals:
+            goalsDict[subGoal.name()] = subGoal.goalDict()
+        return goalsDict
+
+    def subGoals(self):
+        return self._subGoals
+
+    def toCSV(self, folderPath):
+        goalFilename = folderPath + "/goal.csv"
+        with open(goalFilename, "w") as file:
+            csv_writer = csv.writer(file, delimiter=",")
+            for subGoal in self.subGoals():
+                if subGoal.parentLink() == 0:
+                    csv_writer.writerow(subGoal.desiredPosition())
 
 
-class PositionGoal(object):
-    def __init__(self, name, goalDict):
-        self._name = name
-        self.parseGoalDict(goalDict)
-
-    def parseGoalDict(self, goalDict):
-        self._m = goalDict['m']
-        self._indices = goalDict['indices']
-        self._parent_link = goalDict['parent_link']
-        self._child_link = goalDict['child_link']
-        self._desired_position = np.array(goalDict['desired_position'])
-        self._low = goalDict['low']
-        self._high = goalDict['high']
-        self._prime = goalDict['prime']
-        self._w = goalDict['w']
-
-    def isPrimeGoal(self):
-        return self._prime
-
-    def getIndices(self):
-        return self._indices
-
-    def generateRandomPosition(self):
-        for i in range(self._m):
-            self._desired_position[i] = np.random.uniform(
-                                            low=self._low[i], high=self._high[i]
-                                        )
-
-    def toDict(self):
-        goalDict = {}
-        goalDict['parent_link'] = self._parent_link
-        goalDict['child_link'] = self._child_link
-        goalDict['desired_position'] = self._desired_position.tolist()
-        goalDict['m'] = self._m
-        goalDict['low'] = self._low
-        goalDict['high'] = self._high
-        return goalDict
+if __name__ == "__main__":
+    goalDict1 = {
+        "m": 2,
+        "w": 1,
+        "prime": True,
+        "indices": [0, 1],
+        "parent_link": 0,
+        "child_link": 1,
+        "desired_position": ["0.0", "1.0"],
+        "low": ["-1.0", "-1.0"],
+        "high": ["1.0", "1.0"],
+    }
+    goalDict2 = {
+        "m": 1,
+        "w": 1,
+        "prime": False,
+        "indices": [0],
+        "parent_link": 0,
+        "child_link": 1,
+        "desired_position": ["0.0"],
+        "low": ["-1.0"],
+        "high": ["1.0"],
+    }
+    goal = {"subgoal1": goalDict1, "subgoal2": goalDict2}
+    motionPlanningGoal = MotionPlanningGoal(goal)
+    motionPlanningGoal.shuffle()
+    print(motionPlanningGoal.subGoalsDict())
