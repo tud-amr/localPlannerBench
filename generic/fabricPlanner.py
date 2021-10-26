@@ -14,14 +14,16 @@ from fabricsExperiments.generic.abstractPlanner import AbstractPlanner
 
 class FabricPlanner(AbstractPlanner):
     def __init__(self, exp, setupFile):
-        required_keys = ['type', 'n', 'obst', 'attractor', 'speed', 'damper', 'limits', 'selfCol']
+        required_keys = ['type', 'n', 'obst', 'attractor', 'speed', 'damper', 'limits', 'selfCol', 'interval']
         super().__init__(exp, setupFile, required_keys)
         self.reset()
 
     def reset(self):
-        print("RESETTING PLANNER")
         self._planner = DefaultFabricPlanner(self.n(), m_base=self.mBase())
         self._q, self._qdot = self._planner.var()
+
+    def interval(self):
+        return self._setup['interval']
 
     def n(self):
         return self._setup['n']
@@ -57,7 +59,7 @@ class FabricPlanner(AbstractPlanner):
             lam=self.configObst()["lam"]
         )
         for i, obst in enumerate(obsts):
-            for i in range(1, self.n()):
+            for i in range(1, self.n() + 1):
                 fk = self._exp.fk(self._q, i, positionOnly=True)
                 dm_col = CollisionMap(self._q, self._qdot, fk, obst.x(), obst.r(), r_body=r_body)
                 self._planner.addGeometry(dm_col, lag_col, geo_col)

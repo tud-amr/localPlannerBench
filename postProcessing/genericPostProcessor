@@ -1,0 +1,306 @@
+#! /usr/bin/python3
+
+import subprocess
+import argparse
+import numpy as np
+import csv
+import sys
+import os
+import yaml
+import pprint
+
+from fabricsExperiments.generic.experiment import Experiment
+from fabricsExperiments.generic.fabricPlanner import FabricPlanner
+from fabricsExperiments.generic.mpcPlanner import MPCPlanner
+
+from metrics import (
+    DistanceToPointMetric,
+    MinimumDistanceToPointMetric,
+    TimeToReachGoalMetric,
+    ClearanceMetric,
+    SelfClearanceMetric,
+    SolverTimesMetric,
+    PathLengthMetric,
+    SuccessMetric,
+)
+
+
+def csvToRawData(fileName):
+    with open(fileName) as csvfile:
+        reader = csv.reader(csvfile, delimiter=",")
+        return list(reader)
+
+
+def listStr2FloatArray(strList):
+    return np.array([float(entry) for entry in strList])
+
+
+class PostProcessor(object):
+    def __init__(self):
+        self.initializeArgumentParser()
+        self._metrices = []
+        self.parseArguments()
+
+    def initializeArgumentParser(self):
+        self._parser = argparse.ArgumentParser(
+            "Run post processing for motion planning experiment"
+        )
+        self._parser.add_argument(
+            "--expFolder",
+            "-exp",
+            type=str,
+            help="Experiment result folder",
+            required=True,
+        )
+        self._parser.add_argument("--series", dest='series', action="store_true")
+        self._parser.set_defaults(series=False)
+        self._parser.add_argument("--plot", dest="plot", action="store_true")
+        self._parser.set_defaults(plot=False)
+        self._parser.add_argument("--verbose", dest="verbose", action="store_true")
+        self._parser.set_defaults(verbose=False)
+
+    def importData(self):
+        self.convertDataPoints(csvToRawData(self._expFolder + "/res.csv"))
+        self._experiment = Experiment(self._expFolder + "/exp.yaml")
+        if "fabric" in self._expFolder:
+            self._planner = FabricPlanner(
+                self._experiment, self._expFolder + "/planner.yaml"
+            )
+        elif "mpc" in self._expFolder:
+            self._planner = MPCPlanner(
+                self._experiment, self._expFolder + "/planner.yaml"
+            )
+        if self._experiment.robotType() == "pointMass":
+            self.defineMetricesPointMass()
+        elif self._experiment.robotType() == "planarArm":
+            self.defineMetricesPlanarArm()
+
+    def parseArguments(self):
+        args = self._parser.parse_args()
+        self._expFolder = args.expFolder
+        self._series = args.series
+        self._plot = args.plot
+        self._verbose = args.verbose
+
+    def processHeader(self, header):
+        headerDict = {}
+        for i, entry in enumerate(header):
+            headerDict[entry] = i
+        return headerDict
+
+    def convertDataPoints(self, rawdata):
+        nbPoints = len(rawdata) - 1
+        self._data = {}
+        headerDict = self.processHeader(rawdata[0])
+        for name in headerDict.keys():
+            self._data[name] = np.array(
+                [float(rawdata[i][headerDict[name]]) for i in range(1, nbPoints)]
+            )
+
+    def evaluateMetric(self, metric):
+        return metric.computeMetric(self._data)
+
+    def addMetric(self, metric):
+        self._metrices.append(metric)
+
+    def defineMetricesPointMass(self):
+        timeToReachGoalMetric = TimeToReachGoalMetric(
+            "time2Goal",
+            ["q0", "q1", "t"],
+            {"goal": self._experiment.primeGoal(), "des_distance": 0.1},
+        )
+        clearanceMetric = ClearanceMetric(
+            "clearance",
+            ["q0", "q1"],
+            {
+                "obstacles": self._experiment.obstacles(),
+                "n": 0,
+                "m": 2,
+                "r_body": self._experiment.rBody(),
+            },
+        )
+        solverTimesMetric = SolverTimesMetric(
+            "solvertime", ["t_planning"], {"interval": self._planner.interval()}
+        )
+        pathLengthMetric = PathLengthMetric("pathLength", ["q0", "q1"], {})
+        self._metrices = []
+        self.addMetric(clearanceMetric)
+        self.addMetric(timeToReachGoalMetric)
+        self.addMetric(solverTimesMetric)
+        self.addMetric(pathLengthMetric)
+
+    def defineMetricesPlanarArm(self):
+        n = 5
+        m = 2
+        fksNames = []
+        for i in range(n + 1):
+            fksNames.append("fk" + str(i) + "_x")
+            fksNames.append("fk" + str(i) + "_y")
+        fkNames = ["fk" + str(n) + "_x", "fk" + str(n) + "_y"]
+        timeToReachGoalMetric = TimeToReachGoalMetric(
+            "time2Goal",
+            fkNames + ["t"],
+            {"goal": self._experiment.primeGoal(), "des_distance": 0.1},
+        )
+        clearanceMetric = ClearanceMetric(
+            "clearance",
+            fksNames,
+            {
+                "obstacles": self._experiment.obstacles(),
+                "m": m,
+                "n": n,
+                "r_body": self._experiment.rBody(),
+            },
+        )
+        selfClearanceMetric = SelfClearanceMetric(
+            "selfClearance",
+            fksNames,
+            {"m": m, "n": n, "r_body": self._experiment.rBody()},
+        )
+        solverTimesMetric = SolverTimesMetric(
+            "solvertime", ["t_planning"], {"interval": self._planner.interval()}
+        )
+        pathLengthMetric = PathLengthMetric("pathLength", fkNames, {})
+        self._metrices = []
+        self.addMetric(clearanceMetric)
+        self.addMetric(timeToReachGoalMetric)
+        self.addMetric(solverTimesMetric)
+        self.addMetric(pathLengthMetric)
+        self.addMetric(selfClearanceMetric)
+
+    def evaluate(self):
+        if self._series:
+            self.seriesEvaluate()
+        else:
+            self.singleEvaluate()
+
+    def seriesEvaluate(self):
+        seriesFolder = self._expFolder
+        listExpFolders = os.listdir(self._expFolder)
+        totalExps = 0
+        fullPaths = [self._expFolder + '/' + exp for exp in listExpFolders]
+        kpis = {'mpc': {}, 'fabric': {}}
+        for fullPath in fullPaths:
+            if not os.path.isdir(fullPath):
+                continue
+            totalExps += 1
+            self._expFolder = fullPath
+            self.singleEvaluate()
+            timeStamp = self.getTimeStamp()
+            kpi = self.getKpis()
+            kpis[self._planner.plannerType()][timeStamp] = kpi
+        resultArray, feasibility, success = self.getSeriesComparison(kpis)
+        self._expFolder = seriesFolder
+        self.writeSeriesResult(kpis, resultArray, feasibility, success)
+        if self._plot:
+            self.plotSeriesResult()
+
+    def getSeriesComparison(self, kpis):
+        mpcMatrix = []
+        fabricMatrix = []
+        mpcCounter = {0:0, -1:0, -2:0}
+        fabricCounter = {0:0, -1:0, -2:0}
+        mpcKpis = kpis['mpc']
+        fabricKpis = kpis['fabric']
+        feasibility = []
+        for timeStamp in mpcKpis.keys():
+            mpcSuccess = mpcKpis[timeStamp][0][0]
+            fabricSuccess = fabricKpis[timeStamp][0][0]
+            feasibility.append([timeStamp, mpcKpis[timeStamp][0][1], fabricKpis[timeStamp][0][1]])
+            mpcCounter[mpcKpis[timeStamp][0][1]] += 1
+            fabricCounter[fabricKpis[timeStamp][0][1]] += 1
+            if mpcSuccess and fabricSuccess:
+                mpcMatrix.append(mpcKpis[timeStamp][1:])
+                fabricMatrix.append(fabricKpis[timeStamp][1:])
+        mpcArray = np.array(mpcMatrix)
+        fabricArray = np.array(fabricMatrix)
+        success = [list(mpcCounter.values()), list(fabricCounter.values())]
+        return fabricArray/mpcArray, feasibility, success
+
+    def getTimeStamp(self):
+        return self._expFolder[-15:]
+
+    def singleEvaluate(self):
+        print("Evaluating experiment %s" % self._expFolder)
+        self.importData()
+        self._evaluations = {}
+        for metric in self._metrices:
+            res = metric.computeMetric(self._data)
+            self._evaluations[metric._name] = res
+        if self._verbose:
+            pprint.pprint(self._evaluations)
+        if self._plot:
+            self.plot()
+        self.evaluateSuccess()
+        self.writeEval2ResultFolder()
+
+    def getEval(self):
+        return self._evaluations
+
+    def getKpis(self):
+        return [
+            self._evaluations['success'], 
+            self._evaluations['solvertime'],
+            self._evaluations['time2Goal'][1],
+            self._evaluations['pathLength'],
+            self._evaluations['selfClearance']['minDist'],
+            self._evaluations['clearance']['minDist']
+        ]
+
+    def evaluateSuccess(self):
+        if "selfClearance" in self._evaluations.keys():
+            minClearance = min(
+                self._evaluations["clearance"]["minDist"],
+                self._evaluations["selfClearance"]["minDist"],
+            )
+        else:
+            minClearance = self._evaluations["clearance"]["minDist"]
+        reachingFlag = self._evaluations["time2Goal"][0]
+        successMetric = SuccessMetric(
+            "success", [], {"minClearance": minClearance, "reachingFlag": reachingFlag},
+        )
+        self._evaluations["success"] = self.evaluateMetric(successMetric)
+
+    def writeSeriesResult(self, seriesRes, resultArray, feasibility, success):
+        postProcessFile = self._expFolder + "/postProcess.yaml"
+        seriesCsvFile = self._expFolder + "/results.csv"
+        feasibilityFile = self._expFolder + "/feasibility.csv"
+        successFile = self._expFolder + "/success.csv"
+        with open(postProcessFile, 'w') as file:
+            yaml.dump(seriesRes, file)
+        with open(seriesCsvFile, 'w') as file:
+            csv_writer = csv.writer(file, delimiter=',')
+            for i in range(len(resultArray)):
+                csv_writer.writerow(resultArray[i])
+        with open(feasibilityFile, 'w') as file:
+            csv_writer = csv.writer(file, delimiter=',')
+            for i in range(len(feasibility)):
+                csv_writer.writerow(feasibility[i])
+        with open(successFile, 'w') as file:
+            csv_writer = csv.writer(file, delimiter=',')
+            for i in range(len(success)):
+                csv_writer.writerow(success[i])
+
+    def writeEval2ResultFolder(self):
+        postProcessFile = self._expFolder + "/postProcess.yaml"
+        with open(postProcessFile, "w") as file:
+            yaml.dump(self._evaluations, file)
+
+    def plot(self):
+        if self._experiment.robotType() == 'planarArm':
+            subprocess.check_call([
+                './plottingPlanarArm/createPlot',
+                self._expFolder,
+                str(self._experiment.n())
+            ])
+        elif self._experiment.robotType() == 'pointMass':
+            subprocess.check_call(['./plottingPointMass/createPlots', self._expFolder, str(self._planner.interval())])
+
+    def plotSeriesResult(self):
+        subprocess.check_call(['./createSeriesPlot', self._expFolder])
+        subprocess.check_call(['./createSuccessPlot', self._expFolder])
+
+
+if __name__ == "__main__":
+    pp = PostProcessor()
+    pp.evaluate()

@@ -1,4 +1,5 @@
 #! /usr/bin/python3
+
 import argparse
 import csv
 import datetime
@@ -11,6 +12,7 @@ import numpy as np
 
 from fabricsExperiments.generic.experiment import Experiment
 from fabricsExperiments.generic.fabricPlanner import FabricPlanner
+from fabricsExperiments.generic.mpcPlanner import MPCPlanner
 from fabricsExperiments.generic.experimentSaver import ExperimentSaver
 
 
@@ -25,7 +27,6 @@ def enablePrint():
 
 class Runner(object):
     def __init__(self):
-        print("Initializing Runner, TODO: Randomizing must be passed")
         self.initializeArgumentParser()
 
     def initializeArgumentParser(self):
@@ -78,6 +79,8 @@ class Runner(object):
             plannerFile = args.planners[i+1]
             if plannerType == 'fabric':
                 self._planners.append(FabricPlanner(self._experiment, plannerFile))
+            elif plannerType == 'mpc':
+                self._planners.append(MPCPlanner(self._experiment, plannerFile))
 
     def setPlanner(self):
         for planner in self._planners:
@@ -89,8 +92,15 @@ class Runner(object):
             planner.concretize()
 
     def run(self):
-        for i in range(self._numberRuns):
+        completedRuns = 0
+        while completedRuns < self._numberRuns:
             self._experiment.shuffle(self._random_obst, self._random_init, self._random_goal)
+            try:
+                self._experiment.checkFeasibility(checkGoalReachible=False)
+                completedRuns += 1
+            except Exception as e:
+                print("Case not feasible %s" % str(e))
+                continue
             self.setPlanner()
             q0, q0dot = self._experiment.initState()
             time.sleep(1)
@@ -114,6 +124,7 @@ class Runner(object):
                         self._env.render()
                 if self._save:
                     saver.save()
+            print("Completed %d runs" % completedRuns)
 
 def newmain():
     myRunner = Runner()

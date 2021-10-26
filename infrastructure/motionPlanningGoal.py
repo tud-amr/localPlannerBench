@@ -42,6 +42,11 @@ class MotionPlanningGoal(object):
     def subGoals(self):
         return self._subGoals
 
+    def primeGoal(self):
+        for subGoal in self._subGoals:
+            if subGoal.isPrimeGoal():
+                return subGoal.desiredPosition()
+
     def toCSV(self, folderPath):
         goalFilename = folderPath + "/goal.csv"
         with open(goalFilename, "w") as file:

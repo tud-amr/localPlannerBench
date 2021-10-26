@@ -26,8 +26,8 @@ set yrange [-5: 5]
 set size ratio -1
 set grid
 
-ee_x = ARG5 + 1
-ee_y = ARG6 + 1
+ee_x = ARG5+1
+ee_y = ARG6+1
 list=system("ls -1B ".resFolderMpc."/obst_*")
 
 plot inFileMpc using ee_x:ee_y with lines lw 2 notitle, \

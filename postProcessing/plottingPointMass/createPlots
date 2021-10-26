@@ -1,4 +1,6 @@
 #!/bin/bash
+abspath=`realpath "$0"`
+plotFolder="${abspath/\/createPlots/}"
 nbArgs=$#
 mpcFile=`ls -t -d ../results/mpc* | head -n 1`
 fabricFile=`ls -t -d ../results/fabric* | head -n 1`
@@ -27,8 +29,8 @@ mkdir -p $plotFolderMpc
 mkdir -p $plotFolderFabric
 timeStampFabric=${mpcFile:(-15)}
 timeStampMpc=${fabricFile:(-15)}
-gnuplot -c makeTrajectoryPlots.gnuplot $mpcFile $timeStampMpc $fabricFile $timeStampFabric
-gnuplot -c makeSolverTimePlot.gnuplot $mpcFile $fabricFile $intervals
+gnuplot -c "$plotFolder/makeTrajectoryPlots.gnuplot" $mpcFile $timeStampMpc $fabricFile $timeStampFabric
+gnuplot -c "$plotFolder/makeSolverTimePlot.gnuplot" $mpcFile $fabricFile $intervals
 xdg-open "$plotFolderMpc/trajectory.eps"
 xdg-open "$plotFolderFabric/trajectory.eps"
 cp "$plotFolderMpc/solverTimes.eps" "$plotFolderFabric/"

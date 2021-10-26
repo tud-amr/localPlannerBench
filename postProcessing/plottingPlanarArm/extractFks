@@ -20,8 +20,8 @@ IFS="," read -a firstLine <<< `sed -n "${firstLineNb}p" $resFile`
 lastLineNb=`wc  -l < $resFile`
 IFS="," read -a lastLine <<< `sed -n "${lastLineNb}p" $resFile`
 IFS="," read -a header <<< `sed -n "1p" $resFile`
-rm "${fkFile}_last.csv"
-rm "${fkFile}_first.csv"
+rm -f "${fkFile}_last.csv"
+rm -f "${fkFile}_first.csv"
 for (( i=0; i<=$n; i++ ))
 do
   key_fk_x=$(getPos $header "fk${i}_x")

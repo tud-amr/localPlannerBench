@@ -1,0 +1,4 @@
+#!/bin/bash
+abspath=`realpath "$0"`
+seriesFolder="${1}/"
+gnuplot -c "makeSeriesPlot.gnuplot" $seriesFolder

@@ -1,4 +1,6 @@
 #!/bin/bash
+abspath=`realpath "$0"`
+plotFolder="${abspath/\/createPlots/}"
 nbArgs=$#
 mpcFile=`ls -t -d ../results/mpc* | head -n 1`
 fabricFile=`ls -t -d ../results/fabric* | head -n 1`
@@ -28,12 +30,13 @@ mkdir -p $plotFolderMpc
 mkdir -p $plotFolderFabric
 timeStampFabric=${mpcFile:(-15)}
 timeStampMpc=${fabricFile:(-15)}
-IFS="," read -r -a fks <<< $(./extractFks $mpcFile "${mpcFile}/fk" $n)
+IFS="," read -r -a fks <<< $("$plotFolder/extractFks" $mpcFile "${mpcFile}/fk" $n)
 fks_x=${fks[0]}
 fks_y=${fks[1]}
-output=$(./extractFks $fabricFile "${fabricFile}/fk" $n)
-gnuplot -c makeTrajectoryPlots.gnuplot $mpcFile $timeStampMpc $fabricFile $timeStampFabric $fks_x $fks_y
-gnuplot -c makeSolverTimePlot.gnuplot $mpcFile $fabricFile $intervals
+# output=$("$plotFolder/extractFks" $fabricFile "${fabricFile}/fk" $n)
+# echo $output
+gnuplot -c "$plotFolder/makeTrajectoryPlots.gnuplot" $mpcFile $timeStampMpc $fabricFile $timeStampFabric $fks_x $fks_y
+gnuplot -c "$plotFolder/makeSolverTimePlot.gnuplot" $mpcFile $fabricFile $intervals
 xdg-open "$plotFolderMpc/trajectory.eps"
 xdg-open "$plotFolderFabric/trajectory.eps"
 cp "$plotFolderMpc/solverTimes.eps" "$plotFolderFabric/"

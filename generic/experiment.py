@@ -21,6 +21,10 @@ class InvalidInitStateError(Exception):
     pass
 
 
+class ExperimentInfeasible(Exception):
+    pass
+
+
 class Experiment(object):
     def __init__(self, setupFile):
         self._setupFile = setupFile
@@ -81,6 +85,9 @@ class Experiment(object):
     def goal(self):
         return self._motionPlanningGoal
 
+    def primeGoal(self):
+        return self._motionPlanningGoal.primeGoal()
+
     def env(self):
         return gym.make(self.envName(), n=self.n(), dt=self.dt())
 
@@ -119,6 +126,28 @@ class Experiment(object):
                 missingKeys += key + ", "
         if incomplete:
             raise ExperimentIncompleteError("Missing keys: %s" % missingKeys[:-2])
+
+    def checkFeasibility(self, checkGoalReachible):
+        for o in self.obstacles():
+            for i in range(0, self.n() + 1):
+                fk = self.fk(self.initState()[0], i, positionOnly=True)
+                dist_initState = np.linalg.norm(np.array(o.x()) - fk)
+                if dist_initState < (o.r() + self.rBody()):
+                    raise ExperimentInfeasible("Initial configuration in collision")
+            dist_goal = np.linalg.norm(np.array(o.x()) - self.primeGoal())
+            if dist_goal < (o.r() + self.rBody()):
+                raise ExperimentInfeasible("Goal in collision")
+        if self.robotType != 'pointMass':
+            for i in range(self.n() + 1):
+                for j in range(i+2, self.n() + 1):
+                    fk1 = self.fk(self.initState()[0], i, positionOnly=True)[0:2]
+                    fk2 = self.fk(self.initState()[0], j, positionOnly=True)[0:2]
+                    dist_initState = np.linalg.norm(fk1 - fk2)
+                    if dist_initState < (2 * self.rBody()):
+                        raise ExperimentInfeasible("Initial configuration in self collision")
+        if checkGoalReachible:
+            if np.linalg.norm(self.primeGoal()) > goal._child_link:
+                raise Experiment("Goal unreachible")
 
     def save(self, folderPath):
         self._setup['goal'] = self._motionPlanningGoal.subGoalsDict()

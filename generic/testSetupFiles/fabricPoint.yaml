@@ -1,3 +1,4 @@
+interval: 1
 type: fabric
 robot_type: pointMass
 n: 2
