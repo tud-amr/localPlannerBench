@@ -12,7 +12,7 @@ goal:
       - 0
       - 1
     parent_link: 0
-    child_link: 5
+    child_link: 4
     desired_position:
       - 1.7
       - 0.7

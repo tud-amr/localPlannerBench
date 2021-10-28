@@ -122,7 +122,9 @@ class FabricPlanner(AbstractPlanner):
         # Speed control
         ex_factor = self.configSpeed()['ex_factor']
         self._planner.setDefaultSpeedControl(
-            self._x_psi, self._dm_psi, exLag, ex_factor
+            self._x_psi, self._dm_psi, exLag, ex_factor,
+            r_b=self.configDamper()['r_d'], 
+            b=self.configDamper()['b']
         )
         self._planner.concretize()
 

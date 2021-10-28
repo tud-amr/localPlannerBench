@@ -29,7 +29,7 @@ class MPCPlanner(AbstractPlanner):
         dt_str = str(self.dt()).replace(".", "")
         self._solverFile = (
             path_name
-            + "/" + self._exp.robotType()
+            + self._exp.robotType()
             + "/solver_n"
             + str(self.n())
             + "_"
@@ -41,6 +41,7 @@ class MPCPlanner(AbstractPlanner):
             self._solver = forcespro.nlp.Solver.from_directory(self._solverFile)
         except Exception as e:
             raise e
+            __import__('pdb').set_trace()
 
     def reset(self):
         print("RESETTING PLANNER")
@@ -155,19 +156,20 @@ class MPCPlanner(AbstractPlanner):
         problem["x0"] = self._x0.flatten()[:]
         problem["all_parameters"] = self._params
         # debug
-        """
-        nbPar = int(len(self._params)/self.H())
-        z = np.concatenate((self._xinit, np.array([self._slack, 0, 0])))
-        p = self._params[0:nbPar]
-        #J = eval_obj(z, p)
-        #print("J : ", J)
-        ineq = eval_ineq(z, p)
-        #print("ineq : ", ineq)
-        for i in range(self.H()):
-            z = self._x0[i]
+        debug = False
+        if debug:
+            nbPar = int(len(self._params)/self.H())
+            z = np.concatenate((self._xinit, np.array([self._slack, 0, 0])))
+            p = self._params[0:nbPar]
+            J = eval_obj(z, p)
             ineq = eval_ineq(z, p)
-            #print("ineq : ", ineq)
-        """
+            print("ineq : ", ineq)
+            for i in range(self.H()):
+                z = self._x0[i]
+                ineq = eval_ineq(z, p)
+            #print("J : ", J)
+            #print('z : ', z)
+            #print('xinit : ', self._xinit)
         output, exitflag, info = self._solver.solve(problem)
         if exitflag < 0:
             print(exitflag)

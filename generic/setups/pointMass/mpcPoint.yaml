@@ -5,8 +5,8 @@ H: 10
 interval: 10
 weights:
   wx: 1.0
-  wvel: 3.0
+  wvel: 1.0
   ws: 1e10
-  wu: 2.0
+  wu: 1.0
 obst:
   nbObst: 5

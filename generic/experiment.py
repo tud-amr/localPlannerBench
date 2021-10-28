@@ -137,7 +137,7 @@ class Experiment(object):
             dist_goal = np.linalg.norm(np.array(o.x()) - self.primeGoal())
             if dist_goal < (o.r() + self.rBody()):
                 raise ExperimentInfeasible("Goal in collision")
-        if self.robotType != 'pointMass':
+        if self.robotType() != 'pointMass':
             for i in range(self.n() + 1):
                 for j in range(i+2, self.n() + 1):
                     fk1 = self.fk(self.initState()[0], i, positionOnly=True)[0:2]
@@ -145,8 +145,7 @@ class Experiment(object):
                     dist_initState = np.linalg.norm(fk1 - fk2)
                     if dist_initState < (2 * self.rBody()):
                         raise ExperimentInfeasible("Initial configuration in self collision")
-        if checkGoalReachible:
-            if np.linalg.norm(self.primeGoal()) > goal._child_link:
+            if np.linalg.norm(self.primeGoal()) > self.n():
                 raise Experiment("Goal unreachible")
 
     def save(self, folderPath):

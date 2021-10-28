@@ -1,0 +1,58 @@
+T: 1000
+dt: 0.05
+env: point-robot-acc-v0
+goal:
+  subgoal1:
+    child_link: 1
+    desired_position:
+    - 3.7004113962577563
+    - 4.121501532528772
+    high:
+    - 5.0
+    - 5.0
+    indices:
+    - 0
+    - 1
+    low:
+    - -5.0
+    - -5.0
+    m: 2
+    parent_link: 0
+    prime: true
+    w: 5
+initState:
+  q0:
+  - 0.0
+  - 0.0
+  q0dot:
+  - 0.0
+  - 0.0
+limits:
+  high:
+  - 5.0
+  - 5.0
+  low:
+  - -5.0
+  - -5.0
+n: 2
+obstacles:
+  obst0:
+    r: 1.0
+    x:
+    - 2.0
+    - 0.2
+r_body: 0.01
+randomObstacles:
+  limits:
+    r:
+      high: 1.0
+      low: 0.1
+    x:
+      high:
+      - 5.0
+      - 5.0
+      low:
+      - -5.0
+      - -5.0
+  number: 5
+robot_type: pointMass

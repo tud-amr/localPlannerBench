@@ -37,7 +37,8 @@ class ExperimentSaver(object):
                 writer.writerow(res)
 
     def save(self):
-        curPath = os.path.dirname(os.path.abspath(__file__)) + "/" + self._resFolder
+        #curPath = os.path.dirname(os.path.abspath(__file__)) + "/" + self._resFolder
+        curPath = self._resFolder
         folderPath = curPath + "/" + self._planner.plannerType() + "_" + self._timeStamp
         print("Saving results to : %s" % folderPath)
         os.makedirs(folderPath)

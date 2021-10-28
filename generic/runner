@@ -1,13 +1,11 @@
 #! /usr/bin/python3
 
 import argparse
-import csv
 import datetime
 import time
 import os
 import sys
 import warnings
-from shutil import copyfile
 import numpy as np
 
 from fabricsExperiments.generic.experiment import Experiment
@@ -70,7 +68,7 @@ class Runner(object):
         self._numberRuns = args.numberRuns
         self._verbose = args.verbose
         self._render = args.render
-        self._res_folder = args.res_folder
+        self._res_folder = os.getcwd() + '/' + args.res_folder
         self._planners = []
         self._experiment = Experiment(args.caseSetup)
         self._env = self._experiment.env()
