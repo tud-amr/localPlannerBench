@@ -12,11 +12,6 @@ from scipy.integrate import odeint
 
 from casadiFk import ForwardKinematics
 
-n = 2
-m = 2
-nbObst = 5
-robotType = 'pointMass'
-generic_fk = ForwardKinematics(robot_type=robotType)
 
 def getParameters(n, m, nbObst):
     pm = {}
@@ -44,19 +39,25 @@ def getParameters(n, m, nbObst):
     ns = 1
     return pm, nPar, nx, nu, dt, ns
 
+
+n = 5
+m = 2
+nbObst = 5
+robotType = 'planarArm'
+generic_fk = ForwardKinematics(robot_type=robotType)
 paramMap, npar, nx, nu, dt, ns = getParameters(n, m, nbObst)
-N = 10
+N = 20
 dt_str = str(dt).replace('.', '')
 
 # file names
 dt_str = str(dt).replace('.', '')
 # TODO: How to define the path to the generated solver? <26-10-21, mspahn> #
-solverName = 'solverCollection/' + robotType + '/solver_n' + str(n) + "_" + dt_str + '_N' + str(N)
+solverName = 'solver_n' + str(n) + "_" + dt_str + '_H' + str(N)
 
 
 # MPC parameter
-upper_lim = np.ones(n) * np.pi
-lower_lim = np.ones(n) * -np.pi
+upper_lim = np.ones(n) * np.inf
+lower_lim = np.ones(n) * -np.inf
 limitVel = np.ones(n) * 4
 limitAcc = np.ones(n) * 1
 slack_upper = np.array([np.inf])
@@ -120,14 +121,17 @@ def eval_ineq(z, p):
     r_body = p[paramMap['r_body']]
     ineqs = []
     for j in range(n):
+        fk = generic_fk.getFk(q, j+1, positionOnly=True)
         for i in range(nbObst):
             obst = obsts[i * 3:(i+1)*3]
             x = obst[0:2]
             r = obst[2]
-            fk = generic_fk.getFk(q, n, positionOnly=True)
             dist = ca.norm_2(fk - x)
             ineqs.append(dist - r - r_body + slack)
-    all_ineqs = ineqs + eval_jointLimits(z, p) + eval_selfCollision(z, p)
+    if robotType != 'pointMass':
+        all_ineqs = ineqs + eval_jointLimits(z, p) + eval_selfCollision(z, p)
+    else:
+        all_ineqs = ineqs + eval_jointLimits(z, p)
     return all_ineqs
 
 
@@ -137,9 +141,9 @@ def eval_selfCollision(z, p):
     r_body = p[paramMap['r_body']]
     ineqs = []
     for i in range(n+1):
-        fk1 = generic_fk.getFk(q, n, positionOnly=True)
+        fk1 = generic_fk.getFk(q, i, positionOnly=True)
         for j in range(i+2, n+1):
-            fk2 = generic_fk.getFk(q, n, positionOnly=True)
+            fk2 = generic_fk.getFk(q, j, positionOnly=True)
             dist = ca.norm_2(fk1 - fk2)
             ineqs.append(dist - (2 * r_body) + slack)
     return ineqs
@@ -177,7 +181,10 @@ def main():
     model.npar = npar
     model.nvar = nx + nu + ns
     model.neq = nx
-    nself = int(((n-0) * (n-1))/2)
+    if robotType != 'pointMass':
+        nself = int(((n-0) * (n-1))/2)
+    else:
+        nself = 0
     model.nh = nbObst*n + 2 * n + nself
     model.hu = np.ones(nbObst*n + 2 * n + nself) * np.inf
     model.hl = np.zeros(nbObst*n + 2 * n + nself)
