@@ -63,11 +63,12 @@ class ClearanceMetric(Metric):
         m = self._params["m"]
         n = self._params["n"]
         r_body = self._params["r_body"]
-        fks = np.stack([data[name] for name in self._measNames]).T.reshape(-1, n + 1, m)
+        rawData = np.stack([data[name] for name in self._measNames])
+        fks = rawData.T.reshape(-1, n, m)
         minDistances = []
         distanceToObsts = {}
         for i, obst in enumerate(obstacles):
-            for i_fk in range(1, n + 1):
+            for i_fk in range(0, n):
                 distancesToObst = (
                     computeDistances(fks[:, i_fk, :], np.array(obst.x()))
                     - obst.r()
@@ -88,11 +89,12 @@ class SelfClearanceMetric(Metric):
         m = self._params["m"]
         n = self._params["n"]
         r_body = self._params["r_body"]
-        fks = np.stack([data[name] for name in self._measNames]).T.reshape(-1, n + 1, m)
+        rawData = np.stack([data[name] for name in self._measNames])
+        fks = rawData.T.reshape(-1, n+1, m)
         minDistances = []
         distanceToBodies = {}
-        for i_fk in range(n + 1):
-            for j_fk in range(i_fk + 2, n + 1):
+        for i_fk in range(n+1):
+            for j_fk in range(i_fk + 2, n+1):
                 distances = (
                     computeDistances(fks[:, i_fk, :], fks[:, j_fk, :]) - 2 * r_body
                 )

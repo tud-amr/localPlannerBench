@@ -62,11 +62,11 @@ class PostProcessor(object):
     def importData(self):
         self.convertDataPoints(csvToRawData(self._expFolder + "/res.csv"))
         self._experiment = Experiment(self._expFolder + "/exp.yaml")
-        if "fabric" in self._expFolder:
+        if "/fabric_" in self._expFolder:
             self._planner = FabricPlanner(
                 self._experiment, self._expFolder + "/planner.yaml"
             )
-        elif "mpc" in self._expFolder:
+        elif "/mpc_" in self._expFolder:
             self._planner = MPCPlanner(
                 self._experiment, self._expFolder + "/planner.yaml"
             )
@@ -77,7 +77,7 @@ class PostProcessor(object):
 
     def parseArguments(self):
         args = self._parser.parse_args()
-        self._expFolder = args.expFolder
+        self._expFolder = os.getcwd() + '/' + args.expFolder
         self._series = args.series
         self._plot = args.plot
         self._verbose = args.verbose
@@ -114,7 +114,7 @@ class PostProcessor(object):
             ["q0", "q1"],
             {
                 "obstacles": self._experiment.obstacles(),
-                "n": 0,
+                "n": 1,
                 "m": 2,
                 "r_body": self._experiment.rBody(),
             },
@@ -130,10 +130,10 @@ class PostProcessor(object):
         self.addMetric(pathLengthMetric)
 
     def defineMetricesPlanarArm(self):
-        n = 5
+        n = self._experiment.n()
         m = 2
         fksNames = []
-        for i in range(n + 1):
+        for i in range(1, n + 1):
             fksNames.append("fk" + str(i) + "_x")
             fksNames.append("fk" + str(i) + "_y")
         fkNames = ["fk" + str(n) + "_x", "fk" + str(n) + "_y"]
@@ -154,7 +154,7 @@ class PostProcessor(object):
         )
         selfClearanceMetric = SelfClearanceMetric(
             "selfClearance",
-            fksNames,
+            ['fk0_x', 'fk0_y'] + fksNames,
             {"m": m, "n": n, "r_body": self._experiment.rBody()},
         )
         solverTimesMetric = SolverTimesMetric(
@@ -238,14 +238,23 @@ class PostProcessor(object):
         return self._evaluations
 
     def getKpis(self):
-        return [
-            self._evaluations['success'], 
-            self._evaluations['solvertime'],
-            self._evaluations['time2Goal'][1],
-            self._evaluations['pathLength'],
-            self._evaluations['selfClearance']['minDist'],
-            self._evaluations['clearance']['minDist']
-        ]
+        if self._experiment.robotType() != 'pointMass':
+            return [
+                self._evaluations['success'], 
+                self._evaluations['solvertime'],
+                self._evaluations['time2Goal'][1],
+                self._evaluations['pathLength'],
+                self._evaluations['selfClearance']['minDist'],
+                self._evaluations['clearance']['minDist']
+            ]
+        else:
+            return [
+                self._evaluations['success'], 
+                self._evaluations['solvertime'],
+                self._evaluations['time2Goal'][1],
+                self._evaluations['pathLength'],
+                self._evaluations['clearance']['minDist']
+            ]
 
     def evaluateSuccess(self):
         if "selfClearance" in self._evaluations.keys():
@@ -287,20 +296,40 @@ class PostProcessor(object):
             yaml.dump(self._evaluations, file)
 
     def plot(self):
+        curPath = os.path.dirname(os.path.abspath(__file__)) + "/"
         if self._experiment.robotType() == 'planarArm':
-            subprocess.check_call([
-                './plottingPlanarArm/createPlot',
-                self._expFolder,
-                str(self._experiment.n())
-            ])
+            createPlotFolder = curPath + 'plottingPlanarArm'
+            subprocess.Popen(
+                ['./createPlot', self._expFolder, str(self._experiment.n())],
+                cwd=createPlotFolder,
+                stdout=subprocess.PIPE
+            )
         elif self._experiment.robotType() == 'pointMass':
-            subprocess.check_call(['./plottingPointMass/createPlots', self._expFolder, str(self._planner.interval())])
+            createPlotFolder = curPath + 'plottingPointMass/'
+            subprocess.Popen(
+                ['./createPlot', self._expFolder],
+                cwd=createPlotFolder,
+                stdout=subprocess.PIPE
+            )
 
     def plotSeriesResult(self):
-        subprocess.check_call(['./createSeriesPlot', self._expFolder])
-        subprocess.check_call(['./createSuccessPlot', self._expFolder])
+        curPath = os.path.dirname(os.path.abspath(__file__)) + "/"
+        subprocess.Popen(
+            ['./createSeriesPlot', self._expFolder],
+            cwd=curPath,
+            stdout=subprocess.PIPE
+        )
+        subprocess.Popen(
+            ['./createSuccessPlot', self._expFolder],
+            cwd=curPath,
+            stdout=subprocess.PIPE
+        )
+
+    def open(self):
+        subprocess.Popen(["xdg-open", self._expFolder], stdout=subprocess.PIPE)
 
 
 if __name__ == "__main__":
     pp = PostProcessor()
     pp.evaluate()
+    pp.open()

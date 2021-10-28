@@ -15,18 +15,15 @@ set yrange [-5: 5]
 set size ratio -1
 set grid
 
-ee_x = ARG2+1
-ee_y = ARG3+1
-n = 5
+q0 = 3
+q1 = 8
+
 obst_list=system("ls -1B ".resFolder."/obst_*")
 
-plot inFile using ee_x:ee_y with lines lw 2 notitle, \
-  for [file in obst_list] file w lines lc rgb "black" lw 10 notitle, \
+plot inFile using q0:q1 with lines lw 2 notitle, \
+  for [file in obst_list] file w lines lc rgb "black" lw 20 notitle, \
   goalFile using 1:2 with points pointsize 5 pointtype 14 lc rgb "red" title "goal", \
-  fkStartFile using 1:2 with linespoints pointtype 7 pointsize 2 lc rgb "black" lw 2 title "start config", \
-  fkLastFile using 1:2 with linespoints pointtype 7 pointsize 2 lc rgb "green" lw 2 title "final config", \
-  fkStartFile every 1::n using 1:2 with linespoints pointtype 15 pointsize 3 lc rgb "black" lw 2 notitle, \
-  fkLastFile every 1::n using 1:2 with linespoints pointtype 15 pointsize 3 lc rgb "green" lw 2 notitle, \
+  initStateFile using 1:2 with points lc rgb "green" title "initial State", \
 
 print "Done creating trajectory plot, saved to"
 print outFile

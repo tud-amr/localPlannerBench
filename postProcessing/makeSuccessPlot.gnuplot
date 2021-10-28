@@ -17,6 +17,7 @@ set xrange [-0.5:1.5]
 set yrange [0:119]
 set xtics nomirror
 set ytics nomirror
+set ylabel '#Cases'
 
 plot inFile using 1 t "Success" lc rgbcolor 'green', '' using 2 t 'Collision' lc rgb 'red', '' using 3 t 'Goal not reached' lc rgb 'blue'
 

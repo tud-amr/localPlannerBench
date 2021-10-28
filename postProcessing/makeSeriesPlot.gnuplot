@@ -19,15 +19,16 @@ set yrange [0:6e0]
 set boxwidth  0.5
 set pointsize 0.5
 set grid
+set ylabel 'Fabrics/MPC'
 
 unset key
 set border 3
-set xtics ("SolverTime" 1, "Time2Goal" 2, "PathLength" 3, "SelfClerance" 4, "Clearance" 5) scale 1.0
+set xtics ("SolverTime" 1, "Time2Goal" 2, "PathLength" 3, "SelfClearance" 4, "Clearance" 5) scale 1.0
+# set xtics ("SolverTime" 1, "Time2Goal" 2, "PathLength" 3, "Clearance" 4) scale 1.0
 set xtics nomirror
 set ytics nomirror
 
 col=2
-set title "SolverTimes"
 plot inFile using (1):1, \
   inFile using (2):2, \
   inFile using (3):3, \
