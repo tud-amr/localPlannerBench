@@ -28,7 +28,19 @@ class ExperimentInfeasible(Exception):
 class Experiment(object):
     def __init__(self, setupFile):
         self._setupFile = setupFile
-        self._required_keys = ["T", "dt", "env", "n", "goal", "initState", "robot_type", "limits", "obstacles", "r_body"]
+        self._required_keys = [
+            "T",
+            "dt",
+            "env",
+            "n",
+            "goal",
+            "initState",
+            "robot_type",
+            "limits",
+            "obstacles",
+            "r_body",
+            "selfCollision",
+        ]
         self.parseSetup()
         self._fk = ForwardKinematics(robot_type=self.robotType())
 
@@ -38,19 +50,24 @@ class Experiment(object):
         self.checkCompleteness()
         self._motionPlanningGoal = MotionPlanningGoal((self._setup["goal"]))
         self._obstacles = []
-        if self._setup['obstacles']:
-            for obst in self._setup['obstacles']:
-                obstData = self._setup['obstacles'][obst]
-                self._obstacles.append(Obstacle([float(xi) for xi in obstData['x']], obstData['r']))
+        if self._setup["obstacles"]:
+            for obst in self._setup["obstacles"]:
+                obstData = self._setup["obstacles"][obst]
+                self._obstacles.append(
+                    Obstacle([float(xi) for xi in obstData["x"]], obstData["r"])
+                )
+
+    def selfCollisionPairs(self):
+        return self._setup["selfCollision"]["pairs"]
 
     def rBody(self):
-        return self._setup['r_body']
+        return self._setup["r_body"]
 
     def fk(self, q, n, positionOnly=False):
         return self._fk.getFk(q, n, positionOnly=positionOnly)
 
     def robotType(self):
-        return self._setup['robot_type']
+        return self._setup["robot_type"]
 
     def n(self):
         return self._setup["n"]
@@ -88,24 +105,31 @@ class Experiment(object):
     def primeGoal(self):
         return self._motionPlanningGoal.primeGoal()
 
-    def env(self):
-        return gym.make(self.envName(), n=self.n(), dt=self.dt())
+    def env(self, render=False):
+        return gym.make(self.envName(), render=render, n=self.n(), dt=self.dt())
+
+    def addScene(self, env):
+        for obst in self._obstacles:
+            env.addObstacle(pos=obst.x(), filename='sphere05red_nocol.urdf')
+        env.addObstacle(pos=self.primeGoal(), filename="sphere_goal.urdf")
 
     def shuffleInitConfiguration(self):
         q0_new = np.random.uniform(low=self.limits()[0], high=self.limits()[1])
-        self._setup['initState']['q0'] = q0_new.tolist()
+        self._setup["initState"]["q0"] = q0_new.tolist()
 
     def shuffleObstacles(self):
         self._obstacles = []
-        for i in range(self._setup['randomObstacles']['number']):
+        for i in range(self._setup["randomObstacles"]["number"]):
             pos = np.random.uniform(
-                low=self._setup['randomObstacles']['limits']['x']['low'], 
-                high=self._setup['randomObstacles']['limits']['x']['high']
+                low=self._setup["randomObstacles"]["limits"]["x"]["low"],
+                high=self._setup["randomObstacles"]["limits"]["x"]["high"],
             )
-            r = float(np.random.uniform(
-                low=self._setup['randomObstacles']['limits']['r']['low'], 
-                high=self._setup['randomObstacles']['limits']['r']['high']
-            ))
+            r = float(
+                np.random.uniform(
+                    low=self._setup["randomObstacles"]["limits"]["r"]["low"],
+                    high=self._setup["randomObstacles"]["limits"]["r"]["high"],
+                )
+            )
             self._obstacles.append(Obstacle(pos, r))
 
     def shuffle(self, random_obst, random_init, random_goal):
@@ -134,30 +158,34 @@ class Experiment(object):
                 dist_initState = np.linalg.norm(np.array(o.x()) - fk)
                 if dist_initState < (o.r() + self.rBody()):
                     raise ExperimentInfeasible("Initial configuration in collision")
-            dist_goal = np.linalg.norm(np.array(o.x()) - self.primeGoal())
-            if dist_goal < (o.r() + self.rBody()):
-                raise ExperimentInfeasible("Goal in collision")
-        if self.robotType() != 'pointMass':
+            if len(self.primeGoal()) == len(o.x()):
+                dist_goal = np.linalg.norm(np.array(o.x()) - self.primeGoal())
+                if dist_goal < (o.r() + self.rBody()):
+                    raise ExperimentInfeasible("Goal in collision")
+        if self.robotType() != "pointMass":
             for i in range(self.n() + 1):
-                for j in range(i+2, self.n() + 1):
-                    fk1 = self.fk(self.initState()[0], i, positionOnly=True)[0:2]
-                    fk2 = self.fk(self.initState()[0], j, positionOnly=True)[0:2]
+                fk1 = self.fk(self.initState()[0], i, positionOnly=True)
+                for j in range(i + 2, self.n() + 1):
+                    fk2 = self.fk(self.initState()[0], j, positionOnly=True)
                     dist_initState = np.linalg.norm(fk1 - fk2)
                     if dist_initState < (2 * self.rBody()):
-                        raise ExperimentInfeasible("Initial configuration in self collision")
+                        __import__("pdb").set_trace()
+                        raise ExperimentInfeasible(
+                            "Initial configuration in self collision"
+                        )
             if np.linalg.norm(self.primeGoal()) > self.n():
                 raise Experiment("Goal unreachible")
 
     def save(self, folderPath):
-        self._setup['goal'] = self._motionPlanningGoal.subGoalsDict()
+        self._setup["goal"] = self._motionPlanningGoal.subGoalsDict()
         obstsDict = {}
         obstFile = folderPath + "/obst"
-        initStateFilename = folderPath + '/initState.csv'
+        initStateFilename = folderPath + "/initState.csv"
         for i, obst in enumerate(self._obstacles):
-            obstsDict['obst' + str(i)] = obst.toDict()
+            obstsDict["obst" + str(i)] = obst.toDict()
             obst.toCSV(obstFile + "_" + str(i) + ".csv")
-        self._setup['obstacles'] = obstsDict
-        with open(folderPath + "/exp.yaml", 'w') as file:
+        self._setup["obstacles"] = obstsDict
+        with open(folderPath + "/exp.yaml", "w") as file:
             yaml.dump(self._setup, file)
         self._motionPlanningGoal.toCSV(folderPath)
         with open(initStateFilename, "w") as file:

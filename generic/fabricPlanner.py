@@ -1,5 +1,6 @@
 import casadi as ca
 import yaml
+import numpy as np
 
 from optFabrics.planner.fabricPlanner import DefaultFabricPlanner
 from optFabrics.planner.default_geometries import CollisionGeometry, GoalGeometry
@@ -75,12 +76,11 @@ class FabricPlanner(AbstractPlanner):
             exp=self.configSelfColAvoidance()['exp'],
             lam=self.configSelfColAvoidance()['lam'],
         )
-        for i in range(self.n()+1):
-            for j in range(i+2, self.n()+1):
-                fk_i = self._exp.fk(self._q, i, positionOnly=True)
-                fk_j = self._exp.fk(self._q, j, positionOnly=True)
-                dm_selfCol = SelfCollisionMap(self._q, self._qdot, fk_i, fk_j, r_body)
-                self._planner.addGeometry(dm_selfCol, lag_selfCol, geo_selfCol)
+        for pair in self._exp.selfCollisionPairs():
+            fk_1 = self._exp.fk(self._q, pair[0], positionOnly=True)
+            fk_2 = self._exp.fk(self._q, pair[1], positionOnly=True)
+            dm_selfCol = SelfCollisionMap(self._q, self._qdot, fk_1, fk_2, r_body)
+            self._planner.addGeometry(dm_selfCol, lag_selfCol, geo_selfCol)
 
     def setJointLimits(self, limits):
         x = ca.SX.sym("x", 1)

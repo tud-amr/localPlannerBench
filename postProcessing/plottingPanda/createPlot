@@ -2,12 +2,16 @@
 abspath=`realpath "$0"`
 plotFolder="${abspath/\/createPlot/}"
 resFile=$1
-n=$2
+n=7
 resPlotFolder="$resFile/plots"
 mkdir -p $resPlotFolder
 IFS="," read -r -a fks <<< $("$plotFolder/extractFks" $resFile "${resFile}/fk" $n)
 fks_x=${fks[0]}
 fks_y=${fks[1]}
+fks_z=${fks[2]}
+goal_x=${fks[3]}
+goal_y=${fks[4]}
+goal_z=${fks[5]}
 pathToMakeTrajectoryPlot="$plotFolder/makeTrajectoryPlot.gnuplot"
 echo $pathToMakeTrajectoryPlot
-gnuplot -c "$plotFolder/makeTrajectoryPlot.gnuplot" $resFile $fks_x $fks_y $n
+gnuplot -c "$plotFolder/makeTrajectoryPlot.gnuplot" $resFile $fks_x $fks_y $fks_z $goal_x $goal_y $goal_z

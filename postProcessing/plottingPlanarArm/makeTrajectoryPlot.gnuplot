@@ -8,16 +8,16 @@ initStateFile=resFolder."/initState.csv"
 fkLastFile=resFolder."/fk_last.csv"
 fkStartFile=resFolder."/fk_first.csv"
 outFile=resFolder."/plots/trajectory.eps"
+ee_x = ARG2+1
+ee_y = ARG3+1
+n = ARG4
 set output outFile
 set datafile separator ','
-set xrange [-5: 5]
-set yrange [-5: 5]
+set xrange [-n: n]
+set yrange [-n: n]
 set size ratio -1
 set grid
 
-ee_x = ARG2+1
-ee_y = ARG3+1
-n = 5
 obst_list=system("ls -1B ".resFolder."/obst_*")
 
 plot inFile using ee_x:ee_y with lines lw 2 notitle, \

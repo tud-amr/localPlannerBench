@@ -13,7 +13,7 @@ class ExperimentSaver(object):
         self._exp = exp
         self._planner = planner
 
-    def addResultPoint(self, t, q, qdot, solving_time):
+    def addResultPoint(self, t, q, qdot, solving_time, goal):
         resDict = {'t': t, 't_planning': solving_time}
         for n_i in range(self._exp.n() + 1):
             if n_i < self._exp.n():
@@ -23,8 +23,12 @@ class ExperimentSaver(object):
             fk = self._exp.fk(q, n_i)
             resDict['fk' + str(n_i) + "_x"] = fk[0]
             resDict['fk' + str(n_i) + "_y"] = fk[1]
-            if len(fk) ==  3:
+            if self._exp.robotType() == 'planarArm':
                 resDict['fk' + str(n_i) + "_theta"] = fk[2]
+            if self._exp.robotType() == 'panda':
+                resDict['fk' + str(n_i) + "_z"] = fk[2]
+        for i, g in enumerate(goal):
+            resDict['goal_' + str(i)] = g
         self._res.append(resDict)
 
     def saveResult(self, folderPath):

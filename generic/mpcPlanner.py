@@ -24,7 +24,7 @@ class MPCPlanner(AbstractPlanner):
         required_keys = ["type", "n", "obst", "weights", "interval", "H", "dt"]
         super().__init__(exp, setupFile, required_keys)
         self._paramMap, self._npar, self._nx, self._nu, self._ns = getParameterMap(
-            self.n(), self.m(), self.nbObstacles()
+            self.n(), self.m(), self.nbObstacles(), self.m()
         )
         dt_str = str(self.dt()).replace(".", "")
         self._solverFile = (
@@ -38,10 +38,11 @@ class MPCPlanner(AbstractPlanner):
             + str(self.H())
         )
         try:
+            print("Loading solver %s" % self._solverFile)
             self._solver = forcespro.nlp.Solver.from_directory(self._solverFile)
         except Exception as e:
+            print("FAILED TO LOAD SOLVER")
             raise e
-            __import__('pdb').set_trace()
 
     def reset(self):
         print("RESETTING PLANNER")
@@ -65,7 +66,10 @@ class MPCPlanner(AbstractPlanner):
             ] = self.weights()["ws"]
 
     def m(self):
-        return 2
+        if self._exp.robotType() == 'panda':
+            return 3
+        else:
+            return 2
 
     def interval(self):
         return self._setup["interval"]
@@ -92,16 +96,12 @@ class MPCPlanner(AbstractPlanner):
                 if j < len(obsts):
                     obst = obsts[j]
                 else:
-                    obst = Obstacle(np.array([-10.0, 10.0]), -1.0)
-                self._params[
-                    self._npar * i + self._paramMap["obst"][j * 3 + 0]
-                ] = obst.x()[0]
-                self._params[
-                    self._npar * i + self._paramMap["obst"][j * 3 + 1]
-                ] = obst.x()[1]
-                self._params[
-                    self._npar * i + self._paramMap["obst"][j * 3 + 2]
-                ] = obst.r()
+                    obst = Obstacle(np.ones(self.m()) * -100, -1.0)
+                for m_i in range(self.m()):
+                    paramsIndexObstX = self._npar * i + self._paramMap['obst'][j * (self.m() + 1) + m_i]
+                    self._params[paramsIndexObstX] = obst.x()[m_i]
+                paramsIndexObstR = self._npar * i + self._paramMap['obst'][j * (self.m() + 1) + self.m()]
+                self._params[paramsIndexObstR] = obst.r()
 
     def setSelfCollisionAvoidance(self, r_body):
         for i in range(self.H()):
@@ -156,17 +156,20 @@ class MPCPlanner(AbstractPlanner):
         problem["x0"] = self._x0.flatten()[:]
         problem["all_parameters"] = self._params
         # debug
-        debug = False
+        debug = True
         if debug:
             nbPar = int(len(self._params)/self.H())
-            z = np.concatenate((self._xinit, np.array([self._slack, 0, 0])))
+            z = np.concatenate((self._xinit, np.array([self._slack])))
             p = self._params[0:nbPar]
-            J = eval_obj(z, p)
+            #J = eval_obj(z, p)
             ineq = eval_ineq(z, p)
-            print("ineq : ", ineq)
+            #print("ineq : ", ineq)
+            # __import__('pdb').set_trace()
+            """
             for i in range(self.H()):
                 z = self._x0[i]
                 ineq = eval_ineq(z, p)
+            """
             #print("J : ", J)
             #print('z : ', z)
             #print('xinit : ', self._xinit)

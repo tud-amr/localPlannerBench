@@ -43,13 +43,11 @@ class MinimumDistanceToPointMetric(Metric):
 class TimeToReachGoalMetric(Metric):
     def computeMetric(self, data):
         goal = np.array(self._params["goal"])
-        print(goal)
         fks = np.stack([data[name] for name in self._measNames[:-1]]).T
         t = data[self._measNames[-1]]
         des_distance = self._params["des_distance"]
         distances = computeDistances(fks, goal)
         minDistance = np.min(distances)
-        print(minDistance)
         indices = np.where(distances < des_distance)
         if indices[0].size == 0:
             return [-1, 0]
@@ -89,18 +87,20 @@ class SelfClearanceMetric(Metric):
         m = self._params["m"]
         n = self._params["n"]
         r_body = self._params["r_body"]
+        pairs = self._params["pairs"]
         rawData = np.stack([data[name] for name in self._measNames])
         fks = rawData.T.reshape(-1, n+1, m)
         minDistances = []
         distanceToBodies = {}
-        for i_fk in range(n+1):
-            for j_fk in range(i_fk + 2, n+1):
-                distances = (
-                    computeDistances(fks[:, i_fk, :], fks[:, j_fk, :]) - 2 * r_body
-                )
-                minDistance = float(np.min(distances))
-                minDistances.append(minDistance)
-                distanceToBodies[str(i_fk) + "_" + str(j_fk)] = {"dist": minDistance}
+        for pair in pairs:
+            i_fk = pair[0]
+            j_fk = pair[1]
+            distances = (
+                computeDistances(fks[:, i_fk, :], fks[:, j_fk, :]) - 2 * r_body
+            )
+            minDistance = float(np.min(distances))
+            minDistances.append(minDistance)
+            distanceToBodies[str(i_fk) + "_" + str(j_fk)] = {"dist": minDistance}
         return {"minDist": min(minDistances), "allMinDist": distanceToBodies}
 
 

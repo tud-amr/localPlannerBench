@@ -1,3 +1,5 @@
+type: fabric
+n: 2
 m_base: 0.1
 obst:
   exp: 1.0

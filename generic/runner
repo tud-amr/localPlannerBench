@@ -71,7 +71,7 @@ class Runner(object):
         self._res_folder = os.getcwd() + '/' + args.res_folder
         self._planners = []
         self._experiment = Experiment(args.caseSetup)
-        self._env = self._experiment.env()
+        self._env = self._experiment.env(render=self._render)
         for i in range(0, len(args.planners), 2):
             plannerType = args.planners[i]
             plannerFile = args.planners[i+1]
@@ -90,6 +90,7 @@ class Runner(object):
             planner.concretize()
 
     def run(self):
+        print("start run")
         completedRuns = 0
         while completedRuns < self._numberRuns:
             self._experiment.shuffle(self._random_obst, self._random_init, self._random_goal)
@@ -98,13 +99,14 @@ class Runner(object):
                 completedRuns += 1
             except Exception as e:
                 print("Case not feasible %s" % str(e))
-                continue
+                # continue
             self.setPlanner()
             q0, q0dot = self._experiment.initState()
-            time.sleep(1)
             timeStamp = "{:%Y%m%d_%H%M%S}".format(datetime.datetime.now())
             for planner in self._planners:
                 ob = self._env.reset(q0, q0dot)
+                if self._experiment.robotType() == 'panda':
+                    self._experiment.addScene(self._env)
                 saver = ExperimentSaver(self._res_folder, timeStamp)
                 saver.setSetups(self._experiment, planner)
                 t = 0.0
@@ -114,12 +116,9 @@ class Runner(object):
                     t_before = time.time()
                     action = planner.computeAction(q, qdot)
                     solving_time = time.time() - t_before
-                    saver.addResultPoint(t, q, qdot, solving_time)
+                    saver.addResultPoint(t, q, qdot, solving_time, self._experiment.primeGoal())
                     ob, _, _, _ = self._env.step(action)
                     t += self._experiment.dt()
-                    if self._render:
-                        time.sleep(self._experiment.dt())
-                        self._env.render()
                 if self._save:
                     saver.save()
             print("Completed %d runs" % completedRuns)

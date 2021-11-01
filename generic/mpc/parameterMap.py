@@ -1,5 +1,5 @@
 
-def getParameterMap(n, m, nbObst):
+def getParameterMap(n, m, nbObst, mObst):
     pm = {}
     pm['wu'] = list(range(0, n))
     nPar = n
@@ -11,8 +11,8 @@ def getParameterMap(n, m, nbObst):
     nPar += 1
     pm['g'] = list(range(nPar, nPar + m))
     nPar += m
-    pm['obst'] = list(range(nPar, nPar + 3 * nbObst))
-    nPar += 3 * nbObst
+    pm['obst'] = list(range(nPar, nPar + (mObst+1) * nbObst))
+    nPar += (mObst+1) * nbObst
     pm['r_body'] = list(range(nPar, nPar + 1))
     nPar += 1
     pm['lower_limits'] = list(range(nPar, nPar + n))

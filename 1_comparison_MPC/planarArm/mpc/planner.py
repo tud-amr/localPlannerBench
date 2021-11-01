@@ -123,11 +123,11 @@ class MPCPlanner(object):
         self.setX0(self._xinit)
         problem["x0"] = self._x0.flatten()[:]
         problem["all_parameters"] = self._params
-        nbPar = int(len(self._params)/self._H)
         # debug
-        """
-        z = np.concatenate((xinit, np.array([self._slack, 0, 0])))
+        nbPar = int(len(self._params)/self._H)
+        z = np.concatenate((self._xinit, np.array([self._slack, 0, 0])))
         p = self._params[0:nbPar]
+        """
         J = eval_obj(z, p)
         #print("J : ", J)
         ineq = eval_ineq(z, p)

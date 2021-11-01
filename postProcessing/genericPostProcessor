@@ -52,7 +52,7 @@ class PostProcessor(object):
             help="Experiment result folder",
             required=True,
         )
-        self._parser.add_argument("--series", dest='series', action="store_true")
+        self._parser.add_argument("--series", dest="series", action="store_true")
         self._parser.set_defaults(series=False)
         self._parser.add_argument("--plot", dest="plot", action="store_true")
         self._parser.set_defaults(plot=False)
@@ -74,10 +74,12 @@ class PostProcessor(object):
             self.defineMetricesPointMass()
         elif self._experiment.robotType() == "planarArm":
             self.defineMetricesPlanarArm()
+        elif self._experiment.robotType() == "panda":
+            self.defineMetricesPanda()
 
     def parseArguments(self):
         args = self._parser.parse_args()
-        self._expFolder = os.getcwd() + '/' + args.expFolder
+        self._expFolder = os.getcwd() + "/" + args.expFolder
         self._series = args.series
         self._plot = args.plot
         self._verbose = args.verbose
@@ -154,8 +156,57 @@ class PostProcessor(object):
         )
         selfClearanceMetric = SelfClearanceMetric(
             "selfClearance",
-            ['fk0_x', 'fk0_y'] + fksNames,
-            {"m": m, "n": n, "r_body": self._experiment.rBody()},
+            ["fk0_x", "fk0_y"] + fksNames,
+            {
+                "m": m,
+                "n": n,
+                "r_body": self._experiment.rBody(),
+                "pairs": self._experiment.selfCollisionPairs()}
+        )
+        solverTimesMetric = SolverTimesMetric(
+            "solvertime", ["t_planning"], {"interval": self._planner.interval()}
+        )
+        pathLengthMetric = PathLengthMetric("pathLength", fkNames, {})
+        self._metrices = []
+        self.addMetric(clearanceMetric)
+        self.addMetric(timeToReachGoalMetric)
+        self.addMetric(solverTimesMetric)
+        self.addMetric(pathLengthMetric)
+        self.addMetric(selfClearanceMetric)
+
+    def defineMetricesPanda(self):
+        n = self._experiment.n()
+        m = 3
+        fksNames = []
+        for i in range(1, n + 1):
+            fksNames.append("fk" + str(i) + "_x")
+            fksNames.append("fk" + str(i) + "_y")
+            fksNames.append("fk" + str(i) + "_z")
+        fkNames = ["fk" + str(n) + "_x", "fk" + str(n) + "_y", "fk" + str(n) + "_z"]
+        timeToReachGoalMetric = TimeToReachGoalMetric(
+            "time2Goal",
+            fkNames + ["t"],
+            {"goal": self._experiment.primeGoal(), "des_distance": 0.01},
+        )
+        clearanceMetric = ClearanceMetric(
+            "clearance",
+            fksNames,
+            {
+                "obstacles": self._experiment.obstacles(),
+                "m": m,
+                "n": n,
+                "r_body": self._experiment.rBody(),
+            },
+        )
+        selfClearanceMetric = SelfClearanceMetric(
+            "selfClearance",
+            ["fk0_x", "fk0_y", "fk0_z"] + fksNames,
+            {
+                "m": m,
+                "n": n,
+                "r_body": self._experiment.rBody(),
+                "pairs": self._experiment.selfCollisionPairs(),
+            },
         )
         solverTimesMetric = SolverTimesMetric(
             "solvertime", ["t_planning"], {"interval": self._planner.interval()}
@@ -178,8 +229,8 @@ class PostProcessor(object):
         seriesFolder = self._expFolder
         listExpFolders = os.listdir(self._expFolder)
         totalExps = 0
-        fullPaths = [self._expFolder + '/' + exp for exp in listExpFolders]
-        kpis = {'mpc': {}, 'fabric': {}}
+        fullPaths = [self._expFolder + "/" + exp for exp in listExpFolders]
+        kpis = {"mpc": {}, "fabric": {}}
         for fullPath in fullPaths:
             if not os.path.isdir(fullPath):
                 continue
@@ -198,15 +249,17 @@ class PostProcessor(object):
     def getSeriesComparison(self, kpis):
         mpcMatrix = []
         fabricMatrix = []
-        mpcCounter = {0:0, -1:0, -2:0}
-        fabricCounter = {0:0, -1:0, -2:0}
-        mpcKpis = kpis['mpc']
-        fabricKpis = kpis['fabric']
+        mpcCounter = {0: 0, -1: 0, -2: 0}
+        fabricCounter = {0: 0, -1: 0, -2: 0}
+        mpcKpis = kpis["mpc"]
+        fabricKpis = kpis["fabric"]
         feasibility = []
         for timeStamp in mpcKpis.keys():
             mpcSuccess = mpcKpis[timeStamp][0][0]
             fabricSuccess = fabricKpis[timeStamp][0][0]
-            feasibility.append([timeStamp, mpcKpis[timeStamp][0][1], fabricKpis[timeStamp][0][1]])
+            feasibility.append(
+                [timeStamp, mpcKpis[timeStamp][0][1], fabricKpis[timeStamp][0][1]]
+            )
             mpcCounter[mpcKpis[timeStamp][0][1]] += 1
             fabricCounter[fabricKpis[timeStamp][0][1]] += 1
             if mpcSuccess and fabricSuccess:
@@ -215,7 +268,7 @@ class PostProcessor(object):
         mpcArray = np.array(mpcMatrix)
         fabricArray = np.array(fabricMatrix)
         success = [list(mpcCounter.values()), list(fabricCounter.values())]
-        return fabricArray/mpcArray, feasibility, success
+        return fabricArray / mpcArray, feasibility, success
 
     def getTimeStamp(self):
         return self._expFolder[-15:]
@@ -238,22 +291,22 @@ class PostProcessor(object):
         return self._evaluations
 
     def getKpis(self):
-        if self._experiment.robotType() != 'pointMass':
+        if self._experiment.robotType() != "pointMass":
             return [
-                self._evaluations['success'], 
-                self._evaluations['solvertime'],
-                self._evaluations['time2Goal'][1],
-                self._evaluations['pathLength'],
-                self._evaluations['selfClearance']['minDist'],
-                self._evaluations['clearance']['minDist']
+                self._evaluations["success"],
+                self._evaluations["solvertime"],
+                self._evaluations["time2Goal"][1],
+                self._evaluations["pathLength"],
+                self._evaluations["selfClearance"]["minDist"],
+                self._evaluations["clearance"]["minDist"],
             ]
         else:
             return [
-                self._evaluations['success'], 
-                self._evaluations['solvertime'],
-                self._evaluations['time2Goal'][1],
-                self._evaluations['pathLength'],
-                self._evaluations['clearance']['minDist']
+                self._evaluations["success"],
+                self._evaluations["solvertime"],
+                self._evaluations["time2Goal"][1],
+                self._evaluations["pathLength"],
+                self._evaluations["clearance"]["minDist"],
             ]
 
     def evaluateSuccess(self):
@@ -275,18 +328,18 @@ class PostProcessor(object):
         seriesCsvFile = self._expFolder + "/results.csv"
         feasibilityFile = self._expFolder + "/feasibility.csv"
         successFile = self._expFolder + "/success.csv"
-        with open(postProcessFile, 'w') as file:
+        with open(postProcessFile, "w") as file:
             yaml.dump(seriesRes, file)
-        with open(seriesCsvFile, 'w') as file:
-            csv_writer = csv.writer(file, delimiter=',')
+        with open(seriesCsvFile, "w") as file:
+            csv_writer = csv.writer(file, delimiter=",")
             for i in range(len(resultArray)):
                 csv_writer.writerow(resultArray[i])
-        with open(feasibilityFile, 'w') as file:
-            csv_writer = csv.writer(file, delimiter=',')
+        with open(feasibilityFile, "w") as file:
+            csv_writer = csv.writer(file, delimiter=",")
             for i in range(len(feasibility)):
                 csv_writer.writerow(feasibility[i])
-        with open(successFile, 'w') as file:
-            csv_writer = csv.writer(file, delimiter=',')
+        with open(successFile, "w") as file:
+            csv_writer = csv.writer(file, delimiter=",")
             for i in range(len(success)):
                 csv_writer.writerow(success[i])
 
@@ -297,32 +350,37 @@ class PostProcessor(object):
 
     def plot(self):
         curPath = os.path.dirname(os.path.abspath(__file__)) + "/"
-        if self._experiment.robotType() == 'planarArm':
-            createPlotFolder = curPath + 'plottingPlanarArm'
+        if self._experiment.robotType() == "planarArm":
+            createPlotFolder = curPath + "plottingPlanarArm"
             subprocess.Popen(
-                ['./createPlot', self._expFolder, str(self._experiment.n())],
+                ["./createPlot", self._expFolder, str(self._experiment.n())],
                 cwd=createPlotFolder,
-                stdout=subprocess.PIPE
+                stdout=subprocess.PIPE,
             )
-        elif self._experiment.robotType() == 'pointMass':
-            createPlotFolder = curPath + 'plottingPointMass/'
+        elif self._experiment.robotType() == "pointMass":
+            createPlotFolder = curPath + "plottingPointMass/"
             subprocess.Popen(
-                ['./createPlot', self._expFolder],
+                ["./createPlot", self._expFolder],
                 cwd=createPlotFolder,
-                stdout=subprocess.PIPE
+                stdout=subprocess.PIPE,
+            )
+        elif self._experiment.robotType() == "panda":
+            createPlotFolder = curPath + "plottingPanda/"
+            subprocess.Popen(
+                ["./createPlot", self._expFolder],
+                cwd=createPlotFolder,
+                stdout=subprocess.PIPE,
             )
 
     def plotSeriesResult(self):
         curPath = os.path.dirname(os.path.abspath(__file__)) + "/"
         subprocess.Popen(
-            ['./createSeriesPlot', self._expFolder],
-            cwd=curPath,
-            stdout=subprocess.PIPE
+            ["./createSeriesPlot", self._expFolder], cwd=curPath, stdout=subprocess.PIPE
         )
         subprocess.Popen(
-            ['./createSuccessPlot', self._expFolder],
+            ["./createSuccessPlot", self._expFolder],
             cwd=curPath,
-            stdout=subprocess.PIPE
+            stdout=subprocess.PIPE,
         )
 
     def open(self):
