@@ -90,8 +90,10 @@ Local motion planning are assessed based on
 | Expermient | PointMass | PlanarArm | Panda | RealPanda | Albert |
 | -----------|---------|---------|-----|---------|------|
 | mpc vs fabric | [x] | [x] | [x] | [ ] | [ ]|
-| static vs dynamic| [x] | [ ] | [ ] | [ ] | [ ]|
+| static vs dynamic| [x] | [x] | [ ] | [ ] | [ ]|
 | moving obstacles | [ ] | [ ] | [ ] | [ ] | [ ]|
+| non holonomic | [ ] | [ ] | [ ] | [ ] | [ ]|
+| dual arm | [ ] | [ ] | [ ] | [ ] | [ ]|
 
 ## Experiment 1: Fabric vs MPC
 
