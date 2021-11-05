@@ -131,7 +131,7 @@ class FabricPlanner(AbstractPlanner):
             if subGoal.dynamic():
                 refTraj = subGoal.trajectory()
                 dm_psi, lag_psi, geo_psi, x_psi, xdot_psi = defaultDynamicAttractor(
-                    self._q, self._qdot, self._q, refTraj,
+                    self._q, self._qdot, fk, refTraj,
                     k_psi=self.configAttractor()['k_psi'] * subGoal.w()
                 )
                 self._planner.addForcingGeometry(

@@ -189,7 +189,7 @@ class Experiment(object):
                         raise ExperimentInfeasible(
                             "Initial configuration in self collision"
                         )
-            if np.linalg.norm(self.primeGoal()) > self.n():
+            if isinstance(self.primeGoal(), np.ndarray) and np.linalg.norm(self.primeGoal()) > self.n():
                 raise Experiment("Goal unreachible")
 
     def save(self, folderPath):
