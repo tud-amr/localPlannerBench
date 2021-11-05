@@ -151,6 +151,11 @@ class PostProcessor(object):
             fkNames + ['goal_0_0', 'goal_1_0', "t"],
             {"m": 2, "des_distance": 0.1},
         )
+        integratedErrorMetric = IntegratedErrorMetric(
+            "integratedError",
+            fkNames + ["goal_0_0", "goal_1_0", "t"],
+            {"m": 2, "des_distance": 0.1},
+        )
         clearanceMetric = ClearanceMetric(
             "clearance",
             fksNames,
@@ -177,6 +182,7 @@ class PostProcessor(object):
         self._metrices = []
         self.addMetric(clearanceMetric)
         self.addMetric(timeToReachGoalMetric)
+        self.addMetric(integratedErrorMetric)
         self.addMetric(solverTimesMetric)
         self.addMetric(pathLengthMetric)
         self.addMetric(selfClearanceMetric)
