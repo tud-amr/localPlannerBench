@@ -27,8 +27,9 @@ class ExperimentSaver(object):
                 resDict['fk' + str(n_i) + "_theta"] = fk[2]
             if self._exp.robotType() == 'panda':
                 resDict['fk' + str(n_i) + "_z"] = fk[2]
-        for i, g in enumerate(goal):
-            resDict['goal_' + str(i)] = g
+        for i_der, goal_der in enumerate(goal):
+            for j_dim, goal_dim in enumerate(goal_der):
+                resDict['goal_' + str(j_dim) + '_' + str(i_der)] = goal_dim
         self._res.append(resDict)
 
     def saveResult(self, folderPath):

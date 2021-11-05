@@ -1,4 +1,6 @@
 #!/bin/bash
 abspath=`realpath "$0"`
 seriesFolder="${1}/"
-gnuplot -c "makeSeriesPlot.gnuplot" $seriesFolder
+planner1=$2
+planner2=$3
+gnuplot -c "makeSeriesPlot.gnuplot" $seriesFolder $planner1 $planner2 $4 $5 $6 $7 $8 $9

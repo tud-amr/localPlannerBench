@@ -80,7 +80,18 @@ Local motion planning are assessed based on
   - [x] How far away from obstacles does the robot stay? (`ClearanceMetric`)
   - [ ] How fast does it move close to them?
   - [ ] How far from joint limits?
+* [x] Integrated Error:
+  - [x] How big is the accumlated error once a trajectory goal is reached? (`IntegratedErrorMetric`)
+
 * (Smoothness): ???
+
+## Overview Experements and robots
+
+| Expermient | PointMass | PlanarArm | Panda | RealPanda | Albert |
+| -----------|---------|---------|-----|---------|------|
+| mpc vs fabric | [x] | [x] | [x] | [ ] | [ ]|
+| static vs dynamic| [x] | [ ] | [ ] | [ ] | [ ]|
+| moving obstacles | [ ] | [ ] | [ ] | [ ] | [ ]|
 
 ## Experiment 1: Fabric vs MPC
 

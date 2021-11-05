@@ -22,6 +22,7 @@ from metrics import (
     SolverTimesMetric,
     PathLengthMetric,
     SuccessMetric,
+    IntegratedErrorMetric
 )
 
 
@@ -62,7 +63,7 @@ class PostProcessor(object):
     def importData(self):
         self.convertDataPoints(csvToRawData(self._expFolder + "/res.csv"))
         self._experiment = Experiment(self._expFolder + "/exp.yaml")
-        if "/fabric_" in self._expFolder:
+        if "/fabric_" in self._expFolder or '/dynamicFabric_' in self._expFolder:
             self._planner = FabricPlanner(
                 self._experiment, self._expFolder + "/planner.yaml"
             )
@@ -108,8 +109,13 @@ class PostProcessor(object):
     def defineMetricesPointMass(self):
         timeToReachGoalMetric = TimeToReachGoalMetric(
             "time2Goal",
-            ["q0", "q1", "t"],
-            {"goal": self._experiment.primeGoal(), "des_distance": 0.1},
+            ["q0", "q1", "goal_0_0", "goal_1_0", "t"],
+            {"m": 2, "des_distance": 0.1},
+        )
+        integratedErrorMetric = IntegratedErrorMetric(
+            "integratedError",
+            ["q0", "q1", "goal_0_0", "goal_1_0", "t"],
+            {"m": 2, "des_distance": 0.1},
         )
         clearanceMetric = ClearanceMetric(
             "clearance",
@@ -130,6 +136,7 @@ class PostProcessor(object):
         self.addMetric(timeToReachGoalMetric)
         self.addMetric(solverTimesMetric)
         self.addMetric(pathLengthMetric)
+        self.addMetric(integratedErrorMetric)
 
     def defineMetricesPlanarArm(self):
         n = self._experiment.n()
@@ -141,8 +148,8 @@ class PostProcessor(object):
         fkNames = ["fk" + str(n) + "_x", "fk" + str(n) + "_y"]
         timeToReachGoalMetric = TimeToReachGoalMetric(
             "time2Goal",
-            fkNames + ["t"],
-            {"goal": self._experiment.primeGoal(), "des_distance": 0.1},
+            fkNames + ['goal_0_0', 'goal_1_0', "t"],
+            {"m": 2, "des_distance": 0.1},
         )
         clearanceMetric = ClearanceMetric(
             "clearance",
@@ -185,8 +192,8 @@ class PostProcessor(object):
         fkNames = ["fk" + str(n) + "_x", "fk" + str(n) + "_y", "fk" + str(n) + "_z"]
         timeToReachGoalMetric = TimeToReachGoalMetric(
             "time2Goal",
-            fkNames + ["t"],
-            {"goal": self._experiment.primeGoal(), "des_distance": 0.01},
+            fkNames + ['goal_0_0', 'goal_1_0', 'goal_2_0', "t"],
+            {"m": 3, "des_distance": 0.1},
         )
         clearanceMetric = ClearanceMetric(
             "clearance",
@@ -221,16 +228,16 @@ class PostProcessor(object):
 
     def evaluate(self):
         if self._series:
-            self.seriesEvaluate()
+            self.seriesEvaluate(['solvertime', 'integratedError', 'clearance'])
         else:
             self.singleEvaluate()
 
-    def seriesEvaluate(self):
+    def seriesEvaluate(self, kpiNames):
         seriesFolder = self._expFolder
         listExpFolders = os.listdir(self._expFolder)
         totalExps = 0
         fullPaths = [self._expFolder + "/" + exp for exp in listExpFolders]
-        kpis = {"mpc": {}, "fabric": {}}
+        kpis = {}
         for fullPath in fullPaths:
             if not os.path.isdir(fullPath):
                 continue
@@ -238,37 +245,42 @@ class PostProcessor(object):
             self._expFolder = fullPath
             self.singleEvaluate()
             timeStamp = self.getTimeStamp()
-            kpi = self.getKpis()
+            kpi = self.getKpis(kpiNames)
+            if not self._planner.plannerType() in kpis.keys():
+                kpis[self._planner.plannerType()] = {}
             kpis[self._planner.plannerType()][timeStamp] = kpi
-        resultArray, feasibility, success = self.getSeriesComparison(kpis)
+        resultArray, feasibility, success = self.getSeriesComparison(kpis, kpiNames)
         self._expFolder = seriesFolder
         self.writeSeriesResult(kpis, resultArray, feasibility, success)
         if self._plot:
-            self.plotSeriesResult()
+            planners = list(kpis.keys())
+            self.plotSeriesResult(planners[0], planners[1], kpiNames)
 
-    def getSeriesComparison(self, kpis):
-        mpcMatrix = []
-        fabricMatrix = []
-        mpcCounter = {0: 0, -1: 0, -2: 0}
-        fabricCounter = {0: 0, -1: 0, -2: 0}
-        mpcKpis = kpis["mpc"]
-        fabricKpis = kpis["fabric"]
+    def getSeriesComparison(self, kpis, kpiNames):
+        planner1Matrix = []
+        planner2Matrix = []
+        planner1Counter = {0: 0, -1: 0, -2: 0}
+        planner2Counter = {0: 0, -1: 0, -2: 0}
+        planner1Kpis = list(kpis.values())[0]
+        planner2Kpis = list(kpis.values())[1]
         feasibility = []
-        for timeStamp in mpcKpis.keys():
-            mpcSuccess = mpcKpis[timeStamp][0][0]
-            fabricSuccess = fabricKpis[timeStamp][0][0]
+        for timeStamp in planner1Kpis.keys():
+            planner1Success =planner1Kpis[timeStamp][0]['short']
+            planner2Success = planner2Kpis[timeStamp][0]['short']
             feasibility.append(
-                [timeStamp, mpcKpis[timeStamp][0][1], fabricKpis[timeStamp][0][1]]
+                [timeStamp, planner1Kpis[timeStamp][0]['flag'], planner2Kpis[timeStamp][0]['flag']]
             )
-            mpcCounter[mpcKpis[timeStamp][0][1]] += 1
-            fabricCounter[fabricKpis[timeStamp][0][1]] += 1
-            if mpcSuccess and fabricSuccess:
-                mpcMatrix.append(mpcKpis[timeStamp][1:])
-                fabricMatrix.append(fabricKpis[timeStamp][1:])
-        mpcArray = np.array(mpcMatrix)
-        fabricArray = np.array(fabricMatrix)
-        success = [list(mpcCounter.values()), list(fabricCounter.values())]
-        return fabricArray / mpcArray, feasibility, success
+            planner1Counter[planner1Kpis[timeStamp][0]['flag']] += 1
+            planner2Counter[planner2Kpis[timeStamp][0]['flag']] += 1
+            if planner1Success and planner2Success:
+                planner1Matrix.append(planner1Kpis[timeStamp][1:])
+                planner2Matrix.append(planner2Kpis[timeStamp][1:])
+        results = np.array(planner1Matrix) / np.array(planner2Matrix)
+        resultDict = {}
+        for i, kpiName in enumerate(kpiNames):
+            resultDict[kpiName] = list(results[:, i])
+        success = [list(planner1Counter.values()), list(planner2Counter.values())]
+        return resultDict , feasibility, success
 
     def getTimeStamp(self):
         return self._expFolder[-15:]
@@ -290,40 +302,25 @@ class PostProcessor(object):
     def getEval(self):
         return self._evaluations
 
-    def getKpis(self):
-        if self._experiment.robotType() != "pointMass":
-            return [
-                self._evaluations["success"],
-                self._evaluations["solvertime"],
-                self._evaluations["time2Goal"][1],
-                self._evaluations["pathLength"],
-                self._evaluations["selfClearance"]["minDist"],
-                self._evaluations["clearance"]["minDist"],
-            ]
-        else:
-            return [
-                self._evaluations["success"],
-                self._evaluations["solvertime"],
-                self._evaluations["time2Goal"][1],
-                self._evaluations["pathLength"],
-                self._evaluations["clearance"]["minDist"],
-            ]
+    def getKpis(self, kpiNames):
+        success = self._evaluations["success"]
+        return [success] + [self._evaluations[kpiName]['short'] for kpiName in kpiNames]
 
     def evaluateSuccess(self):
         if "selfClearance" in self._evaluations.keys():
             minClearance = min(
-                self._evaluations["clearance"]["minDist"],
-                self._evaluations["selfClearance"]["minDist"],
+                self._evaluations["clearance"]["short"],
+                self._evaluations["selfClearance"]["short"],
             )
         else:
-            minClearance = self._evaluations["clearance"]["minDist"]
-        reachingFlag = self._evaluations["time2Goal"][0]
+            minClearance = self._evaluations["clearance"]["short"]
+        reachingFlag = self._evaluations["time2Goal"]['flag']
         successMetric = SuccessMetric(
             "success", [], {"minClearance": minClearance, "reachingFlag": reachingFlag},
         )
         self._evaluations["success"] = self.evaluateMetric(successMetric)
 
-    def writeSeriesResult(self, seriesRes, resultArray, feasibility, success):
+    def writeSeriesResult(self, seriesRes, resultDict, feasibility, success):
         postProcessFile = self._expFolder + "/postProcess.yaml"
         seriesCsvFile = self._expFolder + "/results.csv"
         feasibilityFile = self._expFolder + "/feasibility.csv"
@@ -332,8 +329,11 @@ class PostProcessor(object):
             yaml.dump(seriesRes, file)
         with open(seriesCsvFile, "w") as file:
             csv_writer = csv.writer(file, delimiter=",")
-            for i in range(len(resultArray)):
-                csv_writer.writerow(resultArray[i])
+            csv_writer.writerow(list(resultDict))
+            resultList = list(resultDict.values())
+            for i in range(len(resultList[0])):
+                row = [resultList[j][i] for j in range(len(resultList))]
+                csv_writer.writerow(row)
         with open(feasibilityFile, "w") as file:
             csv_writer = csv.writer(file, delimiter=",")
             for i in range(len(feasibility)):
@@ -372,13 +372,13 @@ class PostProcessor(object):
                 stdout=subprocess.PIPE,
             )
 
-    def plotSeriesResult(self):
+    def plotSeriesResult(self, planner1, planner2, kpiNames):
         curPath = os.path.dirname(os.path.abspath(__file__)) + "/"
         subprocess.Popen(
-            ["./createSeriesPlot", self._expFolder], cwd=curPath, stdout=subprocess.PIPE
+            ["./createSeriesPlot", self._expFolder, planner1, planner2] + kpiNames, cwd=curPath, stdout=subprocess.PIPE
         )
         subprocess.Popen(
-            ["./createSuccessPlot", self._expFolder],
+            ["./createSuccessPlot", self._expFolder, planner1, planner2],
             cwd=curPath,
             stdout=subprocess.PIPE,
         )

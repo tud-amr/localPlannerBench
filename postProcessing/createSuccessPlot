@@ -1,4 +1,4 @@
 #!/bin/bash
 abspath=`realpath "$0"`
 seriesFolder="${1}/"
-gnuplot -c "makeSuccessPlot.gnuplot" $seriesFolder
+gnuplot -c "makeSuccessPlot.gnuplot" $seriesFolder $2 $3

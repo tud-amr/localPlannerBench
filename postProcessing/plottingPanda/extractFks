@@ -23,16 +23,14 @@ IFS="," read -a lastLine <<< `sed -n "${lastLineNb}p" $resFile`
 IFS="," read -a header <<< `sed -n "1p" $resFile`
 rm -f "${fkFile}_last.csv"
 rm -f "${fkFile}_first.csv"
-key_goal_x=$(getPos $header "goal_0")
-key_goal_y=$(getPos $header "goal_1")
-key_goal_z=$(getPos $header "goal_2")
+key_goal_x=$(getPos $header "goal_0_0")
+key_goal_y=$(getPos $header "goal_1_0")
+key_goal_z=$(getPos $header "goal_2_0")
 key_goal_z=$((key_goal_y+1))
 for (( i=0; i<=$n; i++ ))
 do
   key_fk_x=$(getPos $header "fk${i}_x")
   key_fk_y=$(getPos $header "fk${i}_y")
   key_fk_z=$(getPos $header "fk${i}_z")
-  echo "${firstLine[${key_fk_x}]},${firstLine[${key_fk_y}]},${firstLine[${key_fk_z}]}" >> "${fkFile}_first.csv"
-  echo "${lastLine[${key_fk_x}]},${lastLine[${key_fk_y}]},${lastLine[${key_fk_z}]}" >> "${fkFile}_last.csv"
 done
 echo "${key_fk_x},${key_fk_y},${key_fk_z},${key_goal_x},${key_goal_y},${key_goal_z}"

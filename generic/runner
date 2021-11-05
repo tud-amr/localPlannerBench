@@ -8,7 +8,7 @@ import sys
 import warnings
 import numpy as np
 
-from fabricsExperiments.generic.experiment import Experiment
+from fabricsExperiments.generic.experiment import Experiment, ExperimentInfeasible
 from fabricsExperiments.generic.fabricPlanner import FabricPlanner
 from fabricsExperiments.generic.mpcPlanner import MPCPlanner
 from fabricsExperiments.generic.experimentSaver import ExperimentSaver
@@ -93,13 +93,14 @@ class Runner(object):
         print("start run")
         completedRuns = 0
         while completedRuns < self._numberRuns:
+            time.sleep(1)
             self._experiment.shuffle(self._random_obst, self._random_init, self._random_goal)
             try:
                 self._experiment.checkFeasibility(checkGoalReachible=False)
                 completedRuns += 1
-            except Exception as e:
+            except ExperimentInfeasible as e:
                 print("Case not feasible %s" % str(e))
-                # continue
+                continue
             self.setPlanner()
             q0, q0dot = self._experiment.initState()
             timeStamp = "{:%Y%m%d_%H%M%S}".format(datetime.datetime.now())
@@ -114,9 +115,18 @@ class Runner(object):
                     q = ob[0:self._experiment.n()]
                     qdot = ob[self._experiment.n():2*self._experiment.n()]
                     t_before = time.time()
-                    action = planner.computeAction(q, qdot)
+                    if self._experiment.dynamic():
+                        envEval = self._experiment.evaluate(t)
+                        if not planner.dynamic():
+                            envEval[1] = np.zeros(2)
+                            envEval[2] = np.zeros(2)
+                        observation = [q, qdot] + envEval
+                    else:
+                        observation = [q, qdot]
+                    action = planner.computeAction(*observation)
                     solving_time = time.time() - t_before
-                    saver.addResultPoint(t, q, qdot, solving_time, self._experiment.primeGoal())
+                    primeGoal = self._experiment.evaluatePrimeGoal(t)
+                    saver.addResultPoint(t, q, qdot, solving_time, primeGoal)
                     ob, _, _, _ = self._env.step(action)
                     t += self._experiment.dt()
                 if self._save:

@@ -156,7 +156,7 @@ class MPCPlanner(AbstractPlanner):
         problem["x0"] = self._x0.flatten()[:]
         problem["all_parameters"] = self._params
         # debug
-        debug = True
+        debug = False
         if debug:
             nbPar = int(len(self._params)/self.H())
             z = np.concatenate((self._xinit, np.array([self._slack])))

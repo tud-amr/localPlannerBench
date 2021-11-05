@@ -5,17 +5,39 @@ import numpy as np
 from optFabrics.planner.fabricPlanner import DefaultFabricPlanner
 from optFabrics.planner.default_geometries import CollisionGeometry, GoalGeometry
 from optFabrics.planner.default_energies import CollisionLagrangian, ExecutionLagrangian
-from optFabrics.planner.default_maps import CollisionMap, LowerLimitMap, UpperLimitMap, SelfCollisionMap
-from optFabrics.planner.default_leaves import defaultAttractor
-from optFabrics.planner.default_geometries import CollisionGeometry, GoalGeometry, LimitGeometry
+from optFabrics.planner.default_maps import (
+    CollisionMap,
+    LowerLimitMap,
+    UpperLimitMap,
+    SelfCollisionMap,
+)
+from optFabrics.planner.default_leaves import defaultAttractor, defaultDynamicAttractor
+from optFabrics.planner.default_geometries import (
+    CollisionGeometry,
+    GoalGeometry,
+    LimitGeometry,
+)
 
+from optFabrics.diffGeometry.referenceTrajectory import AnalyticTrajectory
 
 from fabricsExperiments.generic.abstractPlanner import AbstractPlanner
+from fabricsExperiments.infrastructure.variables import t
 
 
 class FabricPlanner(AbstractPlanner):
     def __init__(self, exp, setupFile):
-        required_keys = ['type', 'n', 'obst', 'attractor', 'speed', 'damper', 'limits', 'selfCol', 'interval']
+        required_keys = [
+            "type",
+            "n",
+            "obst",
+            "attractor",
+            "speed",
+            "damper",
+            "limits",
+            "selfCol",
+            "interval",
+            "dynamic",
+        ]
         super().__init__(exp, setupFile, required_keys)
         self.reset()
 
@@ -24,57 +46,63 @@ class FabricPlanner(AbstractPlanner):
         self._q, self._qdot = self._planner.var()
 
     def interval(self):
-        return self._setup['interval']
+        return self._setup["interval"]
 
     def n(self):
-        return self._setup['n']
+        return self._setup["n"]
 
     def mBase(self):
-        return self._setup['m_base']
+        return self._setup["m_base"]
+
+    def dynamic(self):
+        return self._setup["dynamic"]
 
     def configObst(self):
-        return self._setup['obst']
+        return self._setup["obst"]
 
     def configSelfColAvoidance(self):
-        return self._setup['selfCol']
+        return self._setup["selfCol"]
 
     def configAttractor(self):
-        return self._setup['attractor']
+        return self._setup["attractor"]
 
     def configSpeed(self):
-        return self._setup['speed']
+        return self._setup["speed"]
 
     def configLimits(self):
-        return self._setup['limits']
+        return self._setup["limits"]
 
     def configDamper(self):
-        return self._setup['damper']
+        return self._setup["damper"]
 
     def setObstacles(self, obsts, r_body):
         x = ca.SX.sym("x", 1)
         xdot = ca.SX.sym("xdot", 1)
         lag_col = CollisionLagrangian(x, xdot)
         geo_col = CollisionGeometry(
-            x, xdot,
-            exp=self.configObst()["exp"],
-            lam=self.configObst()["lam"]
+            x, xdot, exp=self.configObst()["exp"], lam=self.configObst()["lam"]
         )
         for i, obst in enumerate(obsts):
-            for i in range(1, self.n() + 1):
-                fk = self._exp.fk(self._q, i, positionOnly=True)
-                dm_col = CollisionMap(self._q, self._qdot, fk, obst.x(), obst.r(), r_body=r_body)
+            for j in range(1, self.n() + 1):
+                if self._exp.robotType() == "pointMass" and j == 1:
+                    continue
+                fk = self._exp.fk(self._q, j, positionOnly=True)
+                dm_col = CollisionMap(
+                    self._q, self._qdot, fk, obst.x(), obst.r(), r_body=r_body
+                )
                 self._planner.addGeometry(dm_col, lag_col, geo_col)
 
     def setSelfCollisionAvoidance(self, r_body):
-        if self._exp.robotType() == 'pointMass':
+        if self._exp.robotType() == "pointMass":
             return
         x = ca.SX.sym("x", 1)
         xdot = ca.SX.sym("xdot", 1)
         lag_selfCol = CollisionLagrangian(x, xdot)
         geo_selfCol = CollisionGeometry(
-            x, xdot,
-            exp=self.configSelfColAvoidance()['exp'],
-            lam=self.configSelfColAvoidance()['lam'],
+            x,
+            xdot,
+            exp=self.configSelfColAvoidance()["exp"],
+            lam=self.configSelfColAvoidance()["lam"],
         )
         for pair in self._exp.selfCollisionPairs():
             fk_1 = self._exp.fk(self._q, pair[0], positionOnly=True)
@@ -87,9 +115,7 @@ class FabricPlanner(AbstractPlanner):
         xdot = ca.SX.sym("xdot", 1)
         lag_col = CollisionLagrangian(x, xdot)
         geo_col = LimitGeometry(
-            x, xdot,
-            lam=self.configLimits()["lam"],
-            exp=self.configLimits()["exp"],
+            x, xdot, lam=self.configLimits()["lam"], exp=self.configLimits()["exp"],
         )
         for i in range(self.n()):
             dm_col = UpperLimitMap(self._q, self._qdot, limits[1][i], i)
@@ -101,15 +127,24 @@ class FabricPlanner(AbstractPlanner):
         for subGoal in goal.subGoals():
             fk_child = self._exp.fk(self._q, subGoal.childLink())[subGoal.indices()]
             fk_parent = self._exp.fk(self._q, subGoal.parentLink())[subGoal.indices()]
-            fk =  fk_child - fk_parent
-            dm_psi, lag_psi, geo_psi, x_psi, xdot_psi = defaultAttractor(
-                self._q, self._qdot, subGoal.desiredPosition(), fk
-            )
-            geo_psi = GoalGeometry(
-                x_psi, xdot_psi,
-                k_psi=self.configAttractor()['k_psi'] * subGoal.w()
-            )
-            self._planner.addForcingGeometry(dm_psi, lag_psi, geo_psi)
+            fk = fk_child - fk_parent
+            if subGoal.dynamic():
+                refTraj = subGoal.trajectory()
+                dm_psi, lag_psi, geo_psi, x_psi, xdot_psi = defaultDynamicAttractor(
+                    self._q, self._qdot, self._q, refTraj,
+                    k_psi=self.configAttractor()['k_psi'] * subGoal.w()
+                )
+                self._planner.addForcingGeometry(
+                    dm_psi, lag_psi, geo_psi, goalVelocity=refTraj.xdot()
+                )
+            else:
+                dm_psi, lag_psi, geo_psi, x_psi, xdot_psi = defaultAttractor(
+                    self._q, self._qdot, subGoal.desiredPosition(), fk
+                )
+                geo_psi = GoalGeometry(
+                    x_psi, xdot_psi, k_psi=self.configAttractor()["k_psi"] * subGoal.w()
+                )
+                self._planner.addForcingGeometry(dm_psi, lag_psi, geo_psi)
             if subGoal.isPrimeGoal():
                 self._dm_psi = dm_psi
                 self._x_psi = x_psi
@@ -120,16 +155,20 @@ class FabricPlanner(AbstractPlanner):
         exLag = ExecutionLagrangian(self._q, self._qdot)
         self._planner.setExecutionEnergy(exLag)
         # Speed control
-        ex_factor = self.configSpeed()['ex_factor']
+        ex_factor = self.configSpeed()["ex_factor"]
         self._planner.setDefaultSpeedControl(
-            self._x_psi, self._dm_psi, exLag, ex_factor,
-            r_b=self.configDamper()['r_d'], 
-            b=self.configDamper()['b']
+            self._x_psi,
+            self._dm_psi,
+            exLag,
+            ex_factor,
+            r_b=self.configDamper()["r_d"],
+            b=self.configDamper()["b"],
         )
         self._planner.concretize()
 
-    def computeAction(self, q, qdot):
-        return self._planner.computeAction(q, qdot)
+    def computeAction(self, *args):
+        return self._planner.computeAction(*args)
+
 
 if __name__ == "__main__":
     test_setup = "testSetupFiles/properFabric.yaml"

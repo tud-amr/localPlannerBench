@@ -17,13 +17,16 @@ set grid
 
 q0 = 3
 q1 = 8
+goal_x = 15
+goal_y = 16
 
 obst_list=system("ls -1B ".resFolder."/obst_*")
 
-plot inFile using q0:q1 with lines lw 2 notitle, \
+plot inFile using goal_x:goal_y with lines lt rgb "#CFFFCF" lw 10 title "goal trajectory", \
+  inFile using q0:q1 with lines lc rgb "violet" lw 2 notitle, \
   for [file in obst_list] file w lines lc rgb "black" lw 20 notitle, \
-  goalFile using 1:2 with points pointsize 5 pointtype 14 lc rgb "red" title "goal", \
   initStateFile using 1:2 with points lc rgb "green" title "initial State", \
+  inFile every 1000::::3000 using goal_x:goal_y with points pointsize 3 pointtype 14 lc rgb 'red' title "final goal"
 
 print "Done creating trajectory plot, saved to"
 print outFile

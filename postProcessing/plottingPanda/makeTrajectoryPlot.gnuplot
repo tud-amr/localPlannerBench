@@ -21,7 +21,6 @@ ee_z = ARG4+1
 goal_x = ARG5+1
 goal_y = ARG6+1
 goal_z = ARG7+1
-n = 5
 obst_list=system("ls -1B ".resFolder."/obst_*")
 
 plot inFile using 1:goal_x with lines lt rgb "#FFCECF" lw 8 title 'goal_x', \

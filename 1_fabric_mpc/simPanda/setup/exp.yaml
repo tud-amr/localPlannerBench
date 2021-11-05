@@ -1,4 +1,4 @@
-T: 2000
+T: 5000
 dt: 0.01
 env: panda-reacher-acc-v0
 robot_type: panda
@@ -26,6 +26,8 @@ goal:
       - 0.7
       - 0.3
       - 1.3
+    type: static
+    dynamic : False
 # subgoal2:
 #   prime: False
 #   m: 1

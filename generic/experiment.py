@@ -2,6 +2,7 @@ import yaml
 import csv
 import gym
 import numpy as np
+import casadi as ca
 
 import pointRobot
 import pandaReacher
@@ -49,6 +50,7 @@ class Experiment(object):
             self._setup = yaml.safe_load(setupStream)
         self.checkCompleteness()
         self._motionPlanningGoal = MotionPlanningGoal((self._setup["goal"]))
+        self._dynamic = self._motionPlanningGoal.dynamic()
         self._obstacles = []
         if self._setup["obstacles"]:
             for obst in self._setup["obstacles"]:
@@ -56,6 +58,9 @@ class Experiment(object):
                 self._obstacles.append(
                     Obstacle([float(xi) for xi in obstData["x"]], obstData["r"])
                 )
+
+    def dynamic(self):
+        return self._dynamic
 
     def selfCollisionPairs(self):
         return self._setup["selfCollision"]["pairs"]
@@ -65,6 +70,9 @@ class Experiment(object):
 
     def fk(self, q, n, positionOnly=False):
         return self._fk.getFk(q, n, positionOnly=positionOnly)
+
+    def evaluate(self, t):
+        return self._motionPlanningGoal.evaluate(t)
 
     def robotType(self):
         return self._setup["robot_type"]
@@ -102,8 +110,17 @@ class Experiment(object):
     def goal(self):
         return self._motionPlanningGoal
 
-    def primeGoal(self):
-        return self._motionPlanningGoal.primeGoal()
+    def primeGoal(self, **kwargs):
+        if 't' in kwargs:
+            return self._motionPlanningGoal.evaluatePrimeGoal(kwargs.get('t'))
+        else:
+            return self._motionPlanningGoal.primeGoal()
+
+    def evaluatePrimeGoal(self, t):
+        return self._motionPlanningGoal.evaluatePrimeGoal(t)
+
+    def getDynamicGoals(self):
+        return self._motionPlanningGoal.dynamicGoals()
 
     def env(self, render=False):
         return gym.make(self.envName(), render=render, n=self.n(), dt=self.dt())
@@ -158,7 +175,7 @@ class Experiment(object):
                 dist_initState = np.linalg.norm(np.array(o.x()) - fk)
                 if dist_initState < (o.r() + self.rBody()):
                     raise ExperimentInfeasible("Initial configuration in collision")
-            if len(self.primeGoal()) == len(o.x()):
+            if len(self.primeGoal()) == len(o.x()) and isinstance(self.primeGoal(), np.ndarray):
                 dist_goal = np.linalg.norm(np.array(o.x()) - self.primeGoal())
                 if dist_goal < (o.r() + self.rBody()):
                     raise ExperimentInfeasible("Goal in collision")
@@ -169,7 +186,6 @@ class Experiment(object):
                     fk2 = self.fk(self.initState()[0], j, positionOnly=True)
                     dist_initState = np.linalg.norm(fk1 - fk2)
                     if dist_initState < (2 * self.rBody()):
-                        __import__("pdb").set_trace()
                         raise ExperimentInfeasible(
                             "Initial configuration in self collision"
                         )
@@ -192,12 +208,3 @@ class Experiment(object):
             csv_writer = csv.writer(file, delimiter=",")
             csv_writer.writerow(self.initState()[0])
 
-
-if __name__ == "__main__":
-    setupFile = "testSetupFiles/test_setup.yaml"
-    exp = Experiment(setupFile)
-    gymEnv = exp.env()
-    q0, q0dot = exp.initState()
-    gymEnv.reset(q0, q0dot)
-    gymEnv.render()
-    input("Press enter to end")
