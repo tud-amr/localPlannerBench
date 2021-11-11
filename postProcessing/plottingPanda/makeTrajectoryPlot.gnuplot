@@ -15,20 +15,20 @@ set grid
 set xlabel "time[s]"
 set ylabel "x_{ee}[m]"
 
-ee_x = ARG2+1
-ee_y = ARG3+1
-ee_z = ARG4+1
-goal_x = ARG5+1
-goal_y = ARG6+1
-goal_z = ARG7+1
+ee_x = "fk7_x"
+ee_y = "fk7_y"
+ee_z = "fk7_z"
+goal_x = "goal_0_0"
+goal_y = "goal_1_0"
+goal_z = "goal_2_0"
 obst_list=system("ls -1B ".resFolder."/obst_*")
 
-plot inFile using 1:goal_x with lines lt rgb "#FFCECF" lw 8 title 'goal_x', \
-  inFile using 1:goal_y with lines lt rgb "#CFFFCF"lw 8 title 'goal_y', \
-  inFile using 1:goal_z with lines lt rgb "#CFD1FF" lw 8 title 'goal_z', \
-  inFile using 1:ee_x with lines lt rgb "red" lw 2 title 'x_{1}', \
-  inFile using 1:ee_y with lines lt rgb "green" lw 2  title 'x_{2}', \
-  inFile using 1:ee_z with lines lt rgb "blue" lw 2 title 'x_{3}'
+plot inFile using 1:goal_x with lines lt rgb "#FFCECF" lw 8 title 'goal_0', \
+  inFile using 1:goal_y with lines lt rgb "#CFFFCF"lw 8 title 'goal_1', \
+  inFile using 1:goal_z with lines lt rgb "#CFD1FF" lw 8 title 'goal_2', \
+  inFile using 1:ee_x with lines lt rgb "red" lw 2 title 'x_{0}', \
+  inFile using 1:ee_y with lines lt rgb "green" lw 2  title 'x_{1}', \
+  inFile using 1:ee_z with lines lt rgb "blue" lw 2 title 'x_{2}'
 
 print "Done creating trajectory plot, saved to"
 print outFile

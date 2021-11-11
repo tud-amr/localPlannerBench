@@ -100,6 +100,24 @@ class ClearanceMetric(Metric):
         return {"short": float(min(minDistances)), "allMinDist": distanceToObsts}
 
 
+class DynamicClearanceMetric(Metric):
+    def computeMetric(self, data):
+        m = self._params['m']
+        r_body = self._params['r_body']
+        r_obst = self._params['r_obst']
+        fks = np.stack([data[name] for name in self._measNames[:m]]).T
+        obst = np.stack([data[name] for name in self._measNames[m:2*m]]).T
+        t = np.array(data[self._measNames[-1]])
+        distances = computeDistances(fks, obst) - r_body - r_obst
+        index = np.argmin(distances)
+        return {
+            "short": float(min(distances)),
+            "time of minimal clearance": float(t[index]), 
+            "Obstacle at": [float(x) for x in obst[index]], 
+            "Robot at": [float(x) for x in fks[index]], 
+        }
+
+
 class SelfClearanceMetric(Metric):
     def computeMetric(self, data):
         m = self._params["m"]

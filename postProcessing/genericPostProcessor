@@ -18,6 +18,7 @@ from metrics import (
     MinimumDistanceToPointMetric,
     TimeToReachGoalMetric,
     ClearanceMetric,
+    DynamicClearanceMetric,
     SelfClearanceMetric,
     SolverTimesMetric,
     PathLengthMetric,
@@ -59,6 +60,15 @@ class PostProcessor(object):
         self._parser.set_defaults(plot=False)
         self._parser.add_argument("--verbose", dest="verbose", action="store_true")
         self._parser.set_defaults(verbose=False)
+        self._parser.add_argument("--no-open", dest="openFile", action="store_false")
+        self._parser.set_defaults(openFile=True)
+        self._parser.add_argument(
+            "--kpis", "-k",
+            type=str,
+            nargs="+",
+            help="List of all kpis/metrics to be evaluated",
+            required=True
+        )
 
     def importData(self):
         self.convertDataPoints(csvToRawData(self._expFolder + "/res.csv"))
@@ -84,6 +94,8 @@ class PostProcessor(object):
         self._series = args.series
         self._plot = args.plot
         self._verbose = args.verbose
+        self._open = args.openFile
+        self._kpis = args.kpis
 
     def processHeader(self, header):
         headerDict = {}
@@ -100,24 +112,22 @@ class PostProcessor(object):
                 [float(rawdata[i][headerDict[name]]) for i in range(1, nbPoints)]
             )
 
-    def evaluateMetric(self, metric):
-        return metric.computeMetric(self._data)
-
-    def addMetric(self, metric):
-        self._metrices.append(metric)
+    def evaluateMetric(self, metricName):
+        return self._metrics[metricName].computeMetric(self._data)
 
     def defineMetricesPointMass(self):
-        timeToReachGoalMetric = TimeToReachGoalMetric(
+        self._metrics = {}
+        self._metrics['time2Goal'] = TimeToReachGoalMetric(
             "time2Goal",
             ["q0", "q1", "goal_0_0", "goal_1_0", "t"],
             {"m": 2, "des_distance": 0.1},
         )
-        integratedErrorMetric = IntegratedErrorMetric(
+        self._metrics['integratedError'] = IntegratedErrorMetric(
             "integratedError",
             ["q0", "q1", "goal_0_0", "goal_1_0", "t"],
             {"m": 2, "des_distance": 0.1},
         )
-        clearanceMetric = ClearanceMetric(
+        self._metrics['clearance'] = ClearanceMetric(
             "clearance",
             ["q0", "q1"],
             {
@@ -127,18 +137,22 @@ class PostProcessor(object):
                 "r_body": self._experiment.rBody(),
             },
         )
-        solverTimesMetric = SolverTimesMetric(
-            "solvertime", ["t_planning"], {"interval": self._planner.interval()}
+        self._metrics['dynamicClearance'] = DynamicClearanceMetric(
+            "clearance", 
+            ['q0', 'q1', 'obst_0_0', 'obst_1_0', 't'],
+            {
+                'r_body': self._experiment.rBody(),
+                'r_obst': self._experiment.obstacles()[0].r(), 
+                'm': 2
+            }
         )
-        pathLengthMetric = PathLengthMetric("pathLength", ["q0", "q1"], {})
-        self._metrices = []
-        self.addMetric(clearanceMetric)
-        self.addMetric(timeToReachGoalMetric)
-        self.addMetric(solverTimesMetric)
-        self.addMetric(pathLengthMetric)
-        self.addMetric(integratedErrorMetric)
+        self._metrics['solverTime'] = SolverTimesMetric(
+            "solverTime", ["t_planning"], {"interval": self._planner.interval()}
+        )
+        self._metrics['pathLength'] = PathLengthMetric("pathLength", ["q0", "q1"], {})
 
     def defineMetricesPlanarArm(self):
+        self._metrics = {}
         n = self._experiment.n()
         m = 2
         fksNames = []
@@ -146,17 +160,17 @@ class PostProcessor(object):
             fksNames.append("fk" + str(i) + "_x")
             fksNames.append("fk" + str(i) + "_y")
         fkNames = ["fk" + str(n) + "_x", "fk" + str(n) + "_y"]
-        timeToReachGoalMetric = TimeToReachGoalMetric(
+        self._metrics['time2Goal'] = TimeToReachGoalMetric(
             "time2Goal",
             fkNames + ['goal_0_0', 'goal_1_0', "t"],
             {"m": 2, "des_distance": 0.1},
         )
-        integratedErrorMetric = IntegratedErrorMetric(
+        self._metrics['integratedError'] = IntegratedErrorMetric(
             "integratedError",
             fkNames + ["goal_0_0", "goal_1_0", "t"],
             {"m": 2, "des_distance": 0.1},
         )
-        clearanceMetric = ClearanceMetric(
+        self._metrics['clearance'] = ClearanceMetric(
             "clearance",
             fksNames,
             {
@@ -166,7 +180,16 @@ class PostProcessor(object):
                 "r_body": self._experiment.rBody(),
             },
         )
-        selfClearanceMetric = SelfClearanceMetric(
+        self._metrics['dynamicClearance'] = DynamicClearanceMetric(
+            "clearance", 
+            fksNames + ['obst_0_0', 'obst_1_0', 't'],
+            {
+                'r_body': self._experiment.rBody(),
+                'r_obst': self._experiment.obstacles()[0].r(), 
+                'm': 2
+            }
+        )
+        self._metrics['selfClearance'] = SelfClearanceMetric(
             "selfClearance",
             ["fk0_x", "fk0_y"] + fksNames,
             {
@@ -175,19 +198,13 @@ class PostProcessor(object):
                 "r_body": self._experiment.rBody(),
                 "pairs": self._experiment.selfCollisionPairs()}
         )
-        solverTimesMetric = SolverTimesMetric(
-            "solvertime", ["t_planning"], {"interval": self._planner.interval()}
+        self._metrics['solverTime'] = SolverTimesMetric(
+            "solverTime", ["t_planning"], {"interval": self._planner.interval()}
         )
-        pathLengthMetric = PathLengthMetric("pathLength", fkNames, {})
-        self._metrices = []
-        self.addMetric(clearanceMetric)
-        self.addMetric(timeToReachGoalMetric)
-        self.addMetric(integratedErrorMetric)
-        self.addMetric(solverTimesMetric)
-        self.addMetric(pathLengthMetric)
-        self.addMetric(selfClearanceMetric)
+        self._metrics['pathLength'] = PathLengthMetric("pathLength", fkNames, {})
 
     def defineMetricesPanda(self):
+        self._metrics = {}
         n = self._experiment.n()
         m = 3
         fksNames = []
@@ -196,12 +213,17 @@ class PostProcessor(object):
             fksNames.append("fk" + str(i) + "_y")
             fksNames.append("fk" + str(i) + "_z")
         fkNames = ["fk" + str(n) + "_x", "fk" + str(n) + "_y", "fk" + str(n) + "_z"]
-        timeToReachGoalMetric = TimeToReachGoalMetric(
+        self._metrics['time2Goal'] = TimeToReachGoalMetric(
             "time2Goal",
             fkNames + ['goal_0_0', 'goal_1_0', 'goal_2_0', "t"],
             {"m": 3, "des_distance": 0.1},
         )
-        clearanceMetric = ClearanceMetric(
+        self._metrics['integratedError'] = IntegratedErrorMetric(
+            "integratedError",
+            fkNames + ["goal_0_0", "goal_1_0", 'goal_2_0', "t"],
+            {"m": 3, "des_distance": 0.1},
+        )
+        self._metrics['clearance'] = ClearanceMetric(
             "clearance",
             fksNames,
             {
@@ -211,7 +233,7 @@ class PostProcessor(object):
                 "r_body": self._experiment.rBody(),
             },
         )
-        selfClearanceMetric = SelfClearanceMetric(
+        self._metrics['selfClearance'] = SelfClearanceMetric(
             "selfClearance",
             ["fk0_x", "fk0_y", "fk0_z"] + fksNames,
             {
@@ -221,20 +243,14 @@ class PostProcessor(object):
                 "pairs": self._experiment.selfCollisionPairs(),
             },
         )
-        solverTimesMetric = SolverTimesMetric(
-            "solvertime", ["t_planning"], {"interval": self._planner.interval()}
+        self._metrics['solverTime'] = SolverTimesMetric(
+            "solverTime", ["t_planning"], {"interval": self._planner.interval()}
         )
-        pathLengthMetric = PathLengthMetric("pathLength", fkNames, {})
-        self._metrices = []
-        self.addMetric(clearanceMetric)
-        self.addMetric(timeToReachGoalMetric)
-        self.addMetric(solverTimesMetric)
-        self.addMetric(pathLengthMetric)
-        self.addMetric(selfClearanceMetric)
+        self._metrics['pathLength'] = PathLengthMetric("pathLength", fkNames, {})
 
     def evaluate(self):
         if self._series:
-            self.seriesEvaluate(['solvertime', 'integratedError', 'clearance'])
+            self.seriesEvaluate(self._kpis)
         else:
             self.singleEvaluate()
 
@@ -281,7 +297,7 @@ class PostProcessor(object):
             if planner1Success and planner2Success:
                 planner1Matrix.append(planner1Kpis[timeStamp][1:])
                 planner2Matrix.append(planner2Kpis[timeStamp][1:])
-        results = np.array(planner1Matrix) / np.array(planner2Matrix)
+        results = np.array(planner2Matrix) / np.array(planner1Matrix)
         resultDict = {}
         for i, kpiName in enumerate(kpiNames):
             resultDict[kpiName] = list(results[:, i])
@@ -295,9 +311,8 @@ class PostProcessor(object):
         print("Evaluating experiment %s" % self._expFolder)
         self.importData()
         self._evaluations = {}
-        for metric in self._metrices:
-            res = metric.computeMetric(self._data)
-            self._evaluations[metric._name] = res
+        for kpi in self._kpis:
+            self._evaluations[kpi] = self.evaluateMetric(kpi)
         if self._verbose:
             pprint.pprint(self._evaluations)
         if self._plot:
@@ -313,18 +328,25 @@ class PostProcessor(object):
         return [success] + [self._evaluations[kpiName]['short'] for kpiName in kpiNames]
 
     def evaluateSuccess(self):
-        if "selfClearance" in self._evaluations.keys():
-            minClearance = min(
-                self._evaluations["clearance"]["short"],
-                self._evaluations["selfClearance"]["short"],
-            )
+        clearanceKeys = ['selfClearance', 'clearance', 'dynamicClearance']
+        minClearance = 10
+        clearanceChecked = False
+        for clearanceKey in clearanceKeys:
+            if clearanceKey in self._evaluations.keys():
+                minClearance = min(minClearance, self._evaluations[clearanceKey]['short'])
+                clearanceChecked = True
+        if not clearanceChecked:
+            import warnings
+            warnings.warn("No clearance metric set")
+        if 'time2Goal' in self._evaluations.keys():
+            reachingFlag = self._evaluations["time2Goal"]['flag']
         else:
-            minClearance = self._evaluations["clearance"]["short"]
-        reachingFlag = self._evaluations["time2Goal"]['flag']
+            print("INFO: Not evaluating whether the goal was reached.")
+            reachingFlag = 0
         successMetric = SuccessMetric(
             "success", [], {"minClearance": minClearance, "reachingFlag": reachingFlag},
         )
-        self._evaluations["success"] = self.evaluateMetric(successMetric)
+        self._evaluations["success"] = successMetric.computeMetric(self._data)
 
     def writeSeriesResult(self, seriesRes, resultDict, feasibility, success):
         postProcessFile = self._expFolder + "/postProcess.yaml"
@@ -359,7 +381,12 @@ class PostProcessor(object):
         if self._experiment.robotType() == "planarArm":
             createPlotFolder = curPath + "plottingPlanarArm"
             subprocess.Popen(
-                ["./createPlot", self._expFolder, str(self._experiment.n())],
+                [
+                    "./createPlot",
+                    self._expFolder,
+                    str(self._experiment.n()),
+                    str(int(self._experiment.hasDynamicObstacles()))
+                ],
                 cwd=createPlotFolder,
                 stdout=subprocess.PIPE,
             )
@@ -390,7 +417,8 @@ class PostProcessor(object):
         )
 
     def open(self):
-        subprocess.Popen(["xdg-open", self._expFolder], stdout=subprocess.PIPE)
+        if self._open:
+            subprocess.Popen(["xdg-open", self._expFolder], stdout=subprocess.PIPE)
 
 
 if __name__ == "__main__":

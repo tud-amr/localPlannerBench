@@ -1,15 +1,11 @@
 #!/bin/bash
 abspath=`realpath "$0"`
 plotFolder="${abspath/\/createPlot/}"
-resFile=$1
+resFolder=$1
 n=$2
-resPlotFolder="$resFile/plots"
+dynamicObstFlag=$3
+resPlotFolder="$resFolder/plots"
 mkdir -p $resPlotFolder
-IFS="," read -r -a fks <<< $("$plotFolder/extractFks" $resFile "${resFile}/fk" $n)
-fks_x=${fks[0]}
-fks_y=${fks[1]}
-goal_x=${fks[2]}
-goal_y=${fks[3]}
+. "$plotFolder/extractFks" $resFolder "${resFolder}/fk" $n
 pathToMakeTrajectoryPlot="$plotFolder/makeTrajectoryPlot.gnuplot"
-echo $pathToMakeTrajectoryPlot
-gnuplot -c "$plotFolder/makeTrajectoryPlot.gnuplot" $resFile $fks_x $fks_y $n $goal_x $goal_y
+gnuplot -c "$plotFolder/makeTrajectoryPlot.gnuplot" $resFolder $n $dynamicObstFlag
