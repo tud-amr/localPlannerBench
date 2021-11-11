@@ -61,6 +61,8 @@ Beside the obvious, some things need to be changed/added?
   -  Note: the issue is really: What happens if a constraints is violated at some point?
 * [x] Correction self collision with mpc for planar robots (body 0 must be avoided)
 * [x] Add self collision clearenc to clearenc metric
+* [ ] Display moving obstacles in plots?
+  - [ ] How to store the information of moving obstacles in result folder?
 
 ## Metrics
 
@@ -90,8 +92,8 @@ Local motion planning are assessed based on
 | Expermient | PointMass | PlanarArm | Panda | RealPanda | Albert |
 | -----------|---------|---------|-----|---------|------|
 | mpc vs fabric | [x] | [x] | [x] | [ ] | [ ]|
-| static vs dynamic| [x] | [x] | [ ] | [ ] | [ ]|
-| moving obstacles | [ ] | [ ] | [ ] | [ ] | [ ]|
+| static vs dynamic| [x] | [x] | [x] | [ ] | [ ]|
+| moving obstacles | [x] | [ ] | [ ] | [ ] | [ ]|
 | non holonomic | [ ] | [ ] | [ ] | [ ] | [ ]|
 | dual arm | [ ] | [ ] | [ ] | [ ] | [ ]|
 

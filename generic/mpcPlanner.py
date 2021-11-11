@@ -10,7 +10,7 @@ from fabricsExperiments.generic.mpc.parameterMap import getParameterMap
 from fabricsExperiments.generic.mpc.createMPCSolver import eval_ineq, eval_obj
 import fabricsExperiments
 
-from obstacle import Obstacle
+from obstacle import Obstacle, RefDynamicObstacle
 
 path_name = (
     os.path.dirname(os.path.realpath(fabricsExperiments.__file__))
@@ -24,7 +24,7 @@ class MPCPlanner(AbstractPlanner):
         required_keys = ["type", "n", "obst", "weights", "interval", "H", "dt"]
         super().__init__(exp, setupFile, required_keys)
         self._paramMap, self._npar, self._nx, self._nu, self._ns = getParameterMap(
-            self.n(), self.m(), self.nbObstacles(), self.m()
+            self.n(), self.m(), self.nbObstacles(), self.m(), self.useSlack()
         )
         dt_str = str(self.dt()).replace(".", "")
         self._solverFile = (
@@ -37,6 +37,8 @@ class MPCPlanner(AbstractPlanner):
             + "_H"
             + str(self.H())
         )
+        if not self.useSlack():
+            self._solverFile += "_noSlack"
         try:
             print("Loading solver %s" % self._solverFile)
             self._solver = forcespro.nlp.Solver.from_directory(self._solverFile)
@@ -48,7 +50,8 @@ class MPCPlanner(AbstractPlanner):
         print("RESETTING PLANNER")
         self._x0 = np.zeros(shape=(self.H(), self._nx + self._nu + self._ns))
         self._xinit = np.zeros(self._nx)
-        self._slack = 0.0
+        if self.useSlack():
+            self._slack = 0.0
         self._x0[-1, -1] = 0.1
         self._params = np.zeros(shape=(self._npar * self.H()), dtype=float)
         for i in range(self.H()):
@@ -61,9 +64,10 @@ class MPCPlanner(AbstractPlanner):
             self._params[
                 [self._npar * i + val for val in self._paramMap["wu"]]
             ] = self.weights()["wu"]
-            self._params[
-                [self._npar * i + val for val in self._paramMap["ws"]]
-            ] = self.weights()["ws"]
+            if self.useSlack():
+                self._params[
+                    [self._npar * i + val for val in self._paramMap["ws"]]
+                ] = self.weights()["ws"]
 
     def m(self):
         if self._exp.robotType() == 'panda':
@@ -74,6 +78,12 @@ class MPCPlanner(AbstractPlanner):
     def interval(self):
         return self._setup["interval"]
 
+    def useSlack(self):
+        if 'slack' in self._setup.keys():
+            return self._setup['slack']
+        else:
+            return True
+
     def n(self):
         return self._setup["n"]
 
@@ -83,6 +93,12 @@ class MPCPlanner(AbstractPlanner):
     def dt(self):
         return self._setup["dt"]
 
+    def dynamic(self):
+        if 'dynamic' in self._setup.keys():
+            return self._setup['dynamic']
+        else:
+            return False
+
     def weights(self):
         return self._setup["weights"]
 
@@ -90,6 +106,7 @@ class MPCPlanner(AbstractPlanner):
         return self._setup["obst"]["nbObst"]
 
     def setObstacles(self, obsts, r_body):
+        self._r = obsts[0].r()
         for i in range(self.H()):
             self._params[self._npar * i + self._paramMap["r_body"][0]] = r_body
             for j in range(self.nbObstacles()):
@@ -100,6 +117,26 @@ class MPCPlanner(AbstractPlanner):
                 for m_i in range(self.m()):
                     paramsIndexObstX = self._npar * i + self._paramMap['obst'][j * (self.m() + 1) + m_i]
                     self._params[paramsIndexObstX] = obst.x()[m_i]
+                paramsIndexObstR = self._npar * i + self._paramMap['obst'][j * (self.m() + 1) + self.m()]
+                self._params[paramsIndexObstR] = obst.r()
+
+    def updateDynamicObstacles(self, obstArray):
+        r = self._r
+        nbDynamicObsts = int(obstArray.size / 3 / self.m())
+        for j in range(self.nbObstacles()):
+            if j < nbDynamicObsts:
+                obst = Obstacle(obstArray[0:self.m()], r)
+                obstVel = obstArray[self.m():2*self.m()]
+                obstAcc = obstArray[2*self.m():3*self.m()]
+            else:
+                obst = Obstacle(np.ones(self.m()) * -100, -1.0)
+                obstVel = np.zeros(self.m())
+                obstAcc = np.zeros(self.m())
+            for i in range(self.H()):
+                for m_i in range(self.m()):
+                    paramsIndexObstX = self._npar * i + self._paramMap['obst'][j * (self.m() + 1) + m_i]
+                    predictedPosition = obst.x()[m_i] + obstVel[m_i] * self.dt() * i + 0.5 * (self.dt() * i)**2 * obstAcc[m_i]
+                    self._params[paramsIndexObstX] = predictedPosition
                 paramsIndexObstR = self._npar * i + self._paramMap['obst'][j * (self.m() + 1) + self.m()]
                 self._params[paramsIndexObstR] = obst.r()
 
@@ -130,7 +167,10 @@ class MPCPlanner(AbstractPlanner):
 
     def shiftHorizon(self, output, ob):
         for key in output.keys():
-            stage = int(key[-2:])
+            if self.H() > 99:
+                stage = int(key[-3:])
+            else:
+                stage = int(key[-2:])
             if stage == 1:
                 continue
             self._x0[stage - 2, 0 : len(output[key])] = output[key]
@@ -142,6 +182,8 @@ class MPCPlanner(AbstractPlanner):
     def solve(self, ob):
         # print("Observation : " , ob[0:self._nx])
         self._xinit = ob[0 : self._nx]
+        if ob.size > self._nx:
+            self.updateDynamicObstacles(ob[self._nx:])
         action = np.zeros(self._nu)
         problem = {}
         # problem["ToleranceStationarity"] = 1e-7
@@ -159,7 +201,10 @@ class MPCPlanner(AbstractPlanner):
         debug = False
         if debug:
             nbPar = int(len(self._params)/self.H())
-            z = np.concatenate((self._xinit, np.array([self._slack])))
+            if self.useSlack():
+                z = np.concatenate((self._xinit, np.array([self._slack])))
+            else:
+                z = self._xinit
             p = self._params[0:nbPar]
             #J = eval_obj(z, p)
             ineq = eval_ineq(z, p)
@@ -176,10 +221,15 @@ class MPCPlanner(AbstractPlanner):
         output, exitflag, info = self._solver.solve(problem)
         if exitflag < 0:
             print(exitflag)
-        action = output["x01"][-self._nu :]
-        self._slack = output["x01"][self._nx]
-        if self._slack > 1e-3:
-            print("slack : ", self._slack)
+        if self.H() > 99:
+            key1 = 'x001'
+        else:
+            key1 = 'x01'
+        action = output[key1][-self._nu :]
+        if self.useSlack():
+            self._slack = output[key1][self._nx]
+            if self._slack > 1e-3:
+                print("slack : ", self._slack)
         # print('action : ', action)
         # print("prediction : ", output["x02"][0:self._nx])
         self.shiftHorizon(output, ob)
@@ -188,8 +238,8 @@ class MPCPlanner(AbstractPlanner):
     def concretize(self):
         self._actionCounter = self.interval()
 
-    def computeAction(self, q, qdot):
-        ob = np.concatenate((q, qdot))
+    def computeAction(self, *args):
+        ob = np.concatenate(args)
         if self._actionCounter >= self.interval():
             self._action, info = self.solve(ob)
             self._actionCounter = 1

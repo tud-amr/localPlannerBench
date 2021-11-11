@@ -20,8 +20,12 @@ from optFabrics.planner.default_geometries import (
 
 from optFabrics.diffGeometry.referenceTrajectory import AnalyticTrajectory
 
+from optFabrics.diffGeometry.diffMap import DifferentialMap, RelativeDifferentialMap
+
 from fabricsExperiments.generic.abstractPlanner import AbstractPlanner
 from fabricsExperiments.infrastructure.variables import t
+
+from obstacle import RefDynamicObstacle
 
 
 class FabricPlanner(AbstractPlanner):
@@ -83,14 +87,25 @@ class FabricPlanner(AbstractPlanner):
             x, xdot, exp=self.configObst()["exp"], lam=self.configObst()["lam"]
         )
         for i, obst in enumerate(obsts):
+            x_col = ca.SX.sym("x_col", 2)
+            xdot_col = ca.SX.sym("xdot_col", 2)
+            x_rel = ca.SX.sym("x_rel", 2)
+            xdot_rel = ca.SX.sym("xdot_rel", 2)
             for j in range(1, self.n() + 1):
                 if self._exp.robotType() == "pointMass" and j == 1:
                     continue
                 fk = self._exp.fk(self._q, j, positionOnly=True)
-                dm_col = CollisionMap(
-                    self._q, self._qdot, fk, obst.x(), obst.r(), r_body=r_body
-                )
-                self._planner.addGeometry(dm_col, lag_col, geo_col)
+                if isinstance(obst, RefDynamicObstacle):
+                    phi_n = ca.norm_2(x_rel) / obst.r() - 1
+                    dm_n = DifferentialMap(phi_n, q=x_rel, qdot=xdot_rel)
+                    dm_rel = RelativeDifferentialMap(q=x_col, qdot=xdot_col, refTraj = obst.refTraj())
+                    dm_col = DifferentialMap(fk, q=self._q, qdot=self._qdot)
+                    self._planner.addGeometry(dm_col, lag_col.pull(dm_n).pull(dm_rel), geo_col.pull(dm_n).pull(dm_rel))
+                else:
+                    dm_col = CollisionMap(
+                        self._q, self._qdot, fk, obst.x(), obst.r(), r_body=r_body
+                    )
+                    self._planner.addGeometry(dm_col, lag_col, geo_col)
 
     def setSelfCollisionAvoidance(self, r_body):
         if self._exp.robotType() == "pointMass":

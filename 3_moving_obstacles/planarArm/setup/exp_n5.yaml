@@ -1,4 +1,4 @@
-T: 2000
+T: 3000
 dt: 0.05
 env: nLink-reacher-acc-v0
 robot_type: planarArm
@@ -7,21 +7,15 @@ goal:
   subgoal1:
     prime: True
     m: 2
-    w: 5
+    w: 1
     indices:
       - 0
       - 1
     parent_link: 0
     child_link: 5
     desired_position:
-      - 0.7
-      - 1.7
-    low:
-      - -5.0
-      - -5.0
-    high: 
-      - 5.0
-      - 5.0
+      - 2.0
+      - 2.0
     type: static
     dynamic: False
 # subgoal2:
@@ -34,7 +28,6 @@ goal:
 #   child_link: 5
 #   desired_position:
 #     - 0.0
-#   type: static
 # subgoal3:
 #   prime: False
 #   m: 1
@@ -61,7 +54,7 @@ initState:
     - 0.0
     - -1.57
     - 0.0
-    - 0.0
+    - -1.57
   q0dot:
     - 0.0
     - 0.0
@@ -70,24 +63,25 @@ initState:
     - 0.0
 limits:
   low: 
-    - -3.14
-    - -2.0
-    - -2.0
-    - -2.0
-    - -2.0
+    - -200
+    - -200
+    - -200
+    - -200
+    - -200
   high: 
-    - 3.14
-    - 2.0
-    - 2.0
-    - 2.0
-    - 2.0
-r_body: 0.51
+    - 200
+    - 200
+    - 200
+    - 200
+    - 200
+r_body: 0.10
 obstacles:
   obst1:
-    x:
-      - -1.0
-      - -1.0
+    trajFun:
+      - "2.0 + 1.0 * ca.cos(0.1 * t)"
+      - "0.0"
     r: 0.5
+    dynamic: True
 randomObstacles:
   number: 5
   limits:
@@ -96,7 +90,7 @@ randomObstacles:
         - -5.0
         - -5.0
       high:
-        - 5.0
+        - -3.0
         - 5.0
     r:
       low: 0.0
@@ -112,7 +106,6 @@ selfCollision:
     - [1, 5]
     - [2, 4]
     - [2, 5]
-    - [3, 5]
-
+  
     
 

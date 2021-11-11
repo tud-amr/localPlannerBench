@@ -93,7 +93,6 @@ class Runner(object):
         print("start run")
         completedRuns = 0
         while completedRuns < self._numberRuns:
-            time.sleep(1)
             self._experiment.shuffle(self._random_obst, self._random_init, self._random_goal)
             try:
                 self._experiment.checkFeasibility(checkGoalReachible=False)
@@ -101,7 +100,10 @@ class Runner(object):
             except ExperimentInfeasible as e:
                 print("Case not feasible %s" % str(e))
                 continue
+            print("Composing the planner")
+            t0 = time.time()
             self.setPlanner()
+            print("Finished composing the planner in %1.4f secs" % (time.time() - t0))
             q0, q0dot = self._experiment.initState()
             timeStamp = "{:%Y%m%d_%H%M%S}".format(datetime.datetime.now())
             for planner in self._planners:
@@ -112,6 +114,8 @@ class Runner(object):
                 saver.setSetups(self._experiment, planner)
                 t = 0.0
                 for i in range(self._experiment.T()):
+                    if i % 1000 == 0:
+                        print("Timestep : %d" %i)
                     q = ob[0:self._experiment.n()]
                     qdot = ob[self._experiment.n():2*self._experiment.n()]
                     t_before = time.time()
@@ -126,7 +130,8 @@ class Runner(object):
                     action = planner.computeAction(*observation)
                     solving_time = time.time() - t_before
                     primeGoal = self._experiment.evaluatePrimeGoal(t)
-                    saver.addResultPoint(t, q, qdot, solving_time, primeGoal)
+                    obsts = self._experiment.evaluateObstacles(t)
+                    saver.addResultPoint(t, q, qdot, solving_time, primeGoal, obsts)
                     ob, _, _, _ = self._env.step(action)
                     t += self._experiment.dt()
                 if self._save:

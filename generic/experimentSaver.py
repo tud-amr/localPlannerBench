@@ -13,7 +13,7 @@ class ExperimentSaver(object):
         self._exp = exp
         self._planner = planner
 
-    def addResultPoint(self, t, q, qdot, solving_time, goal):
+    def addResultPoint(self, t, q, qdot, solving_time, goal, obst):
         resDict = {'t': t, 't_planning': solving_time}
         for n_i in range(self._exp.n() + 1):
             if n_i < self._exp.n():
@@ -30,6 +30,9 @@ class ExperimentSaver(object):
         for i_der, goal_der in enumerate(goal):
             for j_dim, goal_dim in enumerate(goal_der):
                 resDict['goal_' + str(j_dim) + '_' + str(i_der)] = goal_dim
+        for i_der, obst_der in enumerate(obst):
+            for j_dim in range(obst_der.size):
+                resDict['obst_' + str(j_dim) + '_' + str(i_der)] = obst_der[j_dim]
         self._res.append(resDict)
 
     def saveResult(self, folderPath):

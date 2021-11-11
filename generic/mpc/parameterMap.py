@@ -1,5 +1,5 @@
 
-def getParameterMap(n, m, nbObst, mObst):
+def getParameterMap(n, m, nbObst, mObst, slack):
     pm = {}
     pm['wu'] = list(range(0, n))
     nPar = n
@@ -7,8 +7,9 @@ def getParameterMap(n, m, nbObst, mObst):
     nPar += n
     pm['w'] = list(range(nPar, nPar + m))
     nPar += m
-    pm['ws'] = list(range(nPar, nPar + 1))
-    nPar += 1
+    if slack:
+        pm['ws'] = list(range(nPar, nPar + 1))
+        nPar += 1
     pm['g'] = list(range(nPar, nPar + m))
     nPar += m
     pm['obst'] = list(range(nPar, nPar + (mObst+1) * nbObst))
@@ -21,5 +22,8 @@ def getParameterMap(n, m, nbObst, mObst):
     nPar += n
     nx = n * 2
     nu = n
-    ns = 1
+    if slack:
+        ns = 1
+    else:
+        ns = 0
     return pm, nPar, nx, nu, ns

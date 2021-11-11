@@ -65,7 +65,8 @@ class MotionPlanningGoal(object):
     def evaluate(self, t):
         evaluations = []
         for subGoal in self._subGoals:
-            evaluations += subGoal.evaluate(t)
+            if subGoal.dynamic():
+                evaluations += subGoal.evaluate(t)
         return evaluations
 
     def toCSV(self, folderPath):

@@ -9,9 +9,12 @@ import pandaReacher
 import nLinkReacher
 
 from casadiFk import ForwardKinematics
-from obstacle import Obstacle
+from obstacle import Obstacle, RefDynamicObstacle
 
 from fabricsExperiments.infrastructure.motionPlanningGoal import MotionPlanningGoal
+from fabricsExperiments.infrastructure.variables import t
+
+from optFabrics.diffGeometry.referenceTrajectory import AnalyticTrajectory
 
 
 class ExperimentIncompleteError(Exception):
@@ -51,16 +54,35 @@ class Experiment(object):
         self.checkCompleteness()
         self._motionPlanningGoal = MotionPlanningGoal((self._setup["goal"]))
         self._dynamic = self._motionPlanningGoal.dynamic()
+        self._dynamicObstacles = False
+        self.parseObstacles()
+
+    def parseObstacles(self):
         self._obstacles = []
         if self._setup["obstacles"]:
             for obst in self._setup["obstacles"]:
                 obstData = self._setup["obstacles"][obst]
-                self._obstacles.append(
-                    Obstacle([float(xi) for xi in obstData["x"]], obstData["r"])
-                )
+                if 'dynamic' not in obstData.keys() or not obstData['dynamic']:
+                    self._obstacles.append(
+                        Obstacle([float(xi) for xi in obstData["x"]], obstData["r"])
+                    )
+                else:
+                    self._dynamicObstacles = True
+                    trajFun = [eval(x) for x in obstData['trajFun']]
+                    m = len(obstData['trajFun'])
+                    refTraj = AnalyticTrajectory(
+                        m, ca.SX(np.identity(m)), traj=trajFun, t=t, name="goal"
+                    )
+                    refTraj.concretize()
+                    self._obstacles.append(
+                        RefDynamicObstacle(refTraj, obstData["r"], obstData['trajFun'])
+                    )
 
     def dynamic(self):
-        return self._dynamic
+        return (self._dynamic or self._dynamicObstacles)
+
+    def hasDynamicObstacles(self):
+        return self._dynamicObstacles
 
     def selfCollisionPairs(self):
         return self._setup["selfCollision"]["pairs"]
@@ -72,7 +94,15 @@ class Experiment(object):
         return self._fk.getFk(q, n, positionOnly=positionOnly)
 
     def evaluate(self, t):
-        return self._motionPlanningGoal.evaluate(t)
+        evalObsts = self.evaluateObstacles(t)
+        return self._motionPlanningGoal.evaluate(t) + evalObsts
+
+    def evaluateObstacles(self, t):
+        evals = []
+        for obst in self._obstacles:
+            if isinstance(obst, RefDynamicObstacle):
+                evals += obst.evaluate(t)
+        return evals
 
     def robotType(self):
         return self._setup["robot_type"]
@@ -128,7 +158,8 @@ class Experiment(object):
     def addScene(self, env):
         for obst in self._obstacles:
             env.addObstacle(pos=obst.x(), filename='sphere05red_nocol.urdf')
-        env.addObstacle(pos=self.primeGoal(), filename="sphere_goal.urdf")
+        if isinstance(self.primeGoal(), np.ndarray):
+            env.addObstacle(pos=self.primeGoal(), filename="sphere_goal.urdf")
 
     def shuffleInitConfiguration(self):
         q0_new = np.random.uniform(low=self.limits()[0], high=self.limits()[1])
@@ -199,7 +230,10 @@ class Experiment(object):
         initStateFilename = folderPath + "/initState.csv"
         for i, obst in enumerate(self._obstacles):
             obstsDict["obst" + str(i)] = obst.toDict()
-            obst.toCSV(obstFile + "_" + str(i) + ".csv")
+            if isinstance(obst, RefDynamicObstacle):
+                obst.toCSV(obstFile + "_" + str(i) + ".csv", self.T() * self.dt())
+            else:
+                obst.toCSV(obstFile + "_" + str(i) + ".csv")
         self._setup["obstacles"] = obstsDict
         with open(folderPath + "/exp.yaml", "w") as file:
             yaml.dump(self._setup, file)

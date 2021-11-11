@@ -12,12 +12,13 @@ from scipy.integrate import odeint
 from casadiFk import ForwardKinematics
 from fabricsExperiments.generic.mpc.parameterMap import getParameterMap
 
-n = 3
+slack = True
+n = 2
 m = 2
-dt = 0.5
+dt = 0.01
 nbObst = 5
 m_obst = 2
-robotType = "planarArm"
+robotType = "pointMass"
 pairs = []
 if robotType == 'panda':
     pairs = [
@@ -39,14 +40,17 @@ elif robotType == 'planarArm':
         for j in range(i+2, n+1):
             pairs.append([i, j])
 generic_fk = ForwardKinematics(robot_type=robotType)
-paramMap, npar, nx, nu, ns = getParameterMap(n, m, nbObst, m_obst)
+paramMap, npar, nx, nu, ns = getParameterMap(n, m, nbObst, m_obst, slack)
 N = 20
 dt_str = str(dt).replace(".", "")
 
 # file names
 dt_str = str(dt).replace(".", "")
 # TODO: How to define the path to the generated solver? <26-10-21, mspahn> #
-solverName = "solver_n" + str(n) + "_" + dt_str + "_H" + str(N)
+if slack:
+    solverName = "solver_n" + str(n) + "_" + dt_str + "_H" + str(N)
+else:
+    solverName = "solver_n" + str(n) + "_" + dt_str + "_H" + str(N) + "_noSlack"
 
 
 # MPC parameter
@@ -54,10 +58,14 @@ upper_lim = np.ones(n) * np.inf
 lower_lim = np.ones(n) * -np.inf
 limitVel = np.ones(n) * 4
 limitAcc = np.ones(n) * 1
-slack_upper = np.array([np.inf])
-slack_lower = np.array([0])
-xu = np.concatenate((upper_lim, limitVel, slack_upper))
-xl = np.concatenate((lower_lim, -limitVel, slack_lower))
+if slack:
+    slack_upper = np.array([np.inf])
+    slack_lower = np.array([0])
+    xu = np.concatenate((upper_lim, limitVel, slack_upper))
+    xl = np.concatenate((lower_lim, -limitVel, slack_lower))
+else:
+    xu = np.concatenate((upper_lim, limitVel))
+    xl = np.concatenate((lower_lim, -limitVel))
 uu = limitAcc
 ul = -uu
 
@@ -72,12 +80,10 @@ def diagSX(val, size):
 def eval_obj(z, p):
     q = z[0:n]
     qdot = z[n:nx]
-    slack = z[nx]
     qddot = z[nx + ns : ns + nx + nu]
     w = p[paramMap["w"]]
     wvel = p[paramMap["wvel"]]
     wu = p[paramMap["wu"]]
-    ws = p[paramMap["ws"]]
     g = p[paramMap["g"]]
     W = diagSX(w, m)
     Wvel = diagSX(wvel, n)
@@ -87,33 +93,43 @@ def eval_obj(z, p):
     Jx = ca.dot(err, ca.mtimes(W, err))
     Jvel = ca.dot(qdot, ca.mtimes(Wvel, qdot))
     Ju = ca.dot(qddot, ca.mtimes(Wu, qddot))
-    J = Jx + Jvel + ws * slack
+    if slack:
+        s = z[nx]
+        ws = p[paramMap["ws"]]
+        J = Jx + Jvel + ws * s
+    else:
+        J = Jx + Jvel
     return J
 
 
 def eval_objN(z, p):
     q = z[0:n]
     qdot = z[n:nx]
-    slack = z[nx]
     qddot = z[nx + ns : ns + nx + nu]
     w = p[paramMap["w"]]
     wvel = p[paramMap["wvel"]]
-    ws = p[paramMap["ws"]]
     g = p[paramMap["g"]]
     W = diagSX(w, m)
     Wvel = diagSX(wvel, n)
     fk = generic_fk.getFk(q, n, positionOnly=True)
     err = fk - g
     Jx = ca.dot(err, ca.mtimes(W, err))
-    Jvel = ca.dot(qdot, ca.mtimes(Wvel, qdot))
-    J = 1 * Jx + ws * slack
+    if slack:
+        s = z[nx]
+        ws = p[paramMap["ws"]]
+        J = Jx + ws * s
+    else:
+        J = Jx 
     return J
 
 
 def eval_ineq(z, p):
     q = z[0:n]
     qdot = z[n:nx]
-    slack = z[nx]
+    if slack:
+        s = z[nx]
+    else:
+        s = 0.0
     qddot = z[nx + ns : ns + nx + nu]
     obsts = p[paramMap["obst"]]
     r_body = p[paramMap["r_body"]]
@@ -125,13 +141,16 @@ def eval_ineq(z, p):
             x = obst[0:m_obst]
             r = obst[m_obst]
             dist = ca.norm_2(fk - x)
-            ineqs.append(dist - r - r_body + slack)
+            ineqs.append(dist - r - r_body + s)
     all_ineqs = ineqs + eval_jointLimits(z, p) + eval_selfCollision(z, p)
     return all_ineqs
 
 
 def eval_selfCollision(z, p):
-    slack = z[nx]
+    if slack:
+        s = z[nx]
+    else:
+        s = 0.0
     q = z[0:n]
     r_body = p[paramMap["r_body"]]
     ineqs = []
@@ -139,28 +158,31 @@ def eval_selfCollision(z, p):
         fk1 = generic_fk.getFk(q, pair[0], positionOnly=True)
         fk2 = generic_fk.getFk(q, pair[1], positionOnly=True)
         dist = ca.norm_2(fk1 - fk2)
-        ineqs.append(dist - (2 * r_body) + slack)
+        ineqs.append(dist - (2 * r_body) + s)
     return ineqs
 
 
 def eval_jointLimits(z, p):
     q = z[0:n]
-    slack = z[nx]
+    if slack:
+        s = z[nx]
+    else:
+        s = 0.0
     lower_limits = p[paramMap["lower_limits"]]
     upper_limits = p[paramMap["upper_limits"]]
     ineqs = []
     for j in range(n):
         dist_lower = q[j] - lower_limits[j]
         dist_upper = upper_limits[j] - q[j]
-        ineqs.append(dist_lower + slack)
-        ineqs.append(dist_upper + slack)
+        ineqs.append(dist_lower + s)
+        ineqs.append(dist_upper + s)
     return ineqs
 
 
 def continuous_dynamics(x, u):
     q = x[0:n]
     qdot = x[n:nx]
-    qddot = u[1 : n + 1]
+    qddot = u[ns : n + ns]
     acc = ca.vertcat(qdot, qddot)
     return acc
 

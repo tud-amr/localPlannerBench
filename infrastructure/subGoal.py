@@ -142,7 +142,7 @@ class SubGoal(object):
     def initializeAnalyticTrajectory(self):
         trajFun = [eval(x) for x in self._setup['desired_position']['trajFun']]
         self._desiredPosition = AnalyticTrajectory(
-            2, ca.SX(np.identity(2)), traj=trajFun, t=t, name="goal"
+            self.m(), ca.SX(np.identity(self.m())), traj=trajFun, t=t, name="goal"
         )
         self._desiredPosition.concretize()
 
