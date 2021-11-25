@@ -21,6 +21,7 @@ from optFabrics.planner.default_geometries import (
 from optFabrics.diffGeometry.referenceTrajectory import AnalyticTrajectory
 
 from optFabrics.diffGeometry.diffMap import DifferentialMap, RelativeDifferentialMap
+from optFabrics.diffGeometry.energized_geometry import WeightedGeometry
 
 from fabricsExperiments.generic.abstractPlanner import AbstractPlanner
 from fabricsExperiments.infrastructure.variables import t
@@ -46,7 +47,7 @@ class FabricPlanner(AbstractPlanner):
         self.reset()
 
     def reset(self):
-        self._planner = DefaultFabricPlanner(self.n(), m_base=self.mBase())
+        self._planner = DefaultFabricPlanner(self.n(), m_base=self.mBase(), debug=False)
         self._q, self._qdot = self._planner.var()
 
     def interval(self):
@@ -87,20 +88,28 @@ class FabricPlanner(AbstractPlanner):
             x, xdot, exp=self.configObst()["exp"], lam=self.configObst()["lam"]
         )
         for i, obst in enumerate(obsts):
-            x_col = ca.SX.sym("x_col", 2)
-            xdot_col = ca.SX.sym("xdot_col", 2)
-            x_rel = ca.SX.sym("x_rel", 2)
-            xdot_rel = ca.SX.sym("xdot_rel", 2)
+            if isinstance(obst.x(), np.ndarray):
+                m_obst = obst.x().size
+            else:
+                m_obst = len(obst.x())
+            x_col = ca.SX.sym("x_col", m_obst)
+            xdot_col = ca.SX.sym("xdot_col", m_obst)
+            x_rel = ca.SX.sym("x_rel", m_obst)
+            xdot_rel = ca.SX.sym("xdot_rel", m_obst)
             for j in range(1, self.n() + 1):
                 if self._exp.robotType() == "pointMass" and j == 1:
                     continue
                 fk = self._exp.fk(self._q, j, positionOnly=True)
                 if isinstance(obst, RefDynamicObstacle):
-                    phi_n = ca.norm_2(x_rel) / obst.r() - 1
+                    phi_n = ca.norm_2(x_rel) / (obst.r() + r_body) - 1
                     dm_n = DifferentialMap(phi_n, q=x_rel, qdot=xdot_rel)
                     dm_rel = RelativeDifferentialMap(q=x_col, qdot=xdot_col, refTraj = obst.refTraj())
                     dm_col = DifferentialMap(fk, q=self._q, qdot=self._qdot)
-                    self._planner.addGeometry(dm_col, lag_col.pull(dm_n).pull(dm_rel), geo_col.pull(dm_n).pull(dm_rel))
+                    eg = WeightedGeometry(g=geo_col, le=lag_col)
+                    eg_n = eg.pull(dm_n)
+                    eg_rel = eg_n.pull(dm_rel)
+                    self._planner.addWeightedGeometry(dm_col, eg_rel)
+                    #self._planner.addGeometry(dm_col, lag_col.pull(dm_n).pull(dm_rel), geo_col.pull(dm_n).pull(dm_rel))
                 else:
                     dm_col = CollisionMap(
                         self._q, self._qdot, fk, obst.x(), obst.r(), r_body=r_body
@@ -140,9 +149,12 @@ class FabricPlanner(AbstractPlanner):
 
     def setGoal(self, goal):
         for subGoal in goal.subGoals():
-            fk_child = self._exp.fk(self._q, subGoal.childLink())[subGoal.indices()]
-            fk_parent = self._exp.fk(self._q, subGoal.parentLink())[subGoal.indices()]
-            fk = fk_child - fk_parent
+            if subGoal.isJointSpaceGoal():
+                fk = self._q[subGoal.indices()]
+            else:
+                fk_child = self._exp.fk(self._q, subGoal.childLink(), positionOnly=True)[subGoal.indices()]
+                fk_parent = self._exp.fk(self._q, subGoal.parentLink(), positionOnly=True)[subGoal.indices()]
+                fk = fk_child - fk_parent
             if subGoal.dynamic():
                 refTraj = subGoal.trajectory()
                 dm_psi, lag_psi, geo_psi, x_psi, xdot_psi = defaultDynamicAttractor(
@@ -182,7 +194,50 @@ class FabricPlanner(AbstractPlanner):
         self._planner.concretize()
 
     def computeAction(self, *args):
-        return self._planner.computeAction(*args)
+        """
+        print("----")
+        print(args[0])
+        q = args[0]
+        qdot = args[1]
+        x_col, J_col, _ = self._dm_col.forward(q, qdot)
+        xdot_col = np.dot(J_col, qdot)
+        x_obst = args[2]
+        xdot_obst = args[3]
+        xddot_obst = args[4]
+        x_rel, xdot_rel = self._dm_rel.forward(x_col, xdot_col, x_obst, xdot_obst, xddot_obst)
+        x_n, J_n, Jdot_n = self._dm_n.forward(x_rel, xdot_rel)
+        xdot_n = np.dot(J_n, xdot_rel)
+        #print('fk : ', x_col)
+        #print("x_rel : ", x_rel)
+        #print("x_n : ", x_n)
+        #geoEval = self._geo_col.evaluate(x_n, xdot_n)
+        #print("h : ", geoEval[0])
+        #print("xddot_n : ", geoEval[1])
+        geoColEval = self._geo_col.evaluate(x_n, xdot_n)
+        print("col")
+        print(x_n)
+        print(geoColEval)
+        h_col = geoColEval[0]
+        Jt_n = np.transpose(J_n)
+        JtJ_inv = np.linalg.pinv(np.dot(Jt_n, J_n) + np.identity(3) * 1e-7)
+        h_rel =np.dot(JtJ_inv, -np.dot(Jt_n, np.dot(Jdot_n, xdot_rel)) + np.dot(Jt_n, h_col))
+        print("h_rel_man: ", h_rel)
+        geoRelEval = self._geo_rel.evaluate(x_rel, xdot_rel)
+        print("relative")
+        print(x_rel)
+        print(geoRelEval)
+        print("differential map")
+        #geoLeafEval = self._geo_leaf.evaluate(x_col, xdot_col, x_obst, xdot_obst, xddot_obst)
+        #print(x_col)
+        #print(geoLeafEval)
+        #lagRelEval = self._lag_rel.evaluate(x_col, xdot_col, x_obst, xdot_obst, xddot_obst)
+        #print(np.linalg.cond(lagRelEval[0]), lagRelEval[1], lagRelEval[2])
+        debugEval = self._planner.debugEval(*args)
+        #print(debugEval[:-1])
+        #print(np.linalg.cond(debugEval[-1]))
+        """
+        action = self._planner.computeAction(*args)
+        return action
 
 
 if __name__ == "__main__":

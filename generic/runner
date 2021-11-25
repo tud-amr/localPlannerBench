@@ -1,12 +1,14 @@
 #! /usr/bin/python3
 
 import argparse
+import subprocess
 import datetime
 import time
 import os
 import sys
 import warnings
 import numpy as np
+import signal
 
 from fabricsExperiments.generic.experiment import Experiment, ExperimentInfeasible
 from fabricsExperiments.generic.fabricPlanner import FabricPlanner
@@ -26,6 +28,13 @@ def enablePrint():
 class Runner(object):
     def __init__(self):
         self.initializeArgumentParser()
+        signal.signal(signal.SIGINT, self.handleStop)
+        self._aborted = False
+
+    def handleStop(self, signum, frame):
+        print("\n Stopping runner...")
+        self.stopEnvironment()
+        self._aborted = True
 
     def initializeArgumentParser(self):
         self._parser = argparse.ArgumentParser("Run motion planning experiment")
@@ -45,18 +54,22 @@ class Runner(object):
         self._parser.add_argument(
             "--numberRuns", "-n", type=int, default=1, help="Number of runs of the experiment"
         )
+        self._parser.add_argument("--ros", dest="ros", action="store_true")
         self._parser.add_argument("--no-save", dest="save", action="store_false")
         self._parser.add_argument("--random-goal", dest="random_goal", action="store_true")
         self._parser.add_argument("--random-obst", dest="random_obst", action="store_true")
         self._parser.add_argument("--random-init", dest="random_init", action="store_true")
         self._parser.add_argument("--no-verbose", dest="verbose", action="store_false")
         self._parser.add_argument("--render", dest="render", action="store_true")
+        self._parser.add_argument("--compare", dest="compare", action="store_true")
         self._parser.set_defaults(save=True)
+        self._parser.set_defaults(ros=False)
         self._parser.set_defaults(random_goal=False)
         self._parser.set_defaults(random_obst=False)
         self._parser.set_defaults(random_init=False)
         self._parser.set_defaults(verbose=True)
         self._parser.set_defaults(render=False)
+        self._parser.set_defaults(compare=False)
 
     def parseArguments(self):
         args = self._parser.parse_args()
@@ -71,7 +84,14 @@ class Runner(object):
         self._res_folder = os.getcwd() + '/' + args.res_folder
         self._planners = []
         self._experiment = Experiment(args.caseSetup)
-        self._env = self._experiment.env(render=self._render)
+        self._ros = args.ros
+        self._compare = args.compare
+        if self._compare:
+            self._compareTimeStamp = args.caseSetup[-24:-9]
+        if self._ros:
+            self.startRosConverterNode()
+        else:
+            self._env = self._experiment.env(render=self._render)
         for i in range(0, len(args.planners), 2):
             plannerType = args.planners[i]
             plannerFile = args.planners[i+1]
@@ -79,6 +99,12 @@ class Runner(object):
                 self._planners.append(FabricPlanner(self._experiment, plannerFile))
             elif plannerType == 'mpc':
                 self._planners.append(MPCPlanner(self._experiment, plannerFile))
+
+    def startRosConverterNode(self):
+        from fabricsExperiments.infrastructure.ros_converter_node import ActionConverterNode
+        dt = self._experiment.dt()
+        rate_int = int(1/dt)
+        self._rosConverter = ActionConverterNode(dt, rate_int, self._experiment.n())
 
     def setPlanner(self):
         for planner in self._planners:
@@ -88,6 +114,30 @@ class Runner(object):
             planner.setObstacles(self._experiment.obstacles(), self._experiment.rBody())
             planner.setGoal(self._experiment.goal())
             planner.concretize()
+
+    def applyAction(self, action, t_exp):
+        if self._ros:
+            ob, t = self._rosConverter.publishAction(action)
+        else:
+            ob, _, _, _ = self._env.step(action)
+            t = t_exp + self._experiment.dt()
+        return ob, t
+
+    def reset(self, q0, q0dot):
+        if self._ros:
+            ob, t0 = self._rosConverter.ob()
+        else:
+            ob = self._env.reset(pos=q0, vel=q0dot)
+            t0 = 0.0
+        return ob, t0
+
+    def stopEnvironment(self):
+        """
+        if self._ros:
+            res = subprocess.run(['/bin/zsh', '-i', '-c', 'stopMotion'], stdout=subprocess.PIPE)
+            print(res)
+        """
+        return
 
     def run(self):
         print("start run")
@@ -106,14 +156,20 @@ class Runner(object):
             print("Finished composing the planner in %1.4f secs" % (time.time() - t0))
             q0, q0dot = self._experiment.initState()
             timeStamp = "{:%Y%m%d_%H%M%S}".format(datetime.datetime.now())
+            if self._compare:
+                timeStamp = self._compareTimeStamp
             for planner in self._planners:
-                ob = self._env.reset(q0, q0dot)
-                if self._experiment.robotType() == 'panda':
+                if self._experiment.robotType() == 'panda' and not self._ros:
                     self._experiment.addScene(self._env)
+                if self._experiment.robotType() == 'planarArm':
+                    self._experiment.addMovingObstacle(self._env)
                 saver = ExperimentSaver(self._res_folder, timeStamp)
                 saver.setSetups(self._experiment, planner)
                 t = 0.0
+                ob, t0 = self.reset(q0, q0dot)
                 for i in range(self._experiment.T()):
+                    if self._aborted:
+                        break
                     if i % 1000 == 0:
                         print("Timestep : %d" %i)
                     q = ob[0:self._experiment.n()]
@@ -122,8 +178,8 @@ class Runner(object):
                     if self._experiment.dynamic():
                         envEval = self._experiment.evaluate(t)
                         if not planner.dynamic():
-                            envEval[1] = np.zeros(2)
-                            envEval[2] = np.zeros(2)
+                            envEval[1] = np.zeros(3)
+                            envEval[2] = np.zeros(3)
                         observation = [q, qdot] + envEval
                     else:
                         observation = [q, qdot]
@@ -132,11 +188,12 @@ class Runner(object):
                     primeGoal = self._experiment.evaluatePrimeGoal(t)
                     obsts = self._experiment.evaluateObstacles(t)
                     saver.addResultPoint(t, q, qdot, solving_time, primeGoal, obsts)
-                    ob, _, _, _ = self._env.step(action)
-                    t += self._experiment.dt()
+                    ob, t_new = self.applyAction(action, t)
+                    t = t_new - t0
                 if self._save:
                     saver.save()
             print("Completed %d runs" % completedRuns)
+            self.stopEnvironment()
 
 def newmain():
     myRunner = Runner()

@@ -7,8 +7,11 @@ import casadi as ca
 import pointRobot
 import pandaReacher
 import nLinkReacher
+import tiagoReacher
+import mobileReacher
 
-from casadiFk import ForwardKinematics
+#from casadiFk import ForwardKinematics
+from forwardKinematics.fk_creator import FkCreator
 from obstacle import Obstacle, RefDynamicObstacle
 
 from fabricsExperiments.infrastructure.motionPlanningGoal import MotionPlanningGoal
@@ -46,7 +49,7 @@ class Experiment(object):
             "selfCollision",
         ]
         self.parseSetup()
-        self._fk = ForwardKinematics(robot_type=self.robotType())
+        self._fk = FkCreator(self.robotType(), self.n()).fk()
 
     def parseSetup(self):
         with open(self._setupFile, "r") as setupStream:
@@ -91,7 +94,7 @@ class Experiment(object):
         return self._setup["r_body"]
 
     def fk(self, q, n, positionOnly=False):
-        return self._fk.getFk(q, n, positionOnly=positionOnly)
+        return self._fk.fk(q, n, positionOnly=positionOnly)
 
     def evaluate(self, t):
         evalObsts = self.evaluateObstacles(t)
@@ -133,8 +136,10 @@ class Experiment(object):
             q0dot = np.array([float(x) for x in self._setup["initState"]["q0dot"]])
         except:
             raise InvalidInitStateError("Initial state could not be parsed")
+        """
         if q0.size != self.n() or q0dot.size != self.n():
             raise InvalidInitStateError("Initial state of wrong dimension")
+        """
         return (q0, q0dot)
 
     def goal(self):
@@ -153,13 +158,19 @@ class Experiment(object):
         return self._motionPlanningGoal.dynamicGoals()
 
     def env(self, render=False):
-        return gym.make(self.envName(), render=render, n=self.n(), dt=self.dt())
+        if self.robotType() == 'planarArm':
+            return gym.make(self.envName(), render=render, n=self.n(), dt=self.dt())
+        else:
+            return gym.make(self.envName(), render=render, dt=self.dt())
 
     def addScene(self, env):
         for obst in self._obstacles:
             env.addObstacle(pos=obst.x(), filename='sphere05red_nocol.urdf')
         if isinstance(self.primeGoal(), np.ndarray):
             env.addObstacle(pos=self.primeGoal(), filename="sphere_goal.urdf")
+
+    def addMovingObstacle(self, env):
+        env.addMovingObstacle(self._obstacles[0])
 
     def shuffleInitConfiguration(self):
         q0_new = np.random.uniform(low=self.limits()[0], high=self.limits()[1])

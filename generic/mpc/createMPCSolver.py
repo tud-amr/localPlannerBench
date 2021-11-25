@@ -7,18 +7,17 @@ from casadi import sin, cos, dot
 from urdfpy import URDF
 
 import os
-from scipy.integrate import odeint
 
 from casadiFk import ForwardKinematics
 from fabricsExperiments.generic.mpc.parameterMap import getParameterMap
 
 slack = True
-n = 2
-m = 2
-dt = 0.01
+n = 7
+m = 3
+dt = 0.1
 nbObst = 5
-m_obst = 2
-robotType = "pointMass"
+m_obst = 3
+robotType = "panda"
 pairs = []
 if robotType == 'panda':
     pairs = [
@@ -41,7 +40,7 @@ elif robotType == 'planarArm':
             pairs.append([i, j])
 generic_fk = ForwardKinematics(robot_type=robotType)
 paramMap, npar, nx, nu, ns = getParameterMap(n, m, nbObst, m_obst, slack)
-N = 20
+N = 30
 dt_str = str(dt).replace(".", "")
 
 # file names
@@ -56,8 +55,8 @@ else:
 # MPC parameter
 upper_lim = np.ones(n) * np.inf
 lower_lim = np.ones(n) * -np.inf
-limitVel = np.ones(n) * 4
-limitAcc = np.ones(n) * 1
+limitVel = np.ones(n) * 400
+limitAcc = np.ones(n) * 100
 if slack:
     slack_upper = np.array([np.inf])
     slack_lower = np.array([0])
@@ -90,22 +89,21 @@ def eval_obj(z, p):
     Wu = diagSX(wu, n)
     fk = generic_fk.getFk(q, n, positionOnly=True)
     err = fk - g
-    Jx = ca.dot(err, ca.mtimes(W, err))
+    Jx = ca.dot(err, ca.mtimes(W, err)) # only penalize in objN -> does not affect the result
     Jvel = ca.dot(qdot, ca.mtimes(Wvel, qdot))
     Ju = ca.dot(qddot, ca.mtimes(Wu, qddot))
     if slack:
         s = z[nx]
         ws = p[paramMap["ws"]]
-        J = Jx + Jvel + ws * s
+        J = Jx + Jvel + Ju + ws * s**2
     else:
-        J = Jx + Jvel
+        J = Jx + Jvel + Ju
     return J
 
 
 def eval_objN(z, p):
     q = z[0:n]
     qdot = z[n:nx]
-    qddot = z[nx + ns : ns + nx + nu]
     w = p[paramMap["w"]]
     wvel = p[paramMap["wvel"]]
     g = p[paramMap["g"]]
@@ -113,13 +111,14 @@ def eval_objN(z, p):
     Wvel = diagSX(wvel, n)
     fk = generic_fk.getFk(q, n, positionOnly=True)
     err = fk - g
-    Jx = ca.dot(err, ca.mtimes(W, err))
+    Jx = ca.dot(err, ca.mtimes(W, err)) # only have that term here
+    Jvel = ca.dot(qdot, ca.mtimes(Wvel, qdot))
     if slack:
         s = z[nx]
         ws = p[paramMap["ws"]]
-        J = Jx + ws * s
+        J = Jx + Jvel + ws * s**2
     else:
-        J = Jx 
+        J = Jx  + Jvel
     return J
 
 
@@ -163,6 +162,7 @@ def eval_selfCollision(z, p):
 
 
 def eval_jointLimits(z, p):
+    # Parameters in state boundaries?
     q = z[0:n]
     if slack:
         s = z[nx]
@@ -211,7 +211,7 @@ def main():
     codeoptions = forcespro.CodeOptions(solverName)
     codeoptions.printlevel = 0
     codeoptions.optlevel = 3
-    codeoptions.nlp.integrator.type = "ERK2"
+    codeoptions.nlp.integrator.type = "ERK2" # Consider Bruno's implementation on dynamics 
     codeoptions.nlp.integrator.Ts = dt
     codeoptions.nlp.integrator.nodes = 5
     # codeoptions.maxit = 300

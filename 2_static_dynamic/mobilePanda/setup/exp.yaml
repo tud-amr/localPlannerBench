@@ -1,0 +1,138 @@
+T: 40000
+dt: 0.01
+env: mobile-reacher-acc-v0
+robot_type: mobilePanda
+n: 10
+goal:
+ subgoal1:
+   prime: True
+   m: 3
+   w: 1
+   indices:
+     - 0
+     - 1
+     - 2
+   parent_link: 0
+   child_link: 10
+   desired_position:
+     trajFun:
+       - "3 * ca.sin(0.1 * t) + 0.5"
+       - "1 * (ca.cos(0.1 * t) - 1.0)"
+       - "1.0 + 0.0 * ca.cos(0.1 * t)"
+   type: analytic
+   dynamic : True
+#  subgoal2:
+#    prime: True
+#    m: 2
+#    w: 100
+#    indices:
+#      - 0
+#      - 1
+#    parent_link: 6
+#    child_link: 7
+#    desired_position:
+#     trajFun:
+#      - "0.0"
+#      - "0.0"
+#    type: analytic
+#    dynamic: True
+# subgoal3:
+#   prime: False
+#   m: 1
+#   w: 1
+#   indices:
+#     - 0
+#   parent_link: 3
+#   child_link: 4
+#   desired_position:
+#     - 0.0
+# subgoal4:
+#   prime: False
+#   m: 1
+#   w: 1
+#   indices:
+#     - 1
+#   parent_link: 2
+#   child_link: 3
+#   desired_position:
+#     - 0.0
+initState:
+  q0: 
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - -1.50
+    - 0.0
+    - 1.8675
+    - 0.0
+  q0dot:
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+limits:
+  low: 
+    - -10
+    - -10
+    - -10
+    - -2.8973
+    - -1.7628
+    - -2.8973
+    - -3.0718
+    - -2.8973
+    - -0.0175
+    - -2.8973
+  high:
+    - 10
+    - 10
+    - 10
+    - 2.8973
+    - 1.7628
+    - 2.8973
+    - 0.0698
+    - 2.8973
+    - 3.7525
+    - 2.8973
+r_body: 0.04
+selfCollision:
+  pairs:
+    - [0, 7]
+    - [4, 7]
+    - [4, 7]
+    - [4, 8]
+    - [4, 9]
+    - [4, 10]
+    - [5, 9]
+    - [5, 10]
+obstacles:
+  obst1:
+    x:
+      - 100.6
+      - 0.0
+      - 0.8
+    r: 0.15
+randomObstacles:
+  number: 3
+  limits:
+    x:
+      low:
+        - 0.5
+        - -1.0
+        - 0.0
+      high:
+        - 1.0
+        - 1.0
+        - 1.2
+    r:
+      low: 0.15
+      high: 0.15
+    

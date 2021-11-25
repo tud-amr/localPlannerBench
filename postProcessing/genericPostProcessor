@@ -8,6 +8,7 @@ import sys
 import os
 import yaml
 import pprint
+import time
 
 from fabricsExperiments.generic.experiment import Experiment
 from fabricsExperiments.generic.fabricPlanner import FabricPlanner
@@ -143,7 +144,8 @@ class PostProcessor(object):
             {
                 'r_body': self._experiment.rBody(),
                 'r_obst': self._experiment.obstacles()[0].r(), 
-                'm': 2
+                'm': 2,
+                'n': 1
             }
         )
         self._metrics['solverTime'] = SolverTimesMetric(
@@ -186,7 +188,8 @@ class PostProcessor(object):
             {
                 'r_body': self._experiment.rBody(),
                 'r_obst': self._experiment.obstacles()[0].r(), 
-                'm': 2
+                'm': m,
+                'n': n
             }
         )
         self._metrics['selfClearance'] = SelfClearanceMetric(
@@ -216,7 +219,7 @@ class PostProcessor(object):
         self._metrics['time2Goal'] = TimeToReachGoalMetric(
             "time2Goal",
             fkNames + ['goal_0_0', 'goal_1_0', 'goal_2_0', "t"],
-            {"m": 3, "des_distance": 0.1},
+            {"m": 3, "des_distance": 0.05},
         )
         self._metrics['integratedError'] = IntegratedErrorMetric(
             "integratedError",
@@ -232,6 +235,16 @@ class PostProcessor(object):
                 "n": n,
                 "r_body": self._experiment.rBody(),
             },
+        )
+        self._metrics['dynamicClearance'] = DynamicClearanceMetric(
+            "clearance", 
+            fksNames + ['obst_0_0', 'obst_1_0', 'obst_2_0', 't'],
+            {
+                'r_body': self._experiment.rBody(),
+                'r_obst': self._experiment.obstacles()[0].r(), 
+                'm': m,
+                'n': n
+            }
         )
         self._metrics['selfClearance'] = SelfClearanceMetric(
             "selfClearance",
@@ -404,6 +417,7 @@ class PostProcessor(object):
                 cwd=createPlotFolder,
                 stdout=subprocess.PIPE,
             )
+        time.sleep(1)
 
     def plotSeriesResult(self, planner1, planner2, kpiNames):
         curPath = os.path.dirname(os.path.abspath(__file__)) + "/"

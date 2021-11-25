@@ -15,7 +15,7 @@ set style histogram rowstacked
 set boxwidth 0.5
 set xtics (planner1Type 0, planner2Type 1) scale 1.0 font ',25'
 set xrange [-0.5:1.5]
-set yrange [0:30]
+set yrange [0:120]
 set xtics nomirror font ',25'
 set ytics nomirror font ',25'
 set ylabel '#Cases' font ',25'

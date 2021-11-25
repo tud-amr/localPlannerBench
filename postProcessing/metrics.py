@@ -103,18 +103,31 @@ class ClearanceMetric(Metric):
 class DynamicClearanceMetric(Metric):
     def computeMetric(self, data):
         m = self._params['m']
+        n = self._params['n']
         r_body = self._params['r_body']
         r_obst = self._params['r_obst']
-        fks = np.stack([data[name] for name in self._measNames[:m]]).T
-        obst = np.stack([data[name] for name in self._measNames[m:2*m]]).T
+        rawData = np.stack([data[name] for name in self._measNames[:m*n]])
+        fks = rawData.T.reshape(-1, n, m)
+        #fks = np.stack([data[name] for name in self._measNames[:m]]).T
+        obst = np.stack([data[name] for name in self._measNames[m*n:m*n+m]]).T
         t = np.array(data[self._measNames[-1]])
-        distances = computeDistances(fks, obst) - r_body - r_obst
-        index = np.argmin(distances)
+        minDistances = []
+        distanceToObsts = {}
+        for i in range(1):
+            for i_fk in range(0, n):
+                distancesToObst = computeDistances(fks[:, i_fk, :], obst) - r_body - r_obst
+                index = np.argmin(distancesToObst)
+                minDistToObst = float(min(distancesToObst)) + 1e-3 # make MPC happy
+                minDistances.append(minDistToObst)
+                distanceToObsts["obst" + str(i) + "_fk" + str(i_fk)] = {
+                    "dist": minDistToObst,
+                    "loc": obst[index].tolist(),
+                    "robotLoc": fks[index, i_fk, :].tolist(),
+                    "r": r_body,
+                }
         return {
-            "short": float(min(distances)),
-            "time of minimal clearance": float(t[index]), 
-            "Obstacle at": [float(x) for x in obst[index]], 
-            "Robot at": [float(x) for x in fks[index]], 
+            "short": float(min(minDistances)),
+            "allMinDist": distanceToObsts
         }
 
 
@@ -144,10 +157,7 @@ class SolverTimesMetric(Metric):
     def computeMetric(self, data):
         interval = self._params["interval"]
         t_planning = data[self._measNames[0]]
-        if interval == 1:
-            return {'short': float(np.mean(t_planning))}
-        else:
-            return {'short': float(np.mean(t_planning[: -(interval - 1)].reshape(-1, interval), axis=0)[0])}
+        return {'short': float(np.mean(t_planning[0::interval]))}
 
 
 class PathLengthMetric(Metric):

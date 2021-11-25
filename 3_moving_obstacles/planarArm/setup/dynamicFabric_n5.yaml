@@ -4,8 +4,8 @@ robot_type: planarArm
 n: 5
 m_base: 1.0
 obst:
-  exp: 3.0
-  lam: 1.0
+  exp: 2.0
+  lam: 10.0
 selfCol:
   exp: 1.0
   lam: 2.0
@@ -17,9 +17,9 @@ limits:
 speed:
   ex_factor: 1.0
 damper:
-  r_d: 0.01
+  r_d: 0.2
   b:
-    - 2.0
-    - 15.0
+    - 0.02
+    - 6.5
 dynamic: True
 

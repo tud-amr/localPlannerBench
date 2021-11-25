@@ -20,12 +20,15 @@ class ExperimentSaver(object):
                 resDict['q' + str(n_i)] = q[n_i]
                 resDict['q' + str(n_i) + 'dot'] = qdot[n_i]
                 resDict['a' + str(n_i)] = q[n_i]
-            fk = self._exp.fk(q, n_i)
-            resDict['fk' + str(n_i) + "_x"] = fk[0]
-            resDict['fk' + str(n_i) + "_y"] = fk[1]
             if self._exp.robotType() == 'planarArm':
+                fk = self._exp.fk(q, n_i, positionOnly=False)
+                resDict['fk' + str(n_i) + "_x"] = fk[0]
+                resDict['fk' + str(n_i) + "_y"] = fk[1]
                 resDict['fk' + str(n_i) + "_theta"] = fk[2]
             if self._exp.robotType() == 'panda':
+                fk = self._exp.fk(q, n_i, positionOnly=True)
+                resDict['fk' + str(n_i) + "_x"] = fk[0]
+                resDict['fk' + str(n_i) + "_y"] = fk[1]
                 resDict['fk' + str(n_i) + "_z"] = fk[2]
         for i_der, goal_der in enumerate(goal):
             for j_dim, goal_dim in enumerate(goal_der):
@@ -48,6 +51,8 @@ class ExperimentSaver(object):
         #curPath = os.path.dirname(os.path.abspath(__file__)) + "/" + self._resFolder
         curPath = self._resFolder
         folderPath = curPath + "/" + self._planner.plannerType() + "_" + self._timeStamp
+        while os.path.isdir(folderPath):
+            folderPath = folderPath[:-2] + str(int(folderPath[-2:]) + 1)
         print("Saving results to : %s" % folderPath)
         os.makedirs(folderPath)
         self.saveResult(folderPath)

@@ -7,7 +7,7 @@ goal:
   subgoal1:
     prime: True
     m: 3
-    w: 5
+    w: 1
     indices:
       - 0
       - 1
@@ -16,7 +16,7 @@ goal:
     child_link: 7
     desired_position:
       - 0.2
-      - 0.7
+      - 0.4
       - 0.3
     low:
       - 0.2
@@ -110,7 +110,7 @@ selfCollision:
 obstacles:
   obst1:
     x:
-      - 0.4
+      - 100.4
       - 0.3
       - 0.6
     r: 0.15

@@ -106,6 +106,12 @@ class SubGoal(object):
     def w(self):
         return self._setup["w"]
 
+    def isJointSpaceGoal(self):
+        if 'jointSpace' in self._setup and self._setup['jointSpace']:
+            return True
+        else:
+            return False
+
     def desiredPosition(self):
         if 'ctrlpts' in self._setup['desired_position']:
             return self._setup['desired_position']['ctrlpts'][-1]

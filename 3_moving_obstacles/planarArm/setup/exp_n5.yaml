@@ -15,7 +15,7 @@ goal:
     child_link: 5
     desired_position:
       - 2.0
-      - 2.0
+      - -2.0
     type: static
     dynamic: False
 # subgoal2:
@@ -78,8 +78,8 @@ r_body: 0.10
 obstacles:
   obst1:
     trajFun:
-      - "2.0 + 1.0 * ca.cos(0.1 * t)"
-      - "0.0"
+      - "2.1"
+      - "-1.0 + 0.5 * t"
     r: 0.5
     dynamic: True
 randomObstacles:

@@ -39,7 +39,7 @@ limits:
   high:
     - 5.0
     - 5.0
-r_body: 0.01
+r_body: 0.8
 randomObstacles:
   number: 2
   limits:
@@ -57,7 +57,7 @@ obstacles:
   obst1:
     trajFun: 
       - "0.0"
-      - "-2.5 * ca.cos(0.5 * t)"
+      - "-2.5 + 0.5 * t"
     r: 0.5
     dynamic: True
 selfCollision:
