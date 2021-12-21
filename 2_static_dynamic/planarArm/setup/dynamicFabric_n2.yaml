@@ -12,8 +12,8 @@ selfCol:
 attractor:
   k_psi: 15.0
 limits:
-  exp: 1.0
-  lam: 1.0
+  exp: 3.0
+  lam: 10.0
 speed:
   ex_factor: 1.0
 damper:

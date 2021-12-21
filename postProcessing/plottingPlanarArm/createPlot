@@ -3,9 +3,8 @@ abspath=`realpath "$0"`
 plotFolder="${abspath/\/createPlot/}"
 resFolder=$1
 n=$2
-dynamicObstFlag=$3
 resPlotFolder="$resFolder/plots"
 mkdir -p $resPlotFolder
 . "$plotFolder/extractFks" $resFolder "${resFolder}/fk" $n
 pathToMakeTrajectoryPlot="$plotFolder/makeTrajectoryPlot.gnuplot"
-gnuplot -c "$plotFolder/makeTrajectoryPlot.gnuplot" $resFolder $n $dynamicObstFlag
+gnuplot -c "$plotFolder/makeTrajectoryPlot.gnuplot" $resFolder $n

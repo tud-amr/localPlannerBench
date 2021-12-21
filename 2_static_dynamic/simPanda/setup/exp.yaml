@@ -1,64 +1,43 @@
-T: 40000
+T: 15000
+dynamic: True
 dt: 0.01
 env: panda-reacher-acc-v0
 robot_type: panda
 n: 7
 goal:
- subgoal1:
-   prime: True
-   m: 3
-   w: 1
-   indices:
+  subgoal1:
+    prime: True
+    m: 3
+    w: 3
+    indices:
      - 0
      - 1
      - 2
-   parent_link: 0
-   child_link: 7
-   desired_position:
-     trajFun:
-       - "0.5  + 0.1 * ca.cos(0.1 * t)"
-       - "0.2 * ca.sin(0.1 * t)"
-       - "0.6"
-   type: analytic
-   dynamic : True
-#  subgoal2:
-#    prime: True
-#    m: 2
-#    w: 100
-#    indices:
-#      - 0
-#      - 1
-#    parent_link: 6
-#    child_link: 7
-#    desired_position:
-#     trajFun:
-#      - "0.0"
-#      - "0.0"
-#    type: analytic
-#    dynamic: True
-# subgoal3:
+    parent_link: 0
+    child_link: 7
+    trajectory:
+     - "0.5  + 0.1 * ca.cos(0.3 * t)"
+     - "0.4 * ca.cos(0.3 * t)"
+     - "0.6 + 0.1 * ca.cos(0.05 * t)"
+    type: analyticSubGoal
+    epsilon: 0.02
+# subgoal2:
 #   prime: False
-#   m: 1
-#   w: 1
+#   m: 2
+#   w: 100
 #   indices:
-#     - 0
-#   parent_link: 3
-#   child_link: 4
+#    - 0
+#    - 1
+#   parent_link: 5
+#   child_link: 7
+#   epsilon: 0.05
 #   desired_position:
-#     - 0.0
-# subgoal4:
-#   prime: False
-#   m: 1
-#   w: 1
-#   indices:
-#     - 1
-#   parent_link: 2
-#   child_link: 3
-#   desired_position:
-#     - 0.0
+#    - 0.0
+#    - 0.0
+#   type: staticSubGoal
 initState:
   q0: 
-    - 0.0
+    - 0.8
     - 0.0
     - 0.0
     - -1.50
@@ -106,25 +85,26 @@ selfCollision:
     - [2, 6]
     - [2, 7]
 obstacles:
-  obst1:
-    x:
-      - 0.6
-      - 0.0
-      - 0.8
-    r: 0.15
-randomObstacles:
-  number: 3
-  limits:
-    x:
-      low:
-        - 0.5
-        - -1.0
+  obst0:
+    dim: 3
+    type: sphereObstacle
+    geometry:
+      position:
+        - 0.6
+        - 0.1
+        - 0.4
+      radius: 0.10
+    low:
+      position:
+        - 0.3
+        - -0.5
         - 0.0
-      high:
+      radius: 0.0
+    high:
+      position:
+        - 0.8
+        - 0.5
         - 1.0
-        - 1.0
-        - 1.2
-    r:
-      low: 0.15
-      high: 0.15
-    
+      radius: 0.2
+randomObstacles:
+  number: 1

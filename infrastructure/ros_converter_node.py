@@ -13,6 +13,7 @@ class ActionConverterNode(object):
         self._rate = rospy.Rate(rate_int)
         self._dt = dt
         self._n = n
+        self._nu = n - 1
         self._joint_state_sub = rospy.Subscriber("/joint_states_filtered", JointState, self.joint_state_cb)
         self._acc_pub = rospy.Publisher(
             '/joint_acc_des', 
@@ -22,20 +23,24 @@ class ActionConverterNode(object):
             '/motion_stop_request',
             Bool, queue_size=10
         )
-        self._q = np.zeros(self._n)
-        self._qdot = np.zeros(self._n)
+        self._x = np.zeros(self._n)
+        self._xdot = np.zeros(self._n)
+        self._qdot = np.zeros(self._nu)
         self._acc_msg = Float64MultiArray()
-        self._acc_msg.data = np.zeros(7)
+        self._acc_msg.data = np.zeros(self._nu)
+        self._stateIndices = [0, 1, 2]
+        self._qdotIndices = [3, 4]
 
     def joint_state_cb(self, data):
-        self._q = np.array(data.position[0:7])
-        self._qdot = np.array(data.velocity[0:7])
+        self._x = np.array([data.position[i] for i in self._stateIndices])
+        self._xdot = np.array([data.velocity[i] for i in self._stateIndices])
+        self._qdot = np.array([data.velocity[i] for i in self._qdotIndices])
 
     def ob(self):
-        return np.concatenate((self._q, self._qdot)), rospy.get_time()
+        return np.concatenate((self._x, self._xdot, self._qdot)), rospy.get_time()
 
     def publishAction(self, action):
-        for i in range(self._n):
+        for i in range(self._nu):
             self._acc_msg.data[i] = action[i]
         self._acc_pub.publish(self._acc_msg)
         self._rate.sleep()
@@ -71,7 +76,7 @@ class ActionConverterNode(object):
 
 
 if __name__ == "__main__":
-    converterNode = ActionConverterNode(None, 0.01, 100, 7)
+    converterNode = ActionConverterNode(None, 0.01, 100, 3, 2)
     try:
         converterNode.run()
     except rospy.ROSInterruptException:

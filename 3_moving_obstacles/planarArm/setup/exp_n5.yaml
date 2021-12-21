@@ -1,4 +1,5 @@
 T: 3000
+dynamic: True
 dt: 0.05
 env: nLink-reacher-acc-v0
 robot_type: planarArm

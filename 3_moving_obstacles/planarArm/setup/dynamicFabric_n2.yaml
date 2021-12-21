@@ -2,15 +2,15 @@ interval: 1
 type: dynamicFabric
 robot_type: planarArm
 n: 2
-m_base: 1.0
+m_base: 0.1
 obst:
   exp: 2.0
-  lam: 10.0
+  lam: 1.0
 selfCol:
   exp: 1.0
   lam: 2.0
 attractor:
-  k_psi: 5.0
+  k_psi: 10.0
 limits:
   exp: 1.0
   lam: 1.0
@@ -19,7 +19,6 @@ speed:
 damper:
   r_d: 0.20
   b:
-    - 0.02
-    - 6.5
+    - 0.05
+    - 8.0
 dynamic: True
-

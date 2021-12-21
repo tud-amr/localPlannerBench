@@ -1,0 +1,108 @@
+T: 5000
+dt: 0.01
+dynamic: True
+env: boxer-robot-acc-v0
+robot_type: boxer
+n: 3
+goal:
+# subgoal0:
+#   prime: True
+#   m: 2
+#   w: 1
+#   epsilon: 0.1
+#   indices:
+#     - 0
+#     - 1
+#   parent_link: 0
+#   child_link: 3
+#   desired_position:
+#       - 0.1
+#       - -6.0
+#   low:
+#     - -1.0
+#     - -7.0
+#   high: 
+#     - 8.0
+#     - 2.0
+#   type: staticSubGoal
+  subgoal0:
+    prime: True
+    m: 2
+    w: 5
+    indices:
+      - 0
+      - 1
+    parent_link: 0
+    child_link: 3
+    trajectory:
+      controlPoints:
+        - [0.0, -1.0]
+        - [-1.0, -3.5]
+        - [0.1, -6.0]
+        - [2.1, -5.0]
+        - [1.0, -1.0]
+      degree: 2
+      duration: 30
+    type: splineSubGoal
+    epsilon: 0.2
+initState:
+  q0:
+    - 0.5
+    - 0.0
+    - 0.0
+  q0dot:
+    - 0.0
+    - 0.0
+limits:
+  low:
+    - -15.0
+    - -15.0
+    - -300.14
+  high:
+    - 15.0
+    - 15.0
+    - 300.14
+r_body: 0.4
+randomObstacles:
+  number: 2
+obstacles:
+  obst0:
+    dim: 2
+    type: sphereObstacle
+    geometry:
+      position: 
+        - 0.0
+        - -3.5
+      radius: 0.2
+    low:
+      position:
+        - -4.0
+        - -4.0
+      radius: 0.0
+    high:
+      position:
+        - 4.0
+        - 4.0
+      radius: 1.0
+  obst1:
+    dim: 2
+    type: sphereObstacle
+    geometry:
+      position: 
+        - 1.0
+        - -3.5
+      radius: 0.2
+    low:
+      position:
+        - -4.0
+        - -4.0
+      radius: 0.0
+    high:
+      position:
+        - 4.0
+        - 4.0
+      radius: 1.0
+selfCollision:
+  pairs:
+    
+

@@ -1,10 +1,11 @@
 T: 2000
+dynamic: False
 dt: 0.05
 env: point-robot-acc-v0
 robot_type: pointMass
 n: 2
 goal:
-  subgoal1:
+  subgoal0:
     prime: True
     m: 2
     w: 5
@@ -17,13 +18,13 @@ goal:
       - 4.0
       - 0.2
     low:
-      - -5.0
-      - -5.0
+      - -4.0
+      - -4.0
     high: 
-      - 5.0
-      - 5.0
-    dynamic: False
-    type: static
+      - 4.0
+      - 4.0
+    type: staticSubGoal
+    epsilon: 0.1
 initState:
   q0:
     - 0.0
@@ -41,23 +42,26 @@ limits:
 r_body: 0.01
 randomObstacles:
   number: 5
-  limits:
-    x:
-      low:
-        - -5.0
-        - -5.0
-      high:
-        - 5.0
-        - 5.0
-    r:
-      low: 0.1
-      high: 1.0
 obstacles:
-  obst1:
-    x: 
-      - 2.0
-      - 0.2
-    r: 1.0
+  obst0:
+    type: sphereObstacle
+    dim: 2
+    geometry:
+      position: 
+        - 2.0
+        - 0.2
+      radius: 1.0
+    low:
+      position:
+        - -5.0
+        - -5.0
+      radius: 0.0
+    high:
+      position:
+        - 5.0
+        - 5.0
+      radius: 1.0
 selfCollision:
+  pairs:
     
 

@@ -10,7 +10,6 @@ from fabricsExperiments.generic.mpc.parameterMap import getParameterMap
 from fabricsExperiments.generic.mpc.createMPCSolver import eval_ineq, eval_obj
 import fabricsExperiments
 
-from obstacle import Obstacle, RefDynamicObstacle
 
 path_name = (
     os.path.dirname(os.path.realpath(fabricsExperiments.__file__))
@@ -19,17 +18,31 @@ path_name = (
 sys.path.append(path_name)
 
 
+class EmptyObstacle():
+    def position(self):
+        return [-100, -100, -100]
+
+    def radius(self):
+        return -100
+
+    def dim(self):
+        return 3
+
+
 class MPCPlanner(AbstractPlanner):
     def __init__(self, exp, setupFile):
         required_keys = ["type", "n", "obst", "weights", "interval", "H", "dt"]
         super().__init__(exp, setupFile, required_keys)
+        """
         self._paramMap, self._npar, self._nx, self._nu, self._ns = getParameterMap(
             self.n(), self.m(), self.nbObstacles(), self.m(), self.useSlack()
         )
+        """
         dt_str = str(self.dt()).replace(".", "")
+        debugFolder = ""
         self._solverFile = (
             path_name
-            + self._exp.robotType()
+            + self._exp.robotType() + debugFolder
             + "/solver_n"
             + str(self.n())
             + "_"
@@ -39,6 +52,20 @@ class MPCPlanner(AbstractPlanner):
         )
         if not self.useSlack():
             self._solverFile += "_noSlack"
+        with open(self._solverFile + "/paramMap.yaml", "r") as stream:
+            try:
+                self._paramMap = yaml.safe_load(stream)
+            except yaml.YAMLError as exc:
+                print(exc)
+        with open(self._solverFile + "/properties.yaml", "r") as stream:
+            try:
+                self._properties = yaml.safe_load(stream)
+            except yaml.YAMLError as exc:
+                print(exc)
+        self._nx = self._properties['nx']
+        self._nu = self._properties['nu']
+        self._ns = self._properties['ns']
+        self._npar = self._properties['npar']
         try:
             print("Loading solver %s" % self._solverFile)
             self._solver = forcespro.nlp.Solver.from_directory(self._solverFile)
@@ -68,6 +95,10 @@ class MPCPlanner(AbstractPlanner):
                 self._params[
                     [self._npar * i + val for val in self._paramMap["ws"]]
                 ] = self.weights()["ws"]
+            if 'wobst' in self.weights():
+                self._params[
+                    [self._npar * i + val for val in self._paramMap["wobst"]]
+                ] = self.weights()["wobst"]
 
     def m(self):
         if self._exp.robotType() == 'panda':
@@ -106,39 +137,38 @@ class MPCPlanner(AbstractPlanner):
         return self._setup["obst"]["nbObst"]
 
     def setObstacles(self, obsts, r_body):
-        self._r = obsts[0].r()
+        self._r = obsts[0].radius()
         for i in range(self.H()):
             self._params[self._npar * i + self._paramMap["r_body"][0]] = r_body
             for j in range(self.nbObstacles()):
                 if j < len(obsts):
                     obst = obsts[j]
                 else:
-                    obst = Obstacle(np.ones(self.m()) * -100, -1.0)
-                for m_i in range(self.m()):
+                    obst = EmptyObstacle()
+                for m_i in range(obst.dim()):
                     paramsIndexObstX = self._npar * i + self._paramMap['obst'][j * (self.m() + 1) + m_i]
-                    self._params[paramsIndexObstX] = obst.x()[m_i]
+                    self._params[paramsIndexObstX] = obst.position()[m_i]
                 paramsIndexObstR = self._npar * i + self._paramMap['obst'][j * (self.m() + 1) + self.m()]
-                self._params[paramsIndexObstR] = obst.r()
+                self._params[paramsIndexObstR] = obst.radius()
 
     def updateDynamicObstacles(self, obstArray):
-        r = self._r
         nbDynamicObsts = int(obstArray.size / 3 / self.m())
         for j in range(self.nbObstacles()):
             if j < nbDynamicObsts:
-                obst = Obstacle(obstArray[0:self.m()], r)
+                obstPos = obstArray[:self.m()]
                 obstVel = obstArray[self.m():2*self.m()]
                 obstAcc = obstArray[2*self.m():3*self.m()]
             else:
-                obst = Obstacle(np.ones(self.m()) * -100, -1.0)
+                obstPos = np.ones(self.m()) * -100
                 obstVel = np.zeros(self.m())
                 obstAcc = np.zeros(self.m())
             for i in range(self.H()):
                 for m_i in range(self.m()):
                     paramsIndexObstX = self._npar * i + self._paramMap['obst'][j * (self.m() + 1) + m_i]
-                    predictedPosition = obst.x()[m_i] + obstVel[m_i] * self.dt() * i + 0.5 * (self.dt() * i)**2 * obstAcc[m_i]
+                    predictedPosition = obstPos[m_i] + obstVel[m_i] * self.dt() * i + 0.5 * (self.dt() * i)**2 * obstAcc[m_i]
                     self._params[paramsIndexObstX] = predictedPosition
                 paramsIndexObstR = self._npar * i + self._paramMap['obst'][j * (self.m() + 1) + self.m()]
-                self._params[paramsIndexObstR] = obst.r()
+                self._params[paramsIndexObstR] = self._r
 
     def setSelfCollisionAvoidance(self, r_body):
         for i in range(self.H()):
@@ -160,17 +190,19 @@ class MPCPlanner(AbstractPlanner):
         primeGoal = goal.primeGoal()
         for i in range(self.H()):
             for j in range(self.m()):
-                self._params[self._npar * i + self._paramMap["g"][j]] = primeGoal[j]
+                self._params[self._npar * i + self._paramMap["g"][j]] = primeGoal.position()[j]
 
     def concretize(self):
         pass
 
     def shiftHorizon(self, output, ob):
         for key in output.keys():
-            if self.H() > 99:
-                stage = int(key[-3:])
-            else:
+            if self.H() < 10:
+                stage = int(key[-1])
+            elif self.H() >= 10 and self.H() < 100:
                 stage = int(key[-2:])
+            elif self.H() > 99:
+                stage = int(key[-3:])
             if stage == 1:
                 continue
             self._x0[stage - 2, 0 : len(output[key])] = output[key]
@@ -221,10 +253,12 @@ class MPCPlanner(AbstractPlanner):
         output, exitflag, info = self._solver.solve(problem)
         if exitflag < 0:
             print(exitflag)
-        if self.H() > 99:
-            key1 = 'x001'
-        else:
+        if  self.H() < 10:
+            key1 = 'x1'
+        elif self.H() > 9 and self.H() < 100:
             key1 = 'x01'
+        elif self.H() > 99:
+            key1 = 'x001'
         action = output[key1][-self._nu :]
         if self.useSlack():
             self._slack = output[key1][self._nx]

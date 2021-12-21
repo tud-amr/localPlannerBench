@@ -32,15 +32,19 @@ obst_list=system("ls -1B ".resFolder."/obst_*")
 plot inFile using 1:goal_x with lines lt rgb "#FFCECF" lw 8 title 'goal_0', \
   inFile using 1:goal_y with lines lt rgb "#CFFFCF"lw 8 title 'goal_1', \
   inFile using 1:goal_z with lines lt rgb "#CFD1FF" lw 8 title 'goal_2', \
-  inFile using 1:goal_x_1 with lines lt rgb "#FFCECF" lw 2 title 'goal_0_1', \
-  inFile using 1:goal_y_1 with lines lt rgb "#CFFFCF"lw 2 title 'goal_1_1', \
-  inFile using 1:goal_z_1 with lines lt rgb "#CFD1FF" lw 2 title 'goal_2_1', \
-  inFile using 1:goal_x_2 with lines lt rgb "#FFCECF" lw 1 title 'goal_0_2', \
-  inFile using 1:goal_y_2 with lines lt rgb "#CFFFCF"lw 1 title 'goal_1_2', \
-  inFile using 1:goal_z_2 with lines lt rgb "#CFD1FF" lw 1 title 'goal_2_2', \
   inFile using 1:ee_x with lines lt rgb "red" lw 2 title 'x_{0}', \
   inFile using 1:ee_y with lines lt rgb "green" lw 2  title 'x_{1}', \
   inFile using 1:ee_z with lines lt rgb "blue" lw 2 title 'x_{2}'
 
+
+
 print "Done creating trajectory plot, saved to"
 print outFile
+
+# plotting goal derivatives
+#  inFile using 1:goal_x_1 with lines lt rgb "#FFCECF" lw 2 title 'goal_0_1', \
+#  inFile using 1:goal_y_1 with lines lt rgb "#CFFFCF"lw 2 title 'goal_1_1', \
+#  inFile using 1:goal_z_1 with lines lt rgb "#CFD1FF" lw 2 title 'goal_2_1', \
+#  inFile using 1:goal_x_2 with lines lt rgb "#FFCECF" lw 1 title 'goal_0_2', \
+#  inFile using 1:goal_y_2 with lines lt rgb "#CFFFCF"lw 1 title 'goal_1_2', \
+#  inFile using 1:goal_z_2 with lines lt rgb "#CFD1FF" lw 1 title 'goal_2_2', \

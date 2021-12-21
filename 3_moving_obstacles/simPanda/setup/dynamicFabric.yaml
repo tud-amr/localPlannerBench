@@ -2,13 +2,13 @@ interval: 1
 type: dynamicFabric
 robot_type: simPanda
 n: 7
-m_base: 0.1
+m_base: 1.0
 obst:
   exp: 2.0
-  lam: 10.0
+  lam: 5.0
 selfCol:
   exp: 3.0
-  lam: 0.5
+  lam: 1.5
 attractor:
   k_psi: 5.0
 limits:

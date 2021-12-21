@@ -1,4 +1,5 @@
 T: 4000
+dynamic: True
 dt: 0.01
 env: point-robot-acc-v0
 robot_type: pointMass
@@ -7,24 +8,23 @@ goal:
   subgoal1:
     prime: True
     m: 2
-    w: 1
+    w: 2
     indices:
       - 0
       - 1
     parent_link: 0
     child_link: 1
-    desired_position:
-        - "-2.0 * ca.sin(0.3 * t)"
-        - "1.5 * ca.cos(0.3 * t)"
+    trajectory:
+        - "-2.0 * ca.sin(0.5 * t)"
+        - "1.5 * ca.cos(0.5 * t)"
     low:
       - -5.0
       - -5.0
     high: 
       - 5.0
       - 5.0
-    type: analytic
-    dynamic:
-      True
+    type: analyticSubGoal
+    epsilon: 0.1
 initState:
   q0:
     - 2.0
@@ -42,23 +42,25 @@ limits:
 r_body: 0.01
 randomObstacles:
   number: 2
-  limits:
-    x:
-      low:
-        - -3.0
-        - -3.0
-      high:
-        - 3.0
-        - 3.0
-    r:
-      low: 0.1
-      high: 0.5
 obstacles:
   obst1:
-    x: 
-      - 2.0
-      - 0.5
-    r: 0.15
+    dim: 2
+    type: sphereObstacle
+    geometry:
+      position: 
+        - 2.0
+        - 0.5
+      radius: 0.15
+    low:
+      position:
+        - -3.0
+        - -3.0
+      radius: 0.0
+    high:
+      position:
+        - 3.0
+        - 3.0
+      radius: 0.5
 selfCollision:
   pairs:
     

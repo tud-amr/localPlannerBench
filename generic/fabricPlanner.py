@@ -1,9 +1,8 @@
 import casadi as ca
-import yaml
 import numpy as np
 
 from optFabrics.planner.fabricPlanner import DefaultFabricPlanner
-from optFabrics.planner.default_geometries import CollisionGeometry, GoalGeometry
+from optFabrics.planner.nonHolonomicPlanner import DefaultNonHolonomicPlanner
 from optFabrics.planner.default_energies import CollisionLagrangian, ExecutionLagrangian
 from optFabrics.planner.default_maps import (
     CollisionMap,
@@ -17,16 +16,16 @@ from optFabrics.planner.default_geometries import (
     GoalGeometry,
     LimitGeometry,
 )
+from optFabrics.diffGeometry.analyticSymbolicTrajectory import AnalyticSymbolicTrajectory
 
-from optFabrics.diffGeometry.referenceTrajectory import AnalyticTrajectory
 
 from optFabrics.diffGeometry.diffMap import DifferentialMap, RelativeDifferentialMap
 from optFabrics.diffGeometry.energized_geometry import WeightedGeometry
 
 from fabricsExperiments.generic.abstractPlanner import AbstractPlanner
-from fabricsExperiments.infrastructure.variables import t
 
-from obstacle import RefDynamicObstacle
+from MotionPlanningEnv.dynamicSphereObstacle import DynamicSphereObstacle
+from MotionPlanningEnv.sphereObstacle import SphereObstacle
 
 
 class FabricPlanner(AbstractPlanner):
@@ -47,7 +46,10 @@ class FabricPlanner(AbstractPlanner):
         self.reset()
 
     def reset(self):
-        self._planner = DefaultFabricPlanner(self.n(), m_base=self.mBase(), debug=False)
+        if self._exp.robotType() in ['groundRobot', 'boxer']:
+            self._planner = DefaultNonHolonomicPlanner(self.n(), m_base=self.mBase(), debug=False)
+        else:
+            self._planner = DefaultFabricPlanner(self.n(), m_base=self.mBase(), debug=False)
         self._q, self._qdot = self._planner.var()
 
     def interval(self):
@@ -88,31 +90,39 @@ class FabricPlanner(AbstractPlanner):
             x, xdot, exp=self.configObst()["exp"], lam=self.configObst()["lam"]
         )
         for i, obst in enumerate(obsts):
-            if isinstance(obst.x(), np.ndarray):
-                m_obst = obst.x().size
-            else:
-                m_obst = len(obst.x())
-            x_col = ca.SX.sym("x_col", m_obst)
-            xdot_col = ca.SX.sym("xdot_col", m_obst)
-            x_rel = ca.SX.sym("x_rel", m_obst)
-            xdot_rel = ca.SX.sym("xdot_rel", m_obst)
+            m_obst = obst.dim()
+            if isinstance(obst, DynamicSphereObstacle):
+                refTraj_i = AnalyticSymbolicTrajectory(ca.SX(np.identity(m_obst)), m_obst, traj=obst.traj())
+                x_col = ca.SX.sym("x_col", m_obst)
+                xdot_col = ca.SX.sym("xdot_col", m_obst)
+                x_rel = ca.SX.sym("x_rel", m_obst)
+                xdot_rel = ca.SX.sym("xdot_rel", m_obst)
             for j in range(1, self.n() + 1):
                 if self._exp.robotType() == "pointMass" and j == 1:
                     continue
+                if self._exp.robotType() == "groundRobot" and j == 1:
+                    continue
                 fk = self._exp.fk(self._q, j, positionOnly=True)
-                if isinstance(obst, RefDynamicObstacle):
-                    phi_n = ca.norm_2(x_rel) / (obst.r() + r_body) - 1
+                if self._exp.robotType() == 'boxer':
+                    fk = fk[0:2]
+                if isinstance(obst, DynamicSphereObstacle):
+                    phi_n = ca.norm_2(x_rel) / (obst.radius() + r_body) - 1
                     dm_n = DifferentialMap(phi_n, q=x_rel, qdot=xdot_rel)
-                    dm_rel = RelativeDifferentialMap(q=x_col, qdot=xdot_col, refTraj = obst.refTraj())
+                    dm_rel = RelativeDifferentialMap(q=x_col, qdot=xdot_col, refTraj =refTraj_i)
                     dm_col = DifferentialMap(fk, q=self._q, qdot=self._qdot)
                     eg = WeightedGeometry(g=geo_col, le=lag_col)
                     eg_n = eg.pull(dm_n)
                     eg_rel = eg_n.pull(dm_rel)
                     self._planner.addWeightedGeometry(dm_col, eg_rel)
                     #self._planner.addGeometry(dm_col, lag_col.pull(dm_n).pull(dm_rel), geo_col.pull(dm_n).pull(dm_rel))
-                else:
+                elif isinstance(obst, SphereObstacle):
+                    """
                     dm_col = CollisionMap(
                         self._q, self._qdot, fk, obst.x(), obst.r(), r_body=r_body
+                    )
+                    """
+                    dm_col = CollisionMap(
+                        self._q, self._qdot, fk, obst.position(), obst.radius(), r_body=r_body
                     )
                     self._planner.addGeometry(dm_col, lag_col, geo_col)
 
@@ -149,27 +159,30 @@ class FabricPlanner(AbstractPlanner):
 
     def setGoal(self, goal):
         for subGoal in goal.subGoals():
-            if subGoal.isJointSpaceGoal():
+            if subGoal.type() == "staticJointSpaceSubGoal":
                 fk = self._q[subGoal.indices()]
             else:
                 fk_child = self._exp.fk(self._q, subGoal.childLink(), positionOnly=True)[subGoal.indices()]
                 fk_parent = self._exp.fk(self._q, subGoal.parentLink(), positionOnly=True)[subGoal.indices()]
                 fk = fk_child - fk_parent
-            if subGoal.dynamic():
-                refTraj = subGoal.trajectory()
+            if subGoal.type() == "analyticSubGoal":
+                goalSymbolicTraj = AnalyticSymbolicTrajectory(ca.SX(np.identity(subGoal.m())), subGoal.m(), traj=subGoal.traj())
                 dm_psi, lag_psi, geo_psi, x_psi, xdot_psi = defaultDynamicAttractor(
-                    self._q, self._qdot, fk, refTraj,
-                    k_psi=self.configAttractor()['k_psi'] * subGoal.w()
+                    self._q, self._qdot, fk, goalSymbolicTraj, k_psi=self.configAttractor()['k_psi'] * subGoal.weight()
                 )
-                self._planner.addForcingGeometry(
-                    dm_psi, lag_psi, geo_psi, goalVelocity=refTraj.xdot()
+                self._planner.addForcingGeometry(dm_psi, lag_psi, geo_psi, goalVelocity=goalSymbolicTraj.xdot())
+            elif subGoal.type() == "splineSubGoal": 
+                goalSymbolicTraj = AnalyticSymbolicTrajectory(ca.SX(np.identity(subGoal.m())), subGoal.m(), traj=subGoal.traj())
+                dm_psi, lag_psi, geo_psi, x_psi, xdot_psi = defaultDynamicAttractor(
+                    self._q, self._qdot, fk, goalSymbolicTraj, k_psi=self.configAttractor()['k_psi'] * subGoal.weight()
                 )
+                self._planner.addForcingGeometry(dm_psi, lag_psi, geo_psi, goalVelocity=goalSymbolicTraj.xdot())
             else:
                 dm_psi, lag_psi, geo_psi, x_psi, xdot_psi = defaultAttractor(
-                    self._q, self._qdot, subGoal.desiredPosition(), fk
+                    self._q, self._qdot, subGoal.position(), fk
                 )
                 geo_psi = GoalGeometry(
-                    x_psi, xdot_psi, k_psi=self.configAttractor()["k_psi"] * subGoal.w()
+                    x_psi, xdot_psi, k_psi=self.configAttractor()["k_psi"] * subGoal.weight()
                 )
                 self._planner.addForcingGeometry(dm_psi, lag_psi, geo_psi)
             if subGoal.isPrimeGoal():

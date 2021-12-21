@@ -4,10 +4,10 @@ dt: 0.10
 H: 30
 interval: 10
 weights:
-  wx: 0.2
+  wx: 0.5
   wvel: 2.5
   ws: 1e10
-  wu: 1.0
+  wu: 0.5
 obst:
   nbObst: 5
 dynamic: true

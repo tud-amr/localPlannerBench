@@ -9,15 +9,14 @@ import pandaReacher
 import nLinkReacher
 import tiagoReacher
 import mobileReacher
+import groundRobots
+import boxerRobot
 
-#from casadiFk import ForwardKinematics
-from forwardKinematics.fk_creator import FkCreator
-from obstacle import Obstacle, RefDynamicObstacle
+from forwardkinematics.fksCommon.fk_creator import FkCreator
+from MotionPlanningEnv.obstacleCreator import ObstacleCreator
+from MotionPlanningGoal.staticSubGoal import StaticSubGoal
+from MotionPlanningGoal.goalComposition import GoalComposition
 
-from fabricsExperiments.infrastructure.motionPlanningGoal import MotionPlanningGoal
-from fabricsExperiments.infrastructure.variables import t
-
-from optFabrics.diffGeometry.referenceTrajectory import AnalyticTrajectory
 
 
 class ExperimentIncompleteError(Exception):
@@ -47,6 +46,7 @@ class Experiment(object):
             "obstacles",
             "r_body",
             "selfCollision",
+            "dynamic",
         ]
         self.parseSetup()
         self._fk = FkCreator(self.robotType(), self.n()).fk()
@@ -55,40 +55,27 @@ class Experiment(object):
         with open(self._setupFile, "r") as setupStream:
             self._setup = yaml.safe_load(setupStream)
         self.checkCompleteness()
-        self._motionPlanningGoal = MotionPlanningGoal((self._setup["goal"]))
-        self._dynamic = self._motionPlanningGoal.dynamic()
-        self._dynamicObstacles = False
+        self._motionPlanningGoal = GoalComposition(name="mpg", contentDict=self._setup['goal'])
         self.parseObstacles()
 
     def parseObstacles(self):
         self._obstacles = []
+        self._obstacleCreator = ObstacleCreator()
         if self._setup["obstacles"]:
             for obst in self._setup["obstacles"]:
                 obstData = self._setup["obstacles"][obst]
-                if 'dynamic' not in obstData.keys() or not obstData['dynamic']:
-                    self._obstacles.append(
-                        Obstacle([float(xi) for xi in obstData["x"]], obstData["r"])
-                    )
-                else:
-                    self._dynamicObstacles = True
-                    trajFun = [eval(x) for x in obstData['trajFun']]
-                    m = len(obstData['trajFun'])
-                    refTraj = AnalyticTrajectory(
-                        m, ca.SX(np.identity(m)), traj=trajFun, t=t, name="goal"
-                    )
-                    refTraj.concretize()
-                    self._obstacles.append(
-                        RefDynamicObstacle(refTraj, obstData["r"], obstData['trajFun'])
-                    )
+                obstType = obstData['type']
+                obstName = obst
+                self._obstacles.append(self._obstacleCreator.createObstacle(obstType, obstName, obstData))
 
     def dynamic(self):
-        return (self._dynamic or self._dynamicObstacles)
-
-    def hasDynamicObstacles(self):
-        return self._dynamicObstacles
+        return self._setup['dynamic']
 
     def selfCollisionPairs(self):
-        return self._setup["selfCollision"]["pairs"]
+        if self._setup['selfCollision']['pairs']:
+            return self._setup["selfCollision"]["pairs"]
+        else:
+            return []
 
     def rBody(self):
         return self._setup["r_body"]
@@ -97,14 +84,15 @@ class Experiment(object):
         return self._fk.fk(q, n, positionOnly=positionOnly)
 
     def evaluate(self, t):
-        evalObsts = self.evaluateObstacles(t)
-        return self._motionPlanningGoal.evaluate(t) + evalObsts
+        evalObsts = self.evaluateObstacles(t=t)
+        evalGoal = self._motionPlanningGoal.evaluate(t=t)
+        return evalGoal + evalObsts
 
     def evaluateObstacles(self, t):
         evals = []
         for obst in self._obstacles:
-            if isinstance(obst, RefDynamicObstacle):
-                evals += obst.evaluate(t)
+            if 'analytic' in obst.type():
+                evals += obst.traj().evaluate(t=t)
         return evals
 
     def robotType(self):
@@ -146,13 +134,14 @@ class Experiment(object):
         return self._motionPlanningGoal
 
     def primeGoal(self, **kwargs):
+        return self._motionPlanningGoal.primeGoal()
         if 't' in kwargs:
             return self._motionPlanningGoal.evaluatePrimeGoal(kwargs.get('t'))
         else:
             return self._motionPlanningGoal.primeGoal()
 
     def evaluatePrimeGoal(self, t):
-        return self._motionPlanningGoal.evaluatePrimeGoal(t)
+        return self.primeGoal().position(t=t)
 
     def getDynamicGoals(self):
         return self._motionPlanningGoal.dynamicGoals()
@@ -164,13 +153,15 @@ class Experiment(object):
             return gym.make(self.envName(), render=render, dt=self.dt())
 
     def addScene(self, env):
+        """
         for obst in self._obstacles:
             env.addObstacle(pos=obst.x(), filename='sphere05red_nocol.urdf')
         if isinstance(self.primeGoal(), np.ndarray):
             env.addObstacle(pos=self.primeGoal(), filename="sphere_goal.urdf")
-
-    def addMovingObstacle(self, env):
-        env.addMovingObstacle(self._obstacles[0])
+        """
+        for obst in self._obstacles:
+            env.addObstacle(obst)
+        env.addGoal(self.goal())
 
     def shuffleInitConfiguration(self):
         q0_new = np.random.uniform(low=self.limits()[0], high=self.limits()[1])
@@ -178,18 +169,13 @@ class Experiment(object):
 
     def shuffleObstacles(self):
         self._obstacles = []
+        obstData = self._setup["obstacles"]['obst0']
+        obstType = obstData['type']
         for i in range(self._setup["randomObstacles"]["number"]):
-            pos = np.random.uniform(
-                low=self._setup["randomObstacles"]["limits"]["x"]["low"],
-                high=self._setup["randomObstacles"]["limits"]["x"]["high"],
-            )
-            r = float(
-                np.random.uniform(
-                    low=self._setup["randomObstacles"]["limits"]["r"]["low"],
-                    high=self._setup["randomObstacles"]["limits"]["r"]["high"],
-                )
-            )
-            self._obstacles.append(Obstacle(pos, r))
+            obstName = 'obst' + str(i)
+            randomObst = self._obstacleCreator.createObstacle(obstType, obstName, obstData)
+            randomObst.shuffle()
+            self._obstacles.append(randomObst)
 
     def shuffle(self, random_obst, random_init, random_goal):
         if random_goal:
@@ -212,43 +198,40 @@ class Experiment(object):
 
     def checkFeasibility(self, checkGoalReachible):
         for o in self.obstacles():
-            for i in range(0, self.n() + 1):
+            for i in range(1, self.n() + 1):
                 fk = self.fk(self.initState()[0], i, positionOnly=True)
-                dist_initState = np.linalg.norm(np.array(o.x()) - fk)
-                if dist_initState < (o.r() + self.rBody()):
+                if self.robotType() == 'boxer':
+                    fk = fk[0:2]
+                dist_initState = np.linalg.norm(np.array(o.position()) - fk)
+                if dist_initState < (o.radius() + self.rBody()):
                     raise ExperimentInfeasible("Initial configuration in collision")
-            if len(self.primeGoal()) == len(o.x()) and isinstance(self.primeGoal(), np.ndarray):
-                dist_goal = np.linalg.norm(np.array(o.x()) - self.primeGoal())
-                if dist_goal < (o.r() + self.rBody()):
+            if not self.dynamic():
+                dist_goal = np.linalg.norm(np.array(o.position()) - self.primeGoal().position())
+                if dist_goal < (o.radius() + self.rBody()):
                     raise ExperimentInfeasible("Goal in collision")
-        if self.robotType() != "pointMass":
-            for i in range(self.n() + 1):
-                fk1 = self.fk(self.initState()[0], i, positionOnly=True)
-                for j in range(i + 2, self.n() + 1):
-                    fk2 = self.fk(self.initState()[0], j, positionOnly=True)
-                    dist_initState = np.linalg.norm(fk1 - fk2)
-                    if dist_initState < (2 * self.rBody()):
-                        raise ExperimentInfeasible(
-                            "Initial configuration in self collision"
-                        )
-            if isinstance(self.primeGoal(), np.ndarray) and np.linalg.norm(self.primeGoal()) > self.n():
-                raise Experiment("Goal unreachible")
+        for pair in self.selfCollisionPairs():
+            fk1 = self.fk(self.initState()[0], pair[0], positionOnly=True)
+            fk2 = self.fk(self.initState()[0], pair[1], positionOnly=True)
+            dist_initState = np.linalg.norm(fk1 - fk2)
+            if dist_initState < (2 * self.rBody()):
+                raise ExperimentInfeasible(
+                    "Initial configuration in self collision"
+                )
+        if self.robotType() == "planarArm":
+            if np.linalg.norm(np.array(self.primeGoal().position())) > self.n():
+                raise ExperimentInfeasible("Goal unreachible")
 
     def save(self, folderPath):
-        self._setup["goal"] = self._motionPlanningGoal.subGoalsDict()
+        self._setup["goal"] = self._motionPlanningGoal.toDict()
         obstsDict = {}
         obstFile = folderPath + "/obst"
         initStateFilename = folderPath + "/initState.csv"
         for i, obst in enumerate(self._obstacles):
-            obstsDict["obst" + str(i)] = obst.toDict()
-            if isinstance(obst, RefDynamicObstacle):
-                obst.toCSV(obstFile + "_" + str(i) + ".csv", self.T() * self.dt())
-            else:
-                obst.toCSV(obstFile + "_" + str(i) + ".csv")
+            obstsDict[obst.name()] = obst.toDict()
+            obst.toCSV(obstFile + "_" + str(i) + ".csv")
         self._setup["obstacles"] = obstsDict
         with open(folderPath + "/exp.yaml", "w") as file:
             yaml.dump(self._setup, file)
-        self._motionPlanningGoal.toCSV(folderPath)
         with open(initStateFilename, "w") as file:
             csv_writer = csv.writer(file, delimiter=",")
             csv_writer.writerow(self.initState()[0])

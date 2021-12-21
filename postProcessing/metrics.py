@@ -1,5 +1,4 @@
 import numpy as np
-from numpyFk import numpyFk
 import abc
 
 
@@ -86,16 +85,16 @@ class ClearanceMetric(Metric):
         for i, obst in enumerate(obstacles):
             for i_fk in range(0, n):
                 distancesToObst = (
-                    computeDistances(fks[:, i_fk, :], np.array(obst.x()))
-                    - obst.r()
+                    computeDistances(fks[:, i_fk, :], np.array(obst.position()))
+                    - obst.radius()
                     - r_body
                 )
-                minDistToObst = float(np.min(distancesToObst))
+                minDistToObst = float(np.min(distancesToObst)) + 1e-3 # make  MPC happy
                 minDistances.append(minDistToObst)
                 distanceToObsts["obst" + str(i) + "_fk" + str(i_fk)] = {
                     "dist": minDistToObst,
-                    "loc": obst.toArray()[0:m].tolist(),
-                    "r": obst.r(),
+                    "loc": obst.position(),
+                    "r": obst.radius(),
                 }
         return {"short": float(min(minDistances)), "allMinDist": distanceToObsts}
 
@@ -105,17 +104,20 @@ class DynamicClearanceMetric(Metric):
         m = self._params['m']
         n = self._params['n']
         r_body = self._params['r_body']
-        r_obst = self._params['r_obst']
+        r_obsts = self._params['r_obsts']
         rawData = np.stack([data[name] for name in self._measNames[:m*n]])
         fks = rawData.T.reshape(-1, n, m)
-        #fks = np.stack([data[name] for name in self._measNames[:m]]).T
-        obst = np.stack([data[name] for name in self._measNames[m*n:m*n+m]]).T
+        nb_obst = len(r_obsts)
+        obsts = []
+        for i in range(nb_obst):
+            obstNames = [f'obst_{i}_{j}_0' for j in range(m)]
+            obsts.append(np.stack([data[name] for name in obstNames]).T)
         t = np.array(data[self._measNames[-1]])
         minDistances = []
         distanceToObsts = {}
-        for i in range(1):
+        for i, obst in enumerate(obsts):
             for i_fk in range(0, n):
-                distancesToObst = computeDistances(fks[:, i_fk, :], obst) - r_body - r_obst
+                distancesToObst = computeDistances(fks[:, i_fk, :], obst) - r_body - r_obsts[i]
                 index = np.argmin(distancesToObst)
                 minDistToObst = float(min(distancesToObst)) + 1e-3 # make MPC happy
                 minDistances.append(minDistToObst)
@@ -123,7 +125,8 @@ class DynamicClearanceMetric(Metric):
                     "dist": minDistToObst,
                     "loc": obst[index].tolist(),
                     "robotLoc": fks[index, i_fk, :].tolist(),
-                    "r": r_body,
+                    "r_body": r_body,
+                    "r_obst": r_obsts[i],
                 }
         return {
             "short": float(min(minDistances)),

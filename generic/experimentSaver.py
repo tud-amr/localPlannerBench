@@ -3,6 +3,7 @@ import sys
 import yaml
 import csv
 
+
 class ExperimentSaver(object):
     def __init__(self, resFolder, timeStamp):
         self._resFolder = resFolder
@@ -13,29 +14,32 @@ class ExperimentSaver(object):
         self._exp = exp
         self._planner = planner
 
-    def addResultPoint(self, t, q, qdot, solving_time, goal, obst):
+    def addResultPoint(self, t, q, qdot, action, solving_time, goal, obsts):
         resDict = {'t': t, 't_planning': solving_time}
+        for a_i, a in enumerate(action):
+            resDict['a' + str(a_i)] = a
         for n_i in range(self._exp.n() + 1):
             if n_i < self._exp.n():
                 resDict['q' + str(n_i)] = q[n_i]
                 resDict['q' + str(n_i) + 'dot'] = qdot[n_i]
-                resDict['a' + str(n_i)] = q[n_i]
-            if self._exp.robotType() == 'planarArm':
-                fk = self._exp.fk(q, n_i, positionOnly=False)
-                resDict['fk' + str(n_i) + "_x"] = fk[0]
-                resDict['fk' + str(n_i) + "_y"] = fk[1]
-                resDict['fk' + str(n_i) + "_theta"] = fk[2]
             if self._exp.robotType() == 'panda':
                 fk = self._exp.fk(q, n_i, positionOnly=True)
                 resDict['fk' + str(n_i) + "_x"] = fk[0]
                 resDict['fk' + str(n_i) + "_y"] = fk[1]
                 resDict['fk' + str(n_i) + "_z"] = fk[2]
+            else:
+                fk = self._exp.fk(q, n_i, positionOnly=False)
+                resDict['fk' + str(n_i) + "_x"] = fk[0]
+                resDict['fk' + str(n_i) + "_y"] = fk[1]
+                if self._exp.robotType() == 'planarArm':
+                    resDict['fk' + str(n_i) + "_theta"] = fk[2]
         for i_der, goal_der in enumerate(goal):
             for j_dim, goal_dim in enumerate(goal_der):
                 resDict['goal_' + str(j_dim) + '_' + str(i_der)] = goal_dim
-        for i_der, obst_der in enumerate(obst):
-            for j_dim in range(obst_der.size):
-                resDict['obst_' + str(j_dim) + '_' + str(i_der)] = obst_der[j_dim]
+        for k_obst, obst in enumerate(obsts):
+            for i_der, obst_der in enumerate(obst):
+                for j_dim in range(obst_der.size):
+                    resDict['obst_' + str(k_obst) + '_' + str(j_dim) + '_' + str(i_der)] = obst_der[j_dim]
         self._res.append(resDict)
 
     def saveResult(self, folderPath):

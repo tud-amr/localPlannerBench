@@ -1,4 +1,5 @@
 T: 3000
+dynamic: True
 dt: 0.05
 env: nLink-reacher-acc-v0
 robot_type: planarArm
@@ -7,18 +8,17 @@ goal:
   subgoal1:
     prime: True
     m: 2
-    w: 1
+    w: 2
     indices:
       - 0
       - 1
     parent_link: 0
     child_link: 5
-    desired_position:
-      trajFun:
-        - "3.5 * ca.cos(0.1 * t)"
-        - "-3.5 * ca.sin(0.1 * t)"
-    type: analytic
-    dynamic: True
+    trajectory:
+      - "3.5 * ca.cos(0.1 * t)"
+      - "-3.5 * ca.sin(0.1 * t)"
+    type: dynamicSubGoal
+    epsilon: 0.2
 # subgoal2:
 #   prime: False
 #   m: 1
@@ -78,10 +78,13 @@ limits:
 r_body: 0.10
 obstacles:
   obst1:
-    x:
-      - -3.8
-      - 0.0
-    r: 0.5
+    type: sphereObstacle
+    geometry:
+      position:
+        - -3.8
+        - 0.0
+      radius: 0.5
+    dim: 2
 randomObstacles:
   number: 5
   limits:

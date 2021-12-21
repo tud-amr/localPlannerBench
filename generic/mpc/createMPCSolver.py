@@ -8,27 +8,27 @@ from urdfpy import URDF
 
 import os
 
-from casadiFk import ForwardKinematics
+from forwardkinematics.fksCommon.fk_creator import FkCreator
 from fabricsExperiments.generic.mpc.parameterMap import getParameterMap
 
 slack = True
-n = 7
-m = 3
-dt = 0.1
+n = 2
+m = 2
+dt = 0.01
 nbObst = 5
-m_obst = 3
-robotType = "panda"
+m_obst = 2
+robotType = "pointMass"
 pairs = []
 if robotType == 'panda':
     pairs = [
-        [0, 3],
-        [0, 4],
-        [0, 5],
+        #[0, 3],
+        #[0, 4],
+        #[0, 5],
         [0, 6],
         [0, 7],
-        [1, 3],
-        [1, 4],
-        [1, 5],
+        #[1, 3],
+        #[1, 4],
+        #[1, 5],
         [1, 6],
         [1, 7],
         [2, 6],
@@ -38,7 +38,7 @@ elif robotType == 'planarArm':
     for i in range(n+1):
         for j in range(i+2, n+1):
             pairs.append([i, j])
-generic_fk = ForwardKinematics(robot_type=robotType)
+generic_fk = FkCreator(robotType, n).fk()
 paramMap, npar, nx, nu, ns = getParameterMap(n, m, nbObst, m_obst, slack)
 N = 30
 dt_str = str(dt).replace(".", "")
@@ -87,7 +87,7 @@ def eval_obj(z, p):
     W = diagSX(w, m)
     Wvel = diagSX(wvel, n)
     Wu = diagSX(wu, n)
-    fk = generic_fk.getFk(q, n, positionOnly=True)
+    fk = generic_fk.fk(q, n, positionOnly=True)
     err = fk - g
     Jx = ca.dot(err, ca.mtimes(W, err)) # only penalize in objN -> does not affect the result
     Jvel = ca.dot(qdot, ca.mtimes(Wvel, qdot))
@@ -109,7 +109,7 @@ def eval_objN(z, p):
     g = p[paramMap["g"]]
     W = diagSX(w, m)
     Wvel = diagSX(wvel, n)
-    fk = generic_fk.getFk(q, n, positionOnly=True)
+    fk = generic_fk.fk(q, n, positionOnly=True)
     err = fk - g
     Jx = ca.dot(err, ca.mtimes(W, err)) # only have that term here
     Jvel = ca.dot(qdot, ca.mtimes(Wvel, qdot))
@@ -134,7 +134,7 @@ def eval_ineq(z, p):
     r_body = p[paramMap["r_body"]]
     ineqs = []
     for j in range(n):
-        fk = generic_fk.getFk(q, j + 1, positionOnly=True)
+        fk = generic_fk.fk(q, j + 1, positionOnly=True)
         for i in range(nbObst):
             obst = obsts[i * (m_obst + 1) : (i + 1) * (m_obst + 1)]
             x = obst[0:m_obst]
@@ -154,8 +154,8 @@ def eval_selfCollision(z, p):
     r_body = p[paramMap["r_body"]]
     ineqs = []
     for pair in pairs:
-        fk1 = generic_fk.getFk(q, pair[0], positionOnly=True)
-        fk2 = generic_fk.getFk(q, pair[1], positionOnly=True)
+        fk1 = generic_fk.fk(q, pair[0], positionOnly=True)
+        fk2 = generic_fk.fk(q, pair[1], positionOnly=True)
         dist = ca.norm_2(fk1 - fk2)
         ineqs.append(dist - (2 * r_body) + s)
     return ineqs

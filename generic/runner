@@ -151,43 +151,44 @@ class Runner(object):
                 print("Case not feasible %s" % str(e))
                 continue
             print("Composing the planner")
-            t0 = time.time()
+            t0 = time.perf_counter()
             self.setPlanner()
-            print("Finished composing the planner in %1.4f secs" % (time.time() - t0))
+            print("Finished composing the planner in %1.4f secs" % (time.perf_counter() - t0))
             q0, q0dot = self._experiment.initState()
             timeStamp = "{:%Y%m%d_%H%M%S}".format(datetime.datetime.now())
             if self._compare:
                 timeStamp = self._compareTimeStamp
             for planner in self._planners:
-                if self._experiment.robotType() == 'panda' and not self._ros:
+                ob, t0 = self.reset(q0, q0dot)
+                if not self._ros:
                     self._experiment.addScene(self._env)
-                if self._experiment.robotType() == 'planarArm':
-                    self._experiment.addMovingObstacle(self._env)
                 saver = ExperimentSaver(self._res_folder, timeStamp)
                 saver.setSetups(self._experiment, planner)
                 t = 0.0
-                ob, t0 = self.reset(q0, q0dot)
                 for i in range(self._experiment.T()):
                     if self._aborted:
                         break
                     if i % 1000 == 0:
                         print("Timestep : %d" %i)
                     q = ob[0:self._experiment.n()]
-                    qdot = ob[self._experiment.n():2*self._experiment.n()]
-                    t_before = time.time()
+                    qdot = ob[-self._experiment.n():]
                     if self._experiment.dynamic():
                         envEval = self._experiment.evaluate(t)
                         if not planner.dynamic():
-                            envEval[1] = np.zeros(3)
-                            envEval[2] = np.zeros(3)
+                            envEval[1] = np.zeros(envEval[1].size)
+                            envEval[2] = np.zeros(envEval[2].size)
                         observation = [q, qdot] + envEval
                     else:
                         observation = [q, qdot]
+                    if self._experiment.robotType() in ['groundRobot', 'boxer']:
+                        observation += [ob[self._experiment.n():-self._experiment.n()]]
+                    t_before = time.perf_counter()
                     action = planner.computeAction(*observation)
-                    solving_time = time.time() - t_before
-                    primeGoal = self._experiment.evaluatePrimeGoal(t)
+                    solving_time = time.perf_counter() - t_before
+                    primeGoal = [self._experiment.evaluatePrimeGoal(t)]
                     obsts = self._experiment.evaluateObstacles(t)
-                    saver.addResultPoint(t, q, qdot, solving_time, primeGoal, obsts)
+                    obsts_cleaned = [obsts[i:i+3] for i in range(0, len(obsts), 3)]
+                    saver.addResultPoint(t, q, qdot, action, solving_time, primeGoal, obsts_cleaned)
                     ob, t_new = self.applyAction(action, t)
                     t = t_new - t0
                 if self._save:

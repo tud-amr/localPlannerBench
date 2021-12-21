@@ -1,0 +1,138 @@
+T: 40000
+dynamic: False
+dt: 0.01
+env: mobile-reacher-acc-v0
+robot_type: mobilePanda
+n: 10
+goal:
+  subgoal1:
+    prime: True
+    m: 3
+    w: 3
+    indices:
+     - 0
+     - 1
+     - 2
+    parent_link: 0
+    child_link: 10
+    desired_position:
+      - 3.0
+      - 3.0
+      - 0.5
+    type: staticSubGoal
+    epsilon: 0.05
+  subgoal2:
+    prime: False
+    m: 2
+    w: 5
+    indices:
+      - 1
+      - 2
+    parent_link: 8
+    child_link: 10
+    desired_position:
+      - 0.0
+      - 0.0
+    type: staticSubGoal
+    epsilon: 0.02
+initState:
+  q0: 
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - -1.50
+    - 0.0
+    - 1.8675
+    - 0.0
+  q0dot:
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+limits:
+  low: 
+    - -10
+    - -10
+    - -10
+    - -2.8973
+    - -1.7628
+    - -2.8973
+    - -3.0718
+    - -2.8973
+    - -0.0175
+    - -2.8973
+  high:
+    - 10
+    - 10
+    - 10
+    - 2.8973
+    - 1.7628
+    - 2.8973
+    - 0.0698
+    - 2.8973
+    - 3.7525
+    - 2.8973
+r_body: 0.04
+selfCollision:
+  pairs:
+    - [0, 7]
+    - [4, 7]
+    - [4, 7]
+    - [4, 8]
+    - [4, 9]
+    - [4, 10]
+    - [5, 9]
+    - [5, 10]
+obstacles:
+  obst1:
+    dim: 3
+    type: sphereObstacle
+    geometry:
+      position:
+        - 3.6
+        - 2.0
+        - 0.2
+      radius: 0.15
+  obst2:
+    dim: 3
+    type: sphereObstacle
+    geometry:
+      position:
+        - 1.6
+        - 2.0
+        - 0.2
+      radius: 0.55
+  obst3:
+    dim: 3
+    type: sphereObstacle
+    geometry:
+      position:
+        - 1.6
+        - 0.0
+        - 1.2
+      radius: 0.55
+randomObstacles:
+  number: 3
+  limits:
+    x:
+      low:
+        - 0.5
+        - -1.0
+        - 0.0
+      high:
+        - 1.0
+        - 1.0
+        - 1.2
+    r:
+      low: 0.15
+      high: 0.15
+    

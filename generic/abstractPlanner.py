@@ -61,8 +61,3 @@ class AbstractPlanner(ABC):
     @abstractmethod
     def computeAction(self, q, qdot):
         pass
-
-if __name__ == "__main__":
-    required_keys = ['type']
-    test_setup = "testSetupFiles/planner.yaml"
-    planner = AbstractPlanner(test_setup, required_keys)

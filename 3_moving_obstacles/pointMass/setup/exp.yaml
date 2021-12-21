@@ -1,4 +1,5 @@
 T: 3000
+dynamic: True
 dt: 0.01
 env: point-robot-acc-v0
 robot_type: pointMass
@@ -22,9 +23,8 @@ goal:
     high: 
       - -1.0
       - -1.0
-    type: static
-    dynamic:
-      False
+    type: staticSubGoal
+    epsilon: 0.1
 initState:
   q0:
     - 3.5
@@ -54,12 +54,14 @@ randomObstacles:
       low: 0.1
       high: 0.5
 obstacles:
-  obst1:
-    trajFun: 
-      - "0.0"
-      - "-2.5 + 0.5 * t"
-    r: 0.5
-    dynamic: True
+  obst0:
+    dim: 2
+    type: analyticSphereObstacle
+    geometry: 
+      trajectory:
+        - "0.0"
+        - "-2.5 + 0.5 * t"
+      radius: 0.5
 selfCollision:
   pairs:
     

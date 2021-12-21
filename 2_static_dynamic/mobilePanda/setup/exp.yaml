@@ -1,4 +1,5 @@
 T: 40000
+dynamic: True
 dt: 0.01
 env: mobile-reacher-acc-v0
 robot_type: mobilePanda
@@ -14,13 +15,12 @@ goal:
      - 2
    parent_link: 0
    child_link: 10
-   desired_position:
-     trajFun:
-       - "3 * ca.sin(0.1 * t) + 0.5"
-       - "1 * (ca.cos(0.1 * t) - 1.0)"
-       - "1.0 + 0.0 * ca.cos(0.1 * t)"
-   type: analytic
-   dynamic : True
+   trajectory:
+     - "3 * ca.sin(0.2 * t) + 0.5"
+     - "1 * (ca.cos(0.2 * t) - 1.0)"
+     - "1.0 + 0.1 * ca.cos(0.3 * t)"
+   type: dynamicSubGoal
+   epsilon: 0.02
 #  subgoal2:
 #    prime: True
 #    m: 2
@@ -115,11 +115,23 @@ selfCollision:
     - [5, 10]
 obstacles:
   obst1:
-    x:
-      - 100.6
-      - 0.0
-      - 0.8
-    r: 0.15
+    dim: 3
+    type: sphereObstacle
+    geometry:
+      position:
+        - 2.6
+        - -2.0
+        - 0.8
+      radius: 0.15
+  obst2:
+    dim: 3
+    type: sphereObstacle
+    geometry:
+      position:
+        - -1.6
+        - -2.0
+        - 0.8
+      radius: 0.55
 randomObstacles:
   number: 3
   limits:

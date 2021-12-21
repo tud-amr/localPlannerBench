@@ -19,6 +19,7 @@ speed:
 damper:
   r_d: 0.2
   b:
-    - 0.01
+    - 0.50
     - 6.5
 dynamic: False
+

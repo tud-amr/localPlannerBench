@@ -17,7 +17,7 @@ limits:
 speed:
   ex_factor: 1.0
 damper:
-  r_d: 0.01
+  r_d: 0.3
   b:
     - 2.0
     - 15.0
