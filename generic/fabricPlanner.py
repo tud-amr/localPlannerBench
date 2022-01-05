@@ -46,7 +46,7 @@ class FabricPlanner(AbstractPlanner):
         self.reset()
 
     def reset(self):
-        if self._exp.robotType() in ['groundRobot', 'boxer']:
+        if self._exp.robotType() in ['groundRobot', 'boxer', 'albert']:
             self._planner = DefaultNonHolonomicPlanner(self.n(), m_base=self.mBase(), debug=False)
         else:
             self._planner = DefaultFabricPlanner(self.n(), m_base=self.mBase(), debug=False)
@@ -116,11 +116,6 @@ class FabricPlanner(AbstractPlanner):
                     self._planner.addWeightedGeometry(dm_col, eg_rel)
                     #self._planner.addGeometry(dm_col, lag_col.pull(dm_n).pull(dm_rel), geo_col.pull(dm_n).pull(dm_rel))
                 elif isinstance(obst, SphereObstacle):
-                    """
-                    dm_col = CollisionMap(
-                        self._q, self._qdot, fk, obst.x(), obst.r(), r_body=r_body
-                    )
-                    """
                     dm_col = CollisionMap(
                         self._q, self._qdot, fk, obst.position(), obst.radius(), r_body=r_body
                     )
@@ -195,6 +190,7 @@ class FabricPlanner(AbstractPlanner):
         exLag = ExecutionLagrangian(self._q, self._qdot)
         self._planner.setExecutionEnergy(exLag)
         # Speed control
+        # self._planner.setConstantSpeedControl(beta=2.0)
         ex_factor = self.configSpeed()["ex_factor"]
         self._planner.setDefaultSpeedControl(
             self._x_psi,
@@ -207,49 +203,10 @@ class FabricPlanner(AbstractPlanner):
         self._planner.concretize()
 
     def computeAction(self, *args):
-        """
-        print("----")
-        print(args[0])
-        q = args[0]
-        qdot = args[1]
-        x_col, J_col, _ = self._dm_col.forward(q, qdot)
-        xdot_col = np.dot(J_col, qdot)
-        x_obst = args[2]
-        xdot_obst = args[3]
-        xddot_obst = args[4]
-        x_rel, xdot_rel = self._dm_rel.forward(x_col, xdot_col, x_obst, xdot_obst, xddot_obst)
-        x_n, J_n, Jdot_n = self._dm_n.forward(x_rel, xdot_rel)
-        xdot_n = np.dot(J_n, xdot_rel)
-        #print('fk : ', x_col)
-        #print("x_rel : ", x_rel)
-        #print("x_n : ", x_n)
-        #geoEval = self._geo_col.evaluate(x_n, xdot_n)
-        #print("h : ", geoEval[0])
-        #print("xddot_n : ", geoEval[1])
-        geoColEval = self._geo_col.evaluate(x_n, xdot_n)
-        print("col")
-        print(x_n)
-        print(geoColEval)
-        h_col = geoColEval[0]
-        Jt_n = np.transpose(J_n)
-        JtJ_inv = np.linalg.pinv(np.dot(Jt_n, J_n) + np.identity(3) * 1e-7)
-        h_rel =np.dot(JtJ_inv, -np.dot(Jt_n, np.dot(Jdot_n, xdot_rel)) + np.dot(Jt_n, h_col))
-        print("h_rel_man: ", h_rel)
-        geoRelEval = self._geo_rel.evaluate(x_rel, xdot_rel)
-        print("relative")
-        print(x_rel)
-        print(geoRelEval)
-        print("differential map")
-        #geoLeafEval = self._geo_leaf.evaluate(x_col, xdot_col, x_obst, xdot_obst, xddot_obst)
-        #print(x_col)
-        #print(geoLeafEval)
-        #lagRelEval = self._lag_rel.evaluate(x_col, xdot_col, x_obst, xdot_obst, xddot_obst)
-        #print(np.linalg.cond(lagRelEval[0]), lagRelEval[1], lagRelEval[2])
-        debugEval = self._planner.debugEval(*args)
-        #print(debugEval[:-1])
-        #print(np.linalg.cond(debugEval[-1]))
-        """
         action = self._planner.computeAction(*args)
+        if self._planner._debug:
+            debugEval = self._planner.debugEval(*args)
+            print(debugEval)
         return action
 
 

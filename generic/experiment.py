@@ -9,6 +9,7 @@ import pandaReacher
 import nLinkReacher
 import tiagoReacher
 import mobileReacher
+import albertReacher
 import groundRobots
 import boxerRobot
 

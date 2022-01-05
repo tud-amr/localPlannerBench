@@ -151,9 +151,9 @@ class Runner(object):
                 print("Case not feasible %s" % str(e))
                 continue
             print("Composing the planner")
-            t0 = time.perf_counter()
+            start=time.perf_counter()
             self.setPlanner()
-            print("Finished composing the planner in %1.4f secs" % (time.perf_counter() - t0))
+            print(f"Planner composed in {np.round(time.perf_counter()-start, decimals=2)} sec")
             q0, q0dot = self._experiment.initState()
             timeStamp = "{:%Y%m%d_%H%M%S}".format(datetime.datetime.now())
             if self._compare:
@@ -170,8 +170,8 @@ class Runner(object):
                         break
                     if i % 1000 == 0:
                         print("Timestep : %d" %i)
-                    q = ob[0:self._experiment.n()]
-                    qdot = ob[-self._experiment.n():]
+                    q = ob['x']
+                    qdot = ob['xdot']
                     if self._experiment.dynamic():
                         envEval = self._experiment.evaluate(t)
                         if not planner.dynamic():
@@ -180,8 +180,9 @@ class Runner(object):
                         observation = [q, qdot] + envEval
                     else:
                         observation = [q, qdot]
-                    if self._experiment.robotType() in ['groundRobot', 'boxer']:
-                        observation += [ob[self._experiment.n():-self._experiment.n()]]
+                    if self._experiment.robotType() in ['groundRobot', 'boxer', 'albert']:
+                        qudot = np.concatenate((ob['vel'], ob['xdot'][3:]))
+                        observation += [qudot]
                     t_before = time.perf_counter()
                     action = planner.computeAction(*observation)
                     solving_time = time.perf_counter() - t_before
