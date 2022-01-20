@@ -10,3 +10,4 @@ weights:
   wu: 5.0
 obst:
   nbObst: 5
+slack: True
