@@ -5,11 +5,11 @@ from robotmpcs.models.pandaMpcModel import PandaMpcModel
 
 
 def createSolver():
-    robotType = "pointRobot"
+    robotType = "panda"
     debug = False
     slack = True
-    dt = 0.5
-    N = 10
+    dt = 0.1
+    N = 30
     if robotType == 'planarArm':
         n = 2
         mpcModel = PlanarArmMpcModel(2, N, n)
@@ -25,7 +25,7 @@ def createSolver():
     if slack:
         mpcModel.setSlack()
     mpcModel.setDt(dt)
-    mpcModel.setObstacles(5, 2, inCostFunction=False)
+    mpcModel.setObstacles(5, 3, inCostFunction=False)
     mpcModel.setModel()
     mpcModel.setCodeoptions(debug=debug)
     location = "./solverCollection/"

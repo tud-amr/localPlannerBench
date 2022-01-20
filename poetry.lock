@@ -359,13 +359,13 @@ pyaml = "^21.10.1"
 requests = "^2.27.1"
 
 [package.extras]
-agents = ["planarenvs", "motion-planning-scenes (>=0.1.0,<0.2.0)"]
+agents = ["planarenvs @ git+ssh://git@github.com/maxspahn/gym_envs_planar.git@ft-clean-build", "motion-planning-scenes (>=0.1.0,<0.2.0)"]
 
 [package.source]
 type = "git"
 url = "https://git@github.com/maxspahn/robot_mpcs.git"
 reference = "main"
-resolved_reference = "a695b508d42b06a6795bb4721a98c9c02995b71d"
+resolved_reference = "a30fcc7535edc0d1eca904b7537363c2103df85d"
 
 [[package]]
 name = "scipy"

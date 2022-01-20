@@ -11,9 +11,9 @@ import pprint
 import time
 import collections
 
-from fabricsExperiments.generic.experiment import Experiment
-from fabricsExperiments.generic.fabricPlanner import FabricPlanner
-from fabricsExperiments.generic.mpcPlanner import MPCPlanner
+from plannerbenchmark.generic.experiment import Experiment
+from plannerbenchmark.generic.fabricPlanner import FabricPlanner
+from plannerbenchmark.generic.mpcPlanner import MPCPlanner
 
 from metrics import (
     DistanceToPointMetric,

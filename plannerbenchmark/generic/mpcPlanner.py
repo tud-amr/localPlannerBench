@@ -39,8 +39,8 @@ class MPCPlanner(AbstractPlanner):
         debugFolder = ""
         self._solverFile = (
             path_name
-            + "/pointRobot_n"
-            + str(self.n())
+            + self._exp.robotType()
+            + "_n" + str(self.n())
             + "_"
             + dt_str
             + "_H"

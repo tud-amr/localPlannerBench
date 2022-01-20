@@ -1,6 +1,6 @@
 interval: 1
 type: fabric
-robot_type: pointMass
+robot_type: pointRobot
 n: 2
 m_base: 0.2
 obst:
