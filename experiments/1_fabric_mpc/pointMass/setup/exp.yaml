@@ -2,7 +2,7 @@ T: 2000
 dynamic: False
 dt: 0.05
 env: point-robot-acc-v0
-robot_type: pointMass
+robot_type: pointRobot
 n: 2
 goal:
   subgoal0:
