@@ -12,12 +12,12 @@ from forwardkinematics.fksCommon.fk_creator import FkCreator
 from fabricsExperiments.generic.mpc.parameterMap import getParameterMap
 
 slack = True
-n = 2
-m = 2
-dt = 0.01
+n = 7
+m = 3
+dt = 0.1
 nbObst = 5
-m_obst = 2
-robotType = "pointMass"
+m_obst = 3
+robotType = "panda"
 pairs = []
 if robotType == 'panda':
     pairs = [

@@ -281,8 +281,3 @@ class MPCPlanner(AbstractPlanner):
             self._actionCounter += 1
         return self._action
 
-
-if __name__ == "__main__":
-    test_setup = "testSetupFiles/mpcPlanar.yaml"
-    myMPCPlanner = MPCPlanner(None, test_setup)
-    myMPCPlanner.reset()

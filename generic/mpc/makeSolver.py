@@ -1,30 +1,30 @@
-from robot_mpcs.pointRobotMpcModel import PointRobotMpcModel
-from robot_mpcs.planarArmMpcModel import PlanarArmMpcModel
-from robot_mpcs.boxerMpcModel import BoxerMpcModel
+from robotmpcs.pointRobotMpcModel import PointRobotMpcModel
+from robotmpcs.planarArmMpcModel import PlanarArmMpcModel
+#from robotmpcs.boxerMpcModel import BoxerMpcModel
+from robotmpcs.pandaMpcModel import PandaMpcModel
 
 def createSolver():
-    robotType = "boxer"
+    robotType = "panda"
     debug = False
-    slack = False
-    dt = 0.5
-    N = 10
+    slack = True
+    dt = 0.1
+    N = 30
     if robotType == 'planarArm':
         n = 2
         mpcModel = PlanarArmMpcModel(2, N, n)
     elif robotType == 'pointMass':
         n = 2
         mpcModel = PointRobotMpcModel(2, N)
-    elif robotType == 'boxer':
-        nu = 2
-        nx = 3
-        mpcModel = BoxerMpcModel(nu, nx, N)
-    solverName = 'solver_n' + str(n) + '_' + str(dt).replace('.', '') + '_H' + str(N)
+    elif robotType == 'panda':
+        n = 7
+        mpcModel = PandaMpcModel(3, N)
+    else:
+        print(f"Solver for robot type {robotType} not available yet")
+        
     if slack:
         mpcModel.setSlack()
-    else:
-        solverName += "_noSlack"
     mpcModel.setDt(dt)
-    mpcModel.setObstacles(5, 2, inCostFunction=True)
+    mpcModel.setObstacles(5, 3, inCostFunction=False)
     mpcModel.setModel()
     mpcModel.setCodeoptions(solverName, debug=debug)
     location = "./solverCollection/" + robotType + "/"
