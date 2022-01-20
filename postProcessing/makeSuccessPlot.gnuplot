@@ -1,4 +1,4 @@
-set term postscript eps color size 2.5, 3.5
+set term postscript eps color size 2.0, 7.0
 seriesFolder=ARG1
 planner1Type=ARG2
 planner2Type=ARG3
@@ -8,19 +8,38 @@ outFileHist=seriesFolder."/success.eps"
 
 set output outFileHist
 set datafile separator ','
-set bmargin at screen 0.4
-set rmargin at screen 0.7
+set bmargin at screen 0.26
+#set rmargin at screen 0.9
+#set tmargin at screen 0.8
 
-set style fill solid 1.0 border -1
+set style fill solid 0.5 border -1
 set style data histogram
 set style histogram rowstacked
+set border 9
 set boxwidth 0.5
-set xtics (planner1Type 0, planner2Type 1) scale 1.0 font ',25' rotate by -45
+set xtics (planner1Type 0, planner2Type 1) scale 1.0 font ',35' rotate by 90 offset 0, -7.0 nomirror
 set xrange [-0.5:1.5]
-set yrange [0:120]
-set xtics nomirror font ',25'
-set ytics nomirror font ',25'
-set ylabel '#Cases' font ',25'
+unset ytics
+set y2range [0:160]
+set y2tics nomirror font ',35'
+set y2tics 0,20,100 rotate by 90 offset 0.5,-2.0
+set y2label '#Cases' font ',35'
 
-plot inFile using 1 t "Success" lc rgbcolor 'green', '' using 2 t 'Collision' lc rgb 'red', '' using 3 t 'Not reached' lc rgb 'blue'
-
+#set key font ',20'
+#set key outside horiz
+#set key top
+x = 0.2
+x2 = 0.6
+x3 = 1.0
+y = 105
+dx = 0.2
+dy = 5
+set label 2 'Success' at x,y+dy rotate by 90 offset 6*dx,1 font ',35'
+set object rectangle from x,y to x+dx,y+dy fc rgb 'green' fs transparent solid 0.5
+set label 3 'Collision' at x2,y+dy rotate by 90 offset 6*dx,1 font ',35'
+set object rectangle from x2,y to x2+dx,y+dy fc rgb 'red' fs transparent solid 0.5
+set label 4 'Not Reached' at x3,y+dy rotate by 90 offset 6*dx,1 font ',35'
+set object rectangle from x3,y to x3+dx,y+dy fc rgb 'blue' fs transparent solid 0.5
+plot inFile using 1 notitle lc rgbcolor 'green' axes x1y2, \
+   '' using 2 notitle lc rgb 'red' axes x1y2, \
+   '' using 3 notitle lc rgb 'blue' axes x1y2

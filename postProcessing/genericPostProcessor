@@ -28,6 +28,16 @@ from metrics import (
     IntegratedErrorMetric
 )
 
+plannerMap = {'fabric': 'SF', 'dynamicFabric': 'DF', 'mpc' : 'MPC'}
+kpiMap = {
+    'integratedError': 'intError',
+    'clearance': 'clearance',
+    'dynamicClearance': 'clearance',
+    'solverTime': 'solverTime',
+    'time2Goal': 'time2Goal',
+    'pathLength': 'pathLength',
+    'selfClearance': 'selfClear',
+}
 
 def csvToRawData(fileName):
     with open(fileName) as csvfile:
@@ -344,7 +354,9 @@ class PostProcessor(object):
         self._expFolder = seriesFolder
         self.writeSeriesResult(kpis, resultArray, feasibility, success)
         if self._seriesPlot:
-            planners = list(kpis_ordered.keys())
+            plannersList = list(kpis_ordered.keys())
+            #plannersList = ['mpc', 'fabric']
+            planners = [plannerMap[i] for i in plannersList]
             self.plotSeriesResult(planners[0], planners[1])
 
     def getSeriesComparison(self, kpis):
@@ -483,8 +495,10 @@ class PostProcessor(object):
 
     def plotSeriesResult(self, planner1, planner2):
         curPath = os.path.dirname(os.path.abspath(__file__)) + "/"
+        kpiNames = [kpiMap[i] for i in self._kpis]
+        #kpiNames = ['clearance', 'selfClear', 'solverTime', 'time2Goal', 'pathLength']
         subprocess.Popen(
-            ["./createSeriesPlot", self._expFolder, planner1, planner2] + self._kpis, cwd=curPath, stdout=subprocess.PIPE
+            ["./createSeriesPlot", self._expFolder, planner1, planner2] + kpiNames, cwd=curPath, stdout=subprocess.PIPE
         )
         subprocess.Popen(
             ["./createSuccessPlot", self._expFolder, planner1, planner2],
