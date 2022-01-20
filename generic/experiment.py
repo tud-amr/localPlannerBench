@@ -4,14 +4,14 @@ import gym
 import numpy as np
 import casadi as ca
 
-import pointRobot
-import pandaReacher
-import nLinkReacher
-import tiagoReacher
-import mobileReacher
-import albertReacher
-import groundRobots
-import boxerRobot
+import planarenvs.pointRobot
+import planarenvs.nLinkReacher
+import planarenvs.groundRobots
+#import tiagoReacher
+#import pandaReacher
+#import mobileReacher
+#import albertReacher
+#import boxerRobot
 
 from forwardkinematics.fksCommon.fk_creator import FkCreator
 from MotionPlanningEnv.obstacleCreator import ObstacleCreator
