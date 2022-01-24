@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "plannerbenchmark"
+version = "0.1.0"
+description = "Benchmark suite for local planner in dynamic environment."
+authors = ["Max Spahn <m.spahn@tudelft.nl>"]
+
+[tool.poetry.dependencies]
+python = "^3.7,<3.11"
+planarenvs = {git = "https://git@github.com/maxspahn/gym_envs_planar.git", rev = "master"}
+robotmpcs = {git = "https://git@github.com/maxspahn/robot_mpcs.git", rev = "main"}
+motion-planning-scenes = "^0.1.0"
+fabrics = {path = "../../../../code/fabrics/dist/fabrics-0.1.0.tar.gz"}
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

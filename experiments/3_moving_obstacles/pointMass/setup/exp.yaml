@@ -1,0 +1,68 @@
+T: 3000
+dynamic: True
+dt: 0.01
+env: point-robot-acc-v0
+robot_type: pointRobot
+n: 2
+goal:
+  subgoal1:
+    prime: True
+    m: 2
+    w: 1
+    indices:
+      - 0
+      - 1
+    parent_link: 0
+    child_link: 1
+    desired_position:
+        - -3.0
+        - -3.0
+    low:
+      - -5.0
+      - -5.0
+    high: 
+      - -1.0
+      - -1.0
+    type: staticSubGoal
+    epsilon: 0.1
+initState:
+  q0:
+    - 3.5
+    - 3.0
+  q0dot:
+    - 0.0
+    - 0.0
+limits:
+  low:
+    - -5.0
+    - -5.0
+  high:
+    - 5.0
+    - 5.0
+r_body: 0.8
+randomObstacles:
+  number: 2
+  limits:
+    x:
+      low:
+        - -3.0
+        - -3.0
+      high:
+        - 3.0
+        - 3.0
+    r:
+      low: 0.1
+      high: 0.5
+obstacles:
+  obst0:
+    dim: 2
+    type: analyticSphereObstacle
+    geometry: 
+      trajectory:
+        - "0.0"
+        - "-2.5 + 0.5 * t"
+      radius: 0.5
+selfCollision:
+  pairs:
+    
+

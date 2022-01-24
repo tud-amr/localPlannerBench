@@ -104,7 +104,7 @@ predictive control.
 
 ### a) point mass
 <p align="left">
-  <img src="./assets/1_comparison_mpc/pointMass/fabric_trajectory-1.png" width="450" title="hover text">
+  <img src="./assets/1_comparison_mpc/pointRobot/fabric_trajectory-1.png" width="450" title="hover text">
 </p>
 
 ### b) planar robotic arm(s)
