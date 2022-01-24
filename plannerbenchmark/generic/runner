@@ -101,7 +101,7 @@ class Runner(object):
                 self._planners.append(MPCPlanner(self._experiment, plannerFile))
 
     def startRosConverterNode(self):
-        from fabricsExperiments.infrastructure.ros_converter_node import ActionConverterNode
+        from plannerbenchmark.ros.ros_converter_node import ActionConverterNode
         dt = self._experiment.dt()
         rate_int = int(1/dt)
         self._rosConverter = ActionConverterNode(dt, rate_int, self._experiment.n())

@@ -28,6 +28,9 @@ from metrics import (
     IntegratedErrorMetric
 )
 
+import plannerbenchmark as pbm
+pkg_path = os.path.dirname(os.path.abspath(pbm.__path__[0])) + '/plannerbenchmark/postProcessing/'
+
 plannerMap = {'fabric': 'SF', 'dynamicFabric': 'DF', 'mpc' : 'MPC'}
 kpiMap = {
     'integratedError': 'intError',
@@ -458,7 +461,8 @@ class PostProcessor(object):
             yaml.dump(self._evaluations, file)
 
     def plot(self):
-        curPath = os.path.dirname(os.path.abspath(__file__)) + "/"
+        #curPath = os.path.dirname(os.path.abspath(__file__)) + "/"
+        curPath = pkg_path
         if self._experiment.robotType() == "planarArm":
             createPlotFolder = curPath + "plottingPlanarArm"
             subprocess.Popen(
@@ -494,7 +498,8 @@ class PostProcessor(object):
         time.sleep(1)
 
     def plotSeriesResult(self, planner1, planner2):
-        curPath = os.path.dirname(os.path.abspath(__file__)) + "/"
+        #curPath = os.path.dirname(os.path.abspath(__file__)) + "/"
+        curPath = pkg_path
         kpiNames = [kpiMap[i] for i in self._kpis]
         #kpiNames = ['clearance', 'selfClear', 'solverTime', 'time2Goal', 'pathLength']
         subprocess.Popen(
