@@ -7,11 +7,11 @@ import casadi as ca
 import planarenvs.pointRobot
 import planarenvs.nLinkReacher
 import planarenvs.groundRobots
-#import tiagoReacher
-#import pandaReacher
-#import mobileReacher
-#import albertReacher
-#import boxerRobot
+import tiagoReacher
+import pandaReacher
+import mobileReacher
+import albertReacher
+import boxerRobot
 
 from forwardkinematics.fksCommon.fk_creator import FkCreator
 from MotionPlanningEnv.obstacleCreator import ObstacleCreator
@@ -206,7 +206,7 @@ class Experiment(object):
                 dist_initState = np.linalg.norm(np.array(o.position()) - fk)
                 if dist_initState < (o.radius() + self.rBody()):
                     raise ExperimentInfeasible("Initial configuration in collision")
-            if not self.dynamic():
+            if not self.dynamic() and len(o.position()) == len(self.primeGoal().position()):
                 dist_goal = np.linalg.norm(np.array(o.position()) - self.primeGoal().position())
                 if dist_goal < (o.radius() + self.rBody()):
                     raise ExperimentInfeasible("Goal in collision")
