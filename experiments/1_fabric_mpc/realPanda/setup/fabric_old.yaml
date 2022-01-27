@@ -5,12 +5,12 @@ n: 7
 m_base: 1.0
 obst:
   exp: 1.0
-  lam: 1.0
+  lam: 2.0
 selfCol:
   exp: 3.0
-  lam: 2.0
+  lam: 0.5
 attractor:
-  k_psi: 10.0
+  k_psi: 7.0
 limits:
   exp: 1.0
   lam: 1.0
