@@ -1,4 +1,4 @@
-#! /usr/bin/python3
+#! /usr/bin/env python3
 
 import argparse
 import subprocess
@@ -11,9 +11,11 @@ import numpy as np
 import signal
 
 from plannerbenchmark.generic.experiment import Experiment, ExperimentInfeasible
-from plannerbenchmark.generic.fabricPlanner import FabricPlanner
-from plannerbenchmark.generic.mpcPlanner import MPCPlanner
-from plannerbenchmark.generic.experimentSaver import ExperimentSaver
+from plannerbenchmark.generic.logger import Logger
+
+# Import the planners you wish to evaluate
+from plannerbenchmark.planner.fabricPlanner import FabricPlanner
+from plannerbenchmark.planner.mpcPlanner import MPCPlanner
 
 
 def blockPrint():
@@ -162,8 +164,8 @@ class Runner(object):
                 ob, t0 = self.reset(q0, q0dot)
                 if not self._ros:
                     self._experiment.addScene(self._env)
-                saver = ExperimentSaver(self._res_folder, timeStamp)
-                saver.setSetups(self._experiment, planner)
+                logger = Logger(self._res_folder, timeStamp)
+                logger.setSetups(self._experiment, planner)
                 t = 0.0
                 for i in range(self._experiment.T()):
                     if self._aborted:
@@ -189,11 +191,11 @@ class Runner(object):
                     primeGoal = [self._experiment.evaluatePrimeGoal(t)]
                     obsts = self._experiment.evaluateObstacles(t)
                     obsts_cleaned = [obsts[i:i+3] for i in range(0, len(obsts), 3)]
-                    saver.addResultPoint(t, q, qdot, action, solving_time, primeGoal, obsts_cleaned)
+                    logger.addResultPoint(t, q, qdot, action, solving_time, primeGoal, obsts_cleaned)
                     ob, t_new = self.applyAction(action, t)
                     t = t_new - t0
                 if self._save:
-                    saver.save()
+                    logger.save()
             print("Completed %d runs" % completedRuns)
             self.stopEnvironment()
 

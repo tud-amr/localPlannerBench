@@ -1,6 +1,8 @@
+# General dependencies
 import casadi as ca
 import numpy as np
 
+# Dependencies for this specific planner
 from fabrics.planner.fabricPlanner import DefaultFabricPlanner
 from fabrics.planner.nonHolonomicPlanner import DefaultNonHolonomicPlanner
 from fabrics.planner.default_energies import CollisionLagrangian, ExecutionLagrangian
@@ -17,16 +19,15 @@ from fabrics.planner.default_geometries import (
     LimitGeometry,
 )
 from fabrics.diffGeometry.analyticSymbolicTrajectory import AnalyticSymbolicTrajectory
-
-
 from fabrics.diffGeometry.diffMap import DifferentialMap, RelativeDifferentialMap
 from fabrics.diffGeometry.energized_geometry import WeightedGeometry
 
-from plannerbenchmark.generic.abstractPlanner import AbstractPlanner
-
+# Motion planning scenes
 from MotionPlanningEnv.dynamicSphereObstacle import DynamicSphereObstacle
 from MotionPlanningEnv.sphereObstacle import SphereObstacle
 
+# Dependencies on plannerbenchmark
+from plannerbenchmark.generic.abstractPlanner import AbstractPlanner
 
 class FabricPlanner(AbstractPlanner):
     def __init__(self, exp, setupFile):
@@ -208,8 +209,3 @@ class FabricPlanner(AbstractPlanner):
             debugEval = self._planner.debugEval(*args)
             print(debugEval)
         return action
-
-
-if __name__ == "__main__":
-    test_setup = "testSetupFiles/properFabric.yaml"
-    myFabricPlanner = FabricPlanner(test_setup)

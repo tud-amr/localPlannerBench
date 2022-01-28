@@ -4,13 +4,13 @@ import os
 import sys
 import forcespro
 
-from plannerbenchmark.generic.abstractPlanner import AbstractPlanner
-from plannerbenchmark.generic.mpc.parameterMap import getParameterMap
 import plannerbenchmark
+from plannerbenchmark.generic.abstractPlanner import AbstractPlanner
+from plannerbenchmark.planner.mpc.parameterMap import getParameterMap
 
 path_name = (
     os.path.dirname(os.path.realpath(plannerbenchmark.__path__[0]))
-    + "/plannerbenchmark/generic/mpc/solverCollection/"
+    + "/plannerbenchmark/planner/mpc/solverCollection/"
 )
 sys.path.append(path_name)
 

@@ -4,7 +4,7 @@ import yaml
 import csv
 
 
-class ExperimentSaver(object):
+class Logger(object):
     def __init__(self, resFolder, timeStamp):
         self._resFolder = resFolder
         self._timeStamp = timeStamp
