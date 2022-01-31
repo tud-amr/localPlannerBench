@@ -17,7 +17,7 @@ goal:
     trajectory:
         - "1.5  + 0.2 * ca.sin(0.2 * t)"
         - "1.0 * ca.cos(0.2 * t)"
-    type: dynamicSubGoal
+    type: analyticSubGoal
     epsilon: 0.2
 # subgoal2:
 #   prime: False
