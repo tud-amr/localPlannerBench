@@ -48,10 +48,15 @@ class FabricPlanner(AbstractPlanner):
 
     def reset(self):
         if self._exp.robotType() in ['groundRobot', 'boxer', 'albert']:
-            self._planner = DefaultNonHolonomicPlanner(self.n(), m_base=self.mBase(), debug=False)
+            self._planner = DefaultNonHolonomicPlanner(self.n(), m_base=self.mBase(), m_ratio=self.m_ratio(), debug=False)
         else:
             self._planner = DefaultFabricPlanner(self.n(), m_base=self.mBase(), debug=False)
         self._q, self._qdot = self._planner.var()
+
+    def m_ratio(self):
+        if 'm_ratio' in self._setup.keys():
+            return self._setup['m_ratio']
+        return 0.1
 
     def interval(self):
         return self._setup["interval"]

@@ -8,8 +8,15 @@ authors = ["Max Spahn <m.spahn@tudelft.nl>"]
 python = "^3.7,<3.11"
 planarenvs = {git = "https://git@github.com/maxspahn/gym_envs_planar.git", rev = "master"}
 urdfenvs = {git = "https://git@github.com/maxspahn/gym_envs_urdf.git", rev = "master"}
-robotmpcs = {git = "https://git@github.com/maxspahn/robot_mpcs.git", rev = "main"}
+robotmpcs = {git = "https://git@github.com/maxspahn/robot_mpcs.git", rev = "main", optional = true}
 motion-planning-scenes = "^0.1.0"
+# fabrics = {path = "../../../../code/fabrics/dist/fabrics-0.2.2.tar.gz", optional = true}
+forwardkinematics = {git = "https://git@github.com/maxspahn/forwardKinematics.git", rev = "main"}
+fabrics = {path = "../../../../code/fabrics"}
+
+[tool.poetry.extras]
+fabric = ['fabrics']
+mpc = ['robotmpcs']
 
 [tool.poetry.dev-dependencies]
 
