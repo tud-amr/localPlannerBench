@@ -4,7 +4,7 @@ import yaml
 import csv
 
 
-class ExperimentSaver(object):
+class Logger(object):
     def __init__(self, resFolder, timeStamp):
         self._resFolder = resFolder
         self._timeStamp = timeStamp
@@ -28,7 +28,7 @@ class ExperimentSaver(object):
                 resDict['fk' + str(n_i) + "_y"] = fk[1]
                 resDict['fk' + str(n_i) + "_z"] = fk[2]
             else:
-                fk = self._exp.fk(q, n_i, positionOnly=False)
+                fk = self._exp.fk(q, n_i, positionOnly=True)
                 resDict['fk' + str(n_i) + "_x"] = fk[0]
                 resDict['fk' + str(n_i) + "_y"] = fk[1]
                 if self._exp.robotType() == 'planarArm':

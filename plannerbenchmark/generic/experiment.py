@@ -7,11 +7,11 @@ import casadi as ca
 import planarenvs.pointRobot
 import planarenvs.nLinkReacher
 import planarenvs.groundRobots
-import tiagoReacher
-import pandaReacher
-import mobileReacher
-import albertReacher
-import boxerRobot
+import urdfenvs.tiagoReacher
+import urdfenvs.pandaReacher
+import urdfenvs.mobileReacher
+import urdfenvs.albertReacher
+import urdfenvs.boxerRobot
 
 from forwardkinematics.fksCommon.fk_creator import FkCreator
 from MotionPlanningEnv.obstacleCreator import ObstacleCreator

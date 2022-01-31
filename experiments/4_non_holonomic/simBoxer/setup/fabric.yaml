@@ -2,7 +2,8 @@ interval: 1
 type: fabric
 robot_type: boxer
 n: 3
-m_base: 1.0 # for differential drives, this is overwritten by the DefaultNonHolonomicPlanner 0.1
+m_base: 1.0
+m_ratio: 0.01
 obst:
   exp: 1.0
   lam: 2.0
@@ -10,7 +11,7 @@ selfCol:
   exp: 2.0
   lam: 5.0
 attractor:
-  k_psi: 4.0
+  k_psi: 10.0
 speed:
   ex_factor: 1.0
 limits:
