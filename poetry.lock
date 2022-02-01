@@ -232,18 +232,25 @@ source = ["Cython (>=0.29.7)"]
 
 [[package]]
 name = "motion-planning-scenes"
-version = "0.1.1"
+version = "0.1.2"
 description = "Generic motion planning scenes, including goals and obstacles."
 category = "main"
 optional = false
-python-versions = ">=3.6,<4.0"
+python-versions = "^3.6"
+develop = false
 
 [package.dependencies]
 casadi = "<=3.5.5"
-geomdl = ">=5.3.1,<6.0.0"
-numpy = ">=1.15.0,<2.0.0"
-pytest = ">=6.2.5,<7.0.0"
-PyYAML = ">=6.0,<7.0"
+geomdl = "^5.3.1"
+numpy = "^1.15.0"
+pytest = "^6.2.5"
+PyYAML = "^6.0"
+
+[package.source]
+type = "git"
+url = "https://git@github.com/maxspahn/motion_planning_scenes.git"
+reference = "main"
+resolved_reference = "f308f5ec27d6479c1f3487fc5725a6db8b9ce374"
 
 [[package]]
 name = "networkx"
@@ -311,7 +318,7 @@ forwardkinematics = "^0.5.0"
 gym = "^0.21.0"
 numpy = "^1.5.1"
 pyglet = "^1.5.21"
-scipy = "^1.5,<1.7"
+scipy = "^1.5"
 
 [package.extras]
 scenes = ["motion-planning-scenes (>=0.1.0,<0.2.0)"]
@@ -320,7 +327,7 @@ scenes = ["motion-planning-scenes (>=0.1.0,<0.2.0)"]
 type = "git"
 url = "https://git@github.com/maxspahn/gym_envs_planar.git"
 reference = "master"
-resolved_reference = "74be4aa04c76b5011bd22c07571e8fb63a8afcff"
+resolved_reference = "f79e5cc37475381d58f0a352dd577e89a7ab990b"
 
 [[package]]
 name = "pluggy"
@@ -491,7 +498,7 @@ use_chardet_on_py3 = ["chardet (>=3.0.2,<5)"]
 
 [[package]]
 name = "robotmpcs"
-version = "0.1.0"
+version = "0.1.1"
 description = "MPC generation for robots using ForcesPro."
 category = "main"
 optional = true
@@ -500,7 +507,7 @@ develop = false
 
 [package.dependencies]
 casadi = "<=3.5.5"
-forwardkinematics = "^0.5"
+forwardkinematics = {git = "https://git@github.com/maxspahn/forwardKinematics.git", rev = "main"}
 numpy = "^1.15"
 pyaml = "^21.10.1"
 requests = "^2.27.1"
@@ -512,7 +519,7 @@ agents = ["planarenvs @ git+https://git@github.com/maxspahn/gym_envs_planar.git@
 type = "git"
 url = "https://git@github.com/maxspahn/robot_mpcs.git"
 reference = "main"
-resolved_reference = "4a692fc66e9acf66d03896b191e0a16600af117b"
+resolved_reference = "b122e78b7b7c7ba837ef4f4f9c3d1c06c2c0e420"
 
 [[package]]
 name = "scipy"
@@ -665,7 +672,7 @@ mpc = ["robotmpcs"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6,<3.11"
-content-hash = "e0e1f83bd4029e0b2cb49bc69266b99bb8ed21ef8ea967d6d0c4d5bc400b0a17"
+content-hash = "2af9303df44906b04cfe77ab71740bad820266451558e847d872a026960a1ca0"
 
 [metadata.files]
 atomicwrites = [
@@ -829,10 +836,7 @@ lxml = [
     {file = "lxml-4.7.1-pp38-pypy38_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_24_x86_64.whl", hash = "sha256:447d5009d6b5447b2f237395d0018901dcc673f7d9f82ba26c1b9f9c3b444b60"},
     {file = "lxml-4.7.1.tar.gz", hash = "sha256:a1613838aa6b89af4ba10a0f3a972836128801ed008078f8c1244e65958f1b24"},
 ]
-motion-planning-scenes = [
-    {file = "motion_planning_scenes-0.1.1-py3-none-any.whl", hash = "sha256:77b58109266a80cb841aaf03200dee72bfc0c2d6b15aeaa6f592353299bd644b"},
-    {file = "motion_planning_scenes-0.1.1.tar.gz", hash = "sha256:e8074211306ace4df3b072a6fcbf87a162cdd2e1907f7f6b9433b1e4b24fd8bb"},
-]
+motion-planning-scenes = []
 networkx = [
     {file = "networkx-2.5.1-py3-none-any.whl", hash = "sha256:0635858ed7e989f4c574c2328380b452df892ae85084144c73d8cd819f0c4e06"},
     {file = "networkx-2.5.1.tar.gz", hash = "sha256:109cd585cac41297f71103c3c42ac6ef7379f29788eb54cb751be5a663bb235a"},

@@ -10,7 +10,7 @@ forwardkinematics = {git = "https://git@github.com/maxspahn/forwardKinematics.gi
 planarenvs = {git = "https://git@github.com/maxspahn/gym_envs_planar.git", rev = "master"}
 urdfenvs = {git = "https://git@github.com/maxspahn/gym_envs_urdf.git", rev = "master"}
 robotmpcs = {git = "https://git@github.com/maxspahn/robot_mpcs.git", rev = "main", optional = true}
-motion-planning-scenes = "^0.1.0"
+motion-planning-scenes= {git = "https://git@github.com/maxspahn/motion_planning_scenes.git", rev = "main"}
 fabrics = {path = "../../../../code/fabrics"}
 
 [tool.poetry.extras]

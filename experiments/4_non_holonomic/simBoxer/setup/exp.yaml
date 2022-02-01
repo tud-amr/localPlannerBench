@@ -1,4 +1,4 @@
-T: 3000
+T: 6000
 dt: 0.01
 dynamic: False
 env: boxer-robot-acc-v0
@@ -35,14 +35,14 @@ initState:
     - 0.0
 limits:
   low:
-    - -15.0
-    - -15.0
-    - -300.00
+    - -5.0
+    - -5.0
+    - -5.0
   high:
-    - 15.0
-    - 15.0
-    - 300.00
-r_body: 0.25
+    - 5.0
+    - 5.0
+    - 5.0
+r_body: 0.5
 randomObstacles:
   number: 5
 obstacles:
@@ -51,8 +51,8 @@ obstacles:
     type: sphereObstacle
     geometry:
       position: 
-        - 0.0
-        - -3.5
+        - 1.6
+        - -1.0
       radius: 0.5
     low:
       position:
@@ -63,24 +63,6 @@ obstacles:
       position:
         - 7.0
         - 7.0
-      radius: 1.0
-  obst1:
-    dim: 2
-    type: sphereObstacle
-    geometry:
-      position: 
-        - 1.0
-        - -3.5
-      radius: 0.2
-    low:
-      position:
-        - -4.0
-        - -4.0
-      radius: 0.0
-    high:
-      position:
-        - 4.0
-        - 4.0
       radius: 1.0
 selfCollision:
   pairs:
