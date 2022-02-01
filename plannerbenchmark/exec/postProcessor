@@ -108,6 +108,8 @@ class PostProcessor(object):
             self.defineMetricesPanda()
         elif self._experiment.robotType() == 'groundRobot':
             self.defineMetricesGroundRobot()
+        elif self._experiment.robotType() == 'boxer':
+            self.defineMetricesGroundRobot()
 
     def parseArguments(self):
         args = self._parser.parse_args()
@@ -497,18 +499,23 @@ class PostProcessor(object):
                 cwd=createPlotFolder,
                 stdout=subprocess.PIPE,
             )
+        elif self._experiment.robotType() == 'boxer':
+            createPlotFolder = curPath + 'plottingGroundRobot/'
+            subprocess.Popen(
+                ["./createPlot", self._expFolder],
+                cwd=createPlotFolder,
+                stdout=subprocess.PIPE,
+            )
         time.sleep(1)
 
     def plotSeriesResult(self, planner1, planner2):
-        #curPath = os.path.dirname(os.path.abspath(__file__)) + "/"
         curPath = pkg_path
         kpiNames = [kpiMap[i] for i in self._kpis]
-        #kpiNames = ['clearance', 'selfClear', 'solverTime', 'time2Goal', 'pathLength']
         subprocess.Popen(
-            ["../postPrcoessing/createSeriesPlot", self._expFolder, planner1, planner2] + kpiNames, cwd=curPath, stdout=subprocess.PIPE
+            ["./createSeriesPlot", self._expFolder, planner1, planner2] + kpiNames, cwd=curPath, stdout=subprocess.PIPE
         )
         subprocess.Popen(
-            ["../postPrcoessing/createSuccessPlot", self._expFolder, planner1, planner2],
+            ["./createSuccessPlot", self._expFolder, planner1, planner2],
             cwd=curPath,
             stdout=subprocess.PIPE,
         )
