@@ -5,7 +5,11 @@ import time
 from geometry_msgs.msg import Pose2D, Twist
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64MultiArray, Bool
+from visualization_msgs.msg import Marker
 import std_msgs
+
+from MotionPlanningGoal.staticSubGoal import StaticSubGoal
+from MotionPlanningEnv.sphereObstacle import SphereObstacle
 
 class ActionConverterNode(object):
     def __init__(self, dt, rate_int, n):
@@ -37,6 +41,33 @@ class ActionConverterNode(object):
         self._qdot = np.zeros(self._nu)
         self._acc_msg = Float64MultiArray()
         self._acc_msg.data = np.zeros(self._nu)
+        self.initMarker()
+
+    def initMarker(self):
+        self._goal_pub = rospy.Publisher(
+            '/bench/goal', 
+            Marker, queue_size=10
+        )
+        self._goal_marker = Marker()
+        self._goal_marker.header.frame_id = "odom"
+        self._goal_marker.type = Marker.SPHERE
+        self._goal_marker.action = Marker.ADD
+        self._goal_marker.color.a = 1.0
+        self._goal_marker.color.r = 1.0
+        self._goal_marker.color.g = 0.0
+        self._goal_marker.color.b = 0.0
+        self._obst_pub = rospy.Publisher(
+            '/bench/obst', 
+            Marker, queue_size=10
+        )
+        self._obst_marker = Marker()
+        self._obst_marker.header.frame_id = "odom"
+        self._obst_marker.type = Marker.SPHERE
+        self._obst_marker.action = Marker.ADD
+        self._obst_marker.color.a = 1.0
+        self._obst_marker.color.r = 1.0
+        self._obst_marker.color.g = 0.0
+        self._obst_marker.color.b = 0.0
 
     def joint_state_cb(self, data):
         self._x = np.array([data.position[i] for i in self._stateIndices])
@@ -46,10 +77,29 @@ class ActionConverterNode(object):
     def ob(self):
         return {'x': self._x, 'xdot': self._xdot, 'vel': self._qdot}, rospy.get_time()
 
+    def setGoal(self, goal: StaticSubGoal):
+        self._goal_marker.pose.position.x = goal.position()[0]
+        self._goal_marker.pose.position.y = goal.position()[1]
+        self._goal_marker.pose.position.z = 0.1
+        self._goal_marker.scale.x = goal.epsilon()
+        self._goal_marker.scale.y = goal.epsilon()
+        self._goal_marker.scale.z = goal.epsilon()
+
+    def setObstacle(self, obst: SphereObstacle):
+        self._obst_marker.pose.position.x = obst.position()[0]
+        self._obst_marker.pose.position.y = obst.position()[1]
+        self._obst_marker.pose.position.z = 0.1
+        self._obst_marker.scale.x = obst.radius()
+        self._obst_marker.scale.y = obst.radius()
+        self._obst_marker.scale.z = obst.radius()
+
+
     def publishAction(self, action):
         for i in range(self._nu):
             self._acc_msg.data[i] = action[i]
         self._acc_pub.publish(self._acc_msg)
+        self._goal_pub.publish(self._goal_marker)
+        self._obst_pub.publish(self._obst_marker)
         self._rate.sleep()
         return self.ob()
 
@@ -61,7 +111,6 @@ class ActionConverterNode(object):
             rospy.loginfo("Stoping node")
             self._stop_pub.publish(stop_msg)
             self._rate.sleep()
-            #self.sendZeroAction()
 
     def run(self):
         self._rate.sleep()
@@ -76,10 +125,6 @@ class ActionConverterNode(object):
             self._rate.sleep()
         return []
 
-    def sendZeroAction(self):
-        action = np.zeros(self._n)
-        for i in range(10):
-            self.publishAction(action)
 
 
 if __name__ == "__main__":

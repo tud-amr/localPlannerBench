@@ -128,6 +128,8 @@ class Runner(object):
     def reset(self, q0, q0dot):
         if self._ros:
             ob, t0 = self._rosConverter.ob()
+            self._rosConverter.setGoal(self._experiment.primeGoal())
+            self._rosConverter.setObstacle(self._experiment.obstacles()[0])
         else:
             ob = self._env.reset(pos=q0, vel=q0dot)
             t0 = 0.0

@@ -16,8 +16,8 @@ goal:
     parent_link: 0
     child_link: 3
     desired_position:
-        - -1.0
-        - -1.0
+        - 3.0
+        - -1.5
     low:
       - -5.0
       - -5.0
@@ -42,7 +42,7 @@ limits:
     - 15.0
     - 15.0
     - 300.00
-r_body: 0.25
+r_body: 0.15
 randomObstacles:
   number: 5
 obstacles:
@@ -51,9 +51,9 @@ obstacles:
     type: sphereObstacle
     geometry:
       position: 
-        - 0.5
-        - 0.0
-      radius: 0.3
+        - 2.0
+        - -1.3
+      radius: 0.5
     low:
       position:
         - -7.0
