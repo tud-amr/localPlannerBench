@@ -9,8 +9,8 @@ from plannerbenchmark.generic.abstractPlanner import AbstractPlanner
 from plannerbenchmark.planner.mpc.parameterMap import getParameterMap
 
 path_name = (
-    os.path.dirname(os.path.realpath(plannerbenchmark.__path__[0]))
-    + "/plannerbenchmark/planner/mpc/solverCollection/"
+    os.path.dirname(os.path.realpath(__file__))
+    + "/mpc/solverCollection/"
 )
 sys.path.append(path_name)
 
