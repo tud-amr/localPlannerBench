@@ -1,5 +1,5 @@
 T: 30000
-dt: 0.01
+dt: 0.005
 dynamic: False
 env: albert-reacher-acc-v0
 robot_type: albert
@@ -19,29 +19,15 @@ goal:
     desired_position:
         - 2.0
         - -1.0
-        - 1.0
+        - 0.3
     low:
-      - -5.0
-      - -5.0
-      - 0.0
+      - -2.0
+      - -2.0
+      - 1.0
     high: 
-      - 5.0
-      - 5.0
       - 2.0
-    type: staticSubGoal
-  subgoal2:
-    prime: False
-    m: 2
-    w: 100
-    indices:
-     - 0
-     - 1
-    parent_link: 8
-    child_link: 10
-    epsilon: 0.05
-    desired_position:
-     - 0.0
-     - 0.0
+      - 2.0
+      - 1.3
     type: staticSubGoal
 initState:
   q0:
@@ -115,6 +101,6 @@ obstacles:
       radius: 1.0
 selfCollision:
   pairs:
-    - [0, 7]
+    - [0, 10]
     
 

@@ -3,7 +3,7 @@ type: fabric
 robot_type: albert
 n: 10
 m_base: 10.0
-m_ratio: 1.0
+m_ratio: 0.1
 obst:
   exp: 2.0
   lam: 0.2
@@ -11,7 +11,7 @@ selfCol:
   exp: 2.0
   lam: 0.5
 attractor:
-  k_psi: 3.0
+  k_psi: 5.0
 speed:
   ex_factor: 1.0
 limits:
