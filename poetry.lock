@@ -98,7 +98,7 @@ url = "../../../../code/fabrics"
 
 [[package]]
 name = "forwardkinematics"
-version = "0.5.2"
+version = "0.5.4"
 description = "\"Light-weight implementation of forward kinematics using casadi.\""
 category = "main"
 optional = false
@@ -115,7 +115,7 @@ urdf_parser_py = ">=0.0.3"
 type = "git"
 url = "https://git@github.com/maxspahn/forwardKinematics.git"
 reference = "main"
-resolved_reference = "f9cf6decf1356d3b879815793db49b4e7d4fc1a8"
+resolved_reference = "6b1f042b2ada78894dd59c9b6073afcc35db233d"
 
 [[package]]
 name = "freetype-py"
