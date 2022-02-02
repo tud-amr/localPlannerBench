@@ -98,11 +98,11 @@ url = "../../../../code/fabrics"
 
 [[package]]
 name = "forwardkinematics"
-version = "0.5.1"
+version = "0.5.2"
 description = "\"Light-weight implementation of forward kinematics using casadi.\""
 category = "main"
 optional = false
-python-versions = "^3.6"
+python-versions = "^3.6,<3.11"
 develop = false
 
 [package.dependencies]
@@ -115,7 +115,7 @@ urdf_parser_py = ">=0.0.3"
 type = "git"
 url = "https://git@github.com/maxspahn/forwardKinematics.git"
 reference = "main"
-resolved_reference = "5343c33c11f16c6b6389b25c8d0e4b086477f4bf"
+resolved_reference = "f9cf6decf1356d3b879815793db49b4e7d4fc1a8"
 
 [[package]]
 name = "freetype-py"
@@ -586,7 +586,7 @@ pyyaml = "*"
 
 [[package]]
 name = "urdfenvs"
-version = "0.1.0"
+version = "0.1.1"
 description = "Simple simulation environment for robots, based on the urdf files."
 category = "main"
 optional = false
@@ -608,7 +608,7 @@ keyboard = ["pynput (>=1.7.6,<2.0.0)", "multiprocess (>=0.70.12,<0.71.0)"]
 type = "git"
 url = "https://git@github.com/maxspahn/gym_envs_urdf.git"
 reference = "master"
-resolved_reference = "b2214e230c489898509a362ffb16f0617dad6d06"
+resolved_reference = "710b295ca76b54ac9e1fb487c0dd268bdb7fce1f"
 
 [[package]]
 name = "urdfpy"
