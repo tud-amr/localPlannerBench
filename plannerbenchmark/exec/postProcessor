@@ -106,6 +106,8 @@ class PostProcessor(object):
             self.defineMetricesPlanarArm()
         elif self._experiment.robotType() == "panda":
             self.defineMetricesPanda()
+        elif self._experiment.robotType() == "mobilePanda":
+            self.defineMetricesMobilePanda()
         elif self._experiment.robotType() == 'groundRobot':
             self.defineMetricesGroundRobot()
         elif self._experiment.robotType() == 'boxer':
@@ -333,6 +335,65 @@ class PostProcessor(object):
         )
         self._metrics['pathLength'] = PathLengthMetric("pathLength", fkNames, {})
 
+    def defineMetricesMobilePanda(self):
+        self._metrics = {}
+        n = self._experiment.n()
+        m = 3
+        fksNames = []
+        for i in range(1, n + 1):
+            fksNames.append("fk" + str(i) + "_x")
+            fksNames.append("fk" + str(i) + "_y")
+            fksNames.append("fk" + str(i) + "_z")
+        fkNames = ["fk" + str(n) + "_x", "fk" + str(n) + "_y", "fk" + str(n) + "_z"]
+        self._metrics['time2Goal'] = TimeToReachGoalMetric(
+            "time2Goal",
+            fkNames + ['goal_0_0', 'goal_1_0', 'goal_2_0', "t"],
+            {"m": 3, "des_distance": self._experiment.primeGoal().epsilon()},
+        )
+        self._metrics['integratedError'] = IntegratedErrorMetric(
+            "integratedError",
+            fkNames + ["goal_0_0", "goal_1_0", 'goal_2_0', "t"],
+            {"m": 3, "des_distance": self._experiment.primeGoal().epsilon()},
+        )
+        self._metrics['clearance'] = ClearanceMetric(
+            "clearance",
+            fksNames,
+            {
+                "obstacles": self._experiment.obstacles(),
+                "m": m,
+                "n": n,
+                "r_body": self._experiment.rBody(),
+            },
+        )
+        r_obsts = []
+        for obst in self._experiment.obstacles():
+            if obst.type() != 'sphereObstacle':
+                r_obsts.append(obst.radius())
+        self._metrics['dynamicClearance'] = DynamicClearanceMetric(
+            "clearance", 
+            fksNames + ['t'],
+            {
+                'r_body': self._experiment.rBody(),
+                'r_obsts': r_obsts, 
+                'm': m,
+                'n': n
+            }
+        )
+        self._metrics['selfClearance'] = SelfClearanceMetric(
+            "selfClearance",
+            ["fk0_x", "fk0_y", "fk0_z"] + fksNames,
+            {
+                "m": m,
+                "n": n,
+                "r_body": self._experiment.rBody(),
+                "pairs": self._experiment.selfCollisionPairs(),
+            },
+        )
+        self._metrics['solverTime'] = SolverTimesMetric(
+            "solverTime", ["t_planning"], {"interval": self._planner.interval()}
+        )
+        self._metrics['pathLength'] = PathLengthMetric("pathLength", fkNames, {})
+
     def evaluate(self):
         if self._series:
             self.seriesEvaluate()
@@ -390,7 +451,7 @@ class PostProcessor(object):
         for i, kpiName in enumerate(self._kpis):
             resultDict[kpiName] = list(results[:, i])
         success = [list(planner1Counter.values()), list(planner2Counter.values())]
-        return resultDict , feasibility, success
+        return resultDict, feasibility, success
 
     def getTimeStamp(self):
         return self._expFolder[-15:]

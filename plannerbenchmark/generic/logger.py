@@ -22,7 +22,7 @@ class Logger(object):
             if n_i < self._exp.n():
                 resDict['q' + str(n_i)] = q[n_i]
                 resDict['q' + str(n_i) + 'dot'] = qdot[n_i]
-            if self._exp.robotType() == 'panda':
+            if self._exp.robotType() in ['panda', 'mobilePanda', 'tiago']:
                 fk = self._exp.fk(q, n_i, positionOnly=True)
                 resDict['fk' + str(n_i) + "_x"] = fk[0]
                 resDict['fk' + str(n_i) + "_y"] = fk[1]

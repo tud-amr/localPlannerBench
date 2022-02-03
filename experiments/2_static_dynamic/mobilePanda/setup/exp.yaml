@@ -1,4 +1,4 @@
-T: 40000
+T: 10000
 dynamic: True
 dt: 0.01
 env: mobile-reacher-acc-v0
@@ -16,11 +16,11 @@ goal:
    parent_link: 0
    child_link: 10
    trajectory:
-     - "3 * ca.sin(0.2 * t) + 0.5"
-     - "1 * (ca.cos(0.2 * t) - 1.0)"
-     - "1.0 + 0.1 * ca.cos(0.3 * t)"
-   type: dynamicSubGoal
-   epsilon: 0.02
+     - "3 * ca.sin(0.1 * t) + 0.5"
+     - "1 * (ca.cos(0.1 * t) - 1.0)"
+     - "1.0 + 0.3 * ca.cos(0.3 * t)"
+   type: analyticSubGoal
+   epsilon: 0.2
 #  subgoal2:
 #    prime: True
 #    m: 2
@@ -114,7 +114,7 @@ selfCollision:
     - [5, 9]
     - [5, 10]
 obstacles:
-  obst1:
+  obst0:
     dim: 3
     type: sphereObstacle
     geometry:
@@ -123,7 +123,19 @@ obstacles:
         - -2.0
         - 0.8
       radius: 0.15
-  obst2:
+    low:
+      position:
+        - -4.0
+        - -4.0
+        - 0.0
+      radius: 0.2
+    high:
+      position:
+        - 4.0
+        - 1.0
+        - 2.0
+      radius: 0.4
+  obst1:
     dim: 3
     type: sphereObstacle
     geometry:
@@ -134,17 +146,3 @@ obstacles:
       radius: 0.55
 randomObstacles:
   number: 3
-  limits:
-    x:
-      low:
-        - 0.5
-        - -1.0
-        - 0.0
-      high:
-        - 1.0
-        - 1.0
-        - 1.2
-    r:
-      low: 0.15
-      high: 0.15
-    

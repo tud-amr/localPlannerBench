@@ -4,8 +4,8 @@ robot_type: mobilePanda
 n: 10
 m_base: 1.0
 obst:
-  exp: 1.0
-  lam: 2.0
+  exp: 2.0
+  lam: 1.0
 selfCol:
   exp: 3.0
   lam: 0.5
