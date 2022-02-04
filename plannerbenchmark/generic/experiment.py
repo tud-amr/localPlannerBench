@@ -154,15 +154,12 @@ class Experiment(object):
             return gym.make(self.envName(), render=render, dt=self.dt())
 
     def addScene(self, env):
-        """
-        for obst in self._obstacles:
-            env.addObstacle(pos=obst.x(), filename='sphere05red_nocol.urdf')
-        if isinstance(self.primeGoal(), np.ndarray):
-            env.addObstacle(pos=self.primeGoal(), filename="sphere_goal.urdf")
-        """
         for obst in self._obstacles:
             env.addObstacle(obst)
-        env.addGoal(self.goal())
+        try:
+            env.addGoal(self.goal())
+        except Exception as e:
+            print(e)
 
     def shuffleInitConfiguration(self):
         q0_new = np.random.uniform(low=self.limits()[0], high=self.limits()[1])

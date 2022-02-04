@@ -11,22 +11,25 @@ import std_msgs
 from MotionPlanningGoal.staticSubGoal import StaticSubGoal
 from MotionPlanningEnv.sphereObstacle import SphereObstacle
 
+
 class ActionConverterNode(object):
-    def __init__(self, dt, rate_int, n):
+    def __init__(self, dt, rate_int, robotType):
         rospy.init_node("ActionConverter", anonymous=True)
         self._rate = rospy.Rate(rate_int)
         self._dt = dt
-        #boxer
-        self._n = 3
-        self._nu = 2
-        self._stateIndices = [0, 1, 2]
-        self._qdotIndices = [3, 4]
 
-        #panda
-        #self._n = n
-        #self._nu = n
-        #self._stateIndices = [0, 1, 2, 3, 4, 5, 6]
-        #self._qdotIndices = []
+        if robotType == 'panda':
+            self._n = 7
+            self._nu = 7
+            self._actionIndices = [2, 3, 4, 5, 6, 7, 8]
+            self._stateIndices = [5, 6, 7, 8, 9, 10, 11]
+            self._qdotIndices = []
+        elif robotType == 'boxer':
+            self._n = 3
+            self._nu = 2
+            self._actionIndices = [0, 1]
+            self._stateIndices = [0, 1, 2]
+            self._qdotIndices = [3, 4]
         self._joint_state_sub = rospy.Subscriber("/joint_states_filtered", JointState, self.joint_state_cb)
         self._acc_pub = rospy.Publisher(
             '/joint_acc_des', 
@@ -40,7 +43,8 @@ class ActionConverterNode(object):
         self._xdot = np.zeros(self._n)
         self._qdot = np.zeros(self._nu)
         self._acc_msg = Float64MultiArray()
-        self._acc_msg.data = np.zeros(self._nu)
+        # fixed message date size for the albert robot, some remain zeros 
+        self._acc_msg.data = np.zeros(10)
         self.initMarker()
 
     def initMarker(self):
@@ -93,10 +97,9 @@ class ActionConverterNode(object):
         self._obst_marker.scale.y = obst.radius()
         self._obst_marker.scale.z = obst.radius()
 
-
     def publishAction(self, action):
         for i in range(self._nu):
-            self._acc_msg.data[i] = action[i]
+            self._acc_msg.data[self._actionIndices[i]] = action[i]
         self._acc_pub.publish(self._acc_msg)
         self._goal_pub.publish(self._goal_marker)
         self._obst_pub.publish(self._obst_marker)

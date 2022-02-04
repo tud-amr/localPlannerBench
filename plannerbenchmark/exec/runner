@@ -106,7 +106,7 @@ class Runner(object):
         from plannerbenchmark.ros.ros_converter_node import ActionConverterNode
         dt = self._experiment.dt()
         rate_int = int(1/dt)
-        self._rosConverter = ActionConverterNode(dt, rate_int, self._experiment.n())
+        self._rosConverter = ActionConverterNode(dt, rate_int, self._experiment.robotType())
 
     def setPlanner(self):
         for planner in self._planners:
