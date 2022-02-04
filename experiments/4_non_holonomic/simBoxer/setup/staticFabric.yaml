@@ -1,5 +1,5 @@
 interval: 1
-type: dynamicFabric
+type: fabric
 robot_type: boxer
 n: 3
 m_base: 1.0
@@ -22,5 +22,5 @@ damper:
   b: 
    - 1.00
    - 1.0
-dynamic: True
+dynamic: False
 
