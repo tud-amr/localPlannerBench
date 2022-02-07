@@ -30,6 +30,12 @@ class ActionConverterNode(object):
             self._actionIndices = [0, 1]
             self._stateIndices = [0, 1, 2]
             self._qdotIndices = [3, 4]
+        elif robotType == 'albert':
+            self._n = 10
+            self._nu = 9
+            self._actionIndices = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+            self._stateIndices = [0, 1, 2, 5, 6, 7, 8, 9, 10, 11]
+            self._qdotIndices = [3, 4]
         self._joint_state_sub = rospy.Subscriber("/joint_states_filtered", JointState, self.joint_state_cb)
         self._acc_pub = rospy.Publisher(
             '/joint_acc_des', 
@@ -44,7 +50,7 @@ class ActionConverterNode(object):
         self._qdot = np.zeros(self._nu)
         self._acc_msg = Float64MultiArray()
         # fixed message date size for the albert robot, some remain zeros 
-        self._acc_msg.data = np.zeros(10)
+        self._acc_msg.data = np.zeros(9)
         self.initMarker()
 
     def initMarker(self):
