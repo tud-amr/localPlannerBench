@@ -1,6 +1,6 @@
 T: 300000
-dt: 0.005
-dynamic: False
+dt: 0.002
+dynamic: True
 env: albert-reacher-acc-v0
 robot_type: albert
 n: 10
@@ -16,19 +16,11 @@ goal:
       - 2
     parent_link: 0
     child_link: 10
-    desired_position:
-        - -2.0
-        - -2.0
-        - 1.5
-    low:
-      - -2.0
-      - -2.0
-      - 1.0
-    high: 
-      - 2.0
-      - 2.0
-      - 1.3
-    type: staticSubGoal
+    trajectory:
+        - "1.0 * (-2 + 0.5 * ca.sin(0.1 * t))"
+        - "1.0 * (-1.5 - 0.5 * ca.cos(0.1 * t))"
+        - "1.2 + 0.4 * ca.sin(0.10 * t)"
+    type: analyticSubGoal
 initState:
   q0:
     - 0.0
@@ -87,21 +79,8 @@ obstacles:
         - 15
         - 0.2
       radius: 0.5
-    low:
-      position:
-        - -7.0
-        - -7.0
-        - 0.0
-      radius: 0.0
-    high:
-      position:
-        - 7.0
-        - 7.0
-        - 2.0
-      radius: 1.0
 selfCollision:
   pairs:
-    - [5, 10]
     - [0, 10]
     
 

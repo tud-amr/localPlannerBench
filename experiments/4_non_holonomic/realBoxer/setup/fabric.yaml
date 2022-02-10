@@ -3,7 +3,7 @@ type: fabric
 robot_type: boxer
 n: 3
 m_base: 0.1
-m_ratio: 1.0
+m_ratio: 4.0
 obst:
   exp: 2.0
   lam: 0.5
@@ -20,7 +20,7 @@ limits:
 damper:
   r_d: 0.20
   b: 
-   - 0.02
+   - 0.50
    - 15.0
 dynamic: False
 

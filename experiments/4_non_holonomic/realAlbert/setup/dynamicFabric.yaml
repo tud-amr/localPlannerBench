@@ -1,26 +1,26 @@
 interval: 1
-type: dynamicFabric
-robot_type: boxer
-n: 3
-m_base: 1.0
+type: fabric
+robot_type: albert
+n: 10
+m_base: 1.5
 m_ratio: 1.0
 obst:
   exp: 2.0
-  lam: 0.5
+  lam: 0.2
 selfCol:
   exp: 2.0
-  lam: 5.0
+  lam: 0.5
 attractor:
-  k_psi: 10.0
+  k_psi: 3.0
 speed:
   ex_factor: 1.0
 limits:
   lam: 10.0
   exp: 3.0
 damper:
-  r_d: 1.00
+  r_d: 0.20
   b: 
-   - 7.00 #10
-   - 2.0 #2
+   - 0.20
+   - 15.0
 dynamic: True
 
