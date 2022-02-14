@@ -56,7 +56,7 @@ randomObstacles:
 obstacles:
   obst0:
     dim: 2
-    type: analyticSphereObstacle
+    type: analyticSphere
     geometry: 
       trajectory:
         - "0.0"
