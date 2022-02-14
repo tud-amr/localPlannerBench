@@ -5,7 +5,7 @@ import time
 from geometry_msgs.msg import Pose2D, Twist
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64MultiArray, Bool
-from visualization_msgs.msg import Marker
+from visualization_msgs.msg import Marker, MarkerArray
 import std_msgs
 
 from MotionPlanningGoal.staticSubGoal import StaticSubGoal
@@ -59,25 +59,19 @@ class ActionConverterNode(object):
             Marker, queue_size=10
         )
         self._goal_marker = Marker()
-        self._goal_marker.header.frame_id = "odom"
+        self._goal_marker.header.frame_id = "map"
         self._goal_marker.type = Marker.SPHERE
         self._goal_marker.action = Marker.ADD
         self._goal_marker.color.a = 1.0
-        self._goal_marker.color.r = 1.0
-        self._goal_marker.color.g = 0.0
+        self._goal_marker.color.r = 0.0
+        self._goal_marker.color.g = 1.0
         self._goal_marker.color.b = 0.0
         self._obst_pub = rospy.Publisher(
             '/bench/obst', 
-            Marker, queue_size=10
+            MarkerArray, queue_size=10
         )
-        self._obst_marker = Marker()
-        self._obst_marker.header.frame_id = "odom"
-        self._obst_marker.type = Marker.SPHERE
-        self._obst_marker.action = Marker.ADD
-        self._obst_marker.color.a = 1.0
-        self._obst_marker.color.r = 1.0
-        self._obst_marker.color.g = 0.0
-        self._obst_marker.color.b = 0.0
+        self._obst_markers = MarkerArray()
+        self._obst_counter = 0
 
     def joint_state_cb(self, data):
         self._x = np.array([data.position[i] for i in self._stateIndices])
@@ -87,59 +81,50 @@ class ActionConverterNode(object):
     def ob(self):
         return {'x': self._x, 'xdot': self._xdot, 'vel': self._qdot}, rospy.get_time()
 
-    def setGoal(self, goal: StaticSubGoal):
-        self._goal_marker.pose.position.x = goal.position()[0]
-        self._goal_marker.pose.position.y = goal.position()[1]
-        self._goal_marker.pose.position.z = 0.1
+    def setGoal(self, goal, t=0):
+        self._goal_marker.pose.position.x = goal.position(t=t)[0]
+        self._goal_marker.pose.position.y = goal.position(t=t)[1]
+        self._goal_marker.pose.position.z = goal.position(t=t)[2]
         self._goal_marker.scale.x = goal.epsilon()
         self._goal_marker.scale.y = goal.epsilon()
         self._goal_marker.scale.z = goal.epsilon()
 
-    def setObstacle(self, obst: SphereObstacle):
-        self._obst_marker.pose.position.x = obst.position()[0]
-        self._obst_marker.pose.position.y = obst.position()[1]
-        self._obst_marker.pose.position.z = 0.1
-        self._obst_marker.scale.x = obst.radius()
-        self._obst_marker.scale.y = obst.radius()
-        self._obst_marker.scale.z = obst.radius()
+    def initObstMarker(self):
+        marker = Marker()
+        marker.header.frame_id = "map"
+        marker.type = Marker.SPHERE
+        marker.action = Marker.ADD
+        marker.color.a = 1.0
+        marker.color.r = 1.0
+        marker.color.g = 0.0
+        marker.color.b = 0.0
+        return marker
+
+    def setObstacle(self, obst: SphereObstacle, i, t=0):
+        self._obst_counter += 1
+        marker = self.initObstMarker()
+        marker.id = i
+        marker.pose.position.x = obst.position(t=t)[0]
+        marker.pose.position.y = obst.position(t=t)[1]
+        marker.pose.position.z = 0.1
+        marker.scale.x = obst.radius()
+        marker.scale.y = obst.radius()
+        marker.scale.z = obst.radius()
+        self._obst_markers.markers.append(marker)
 
     def publishAction(self, action):
         for i in range(self._nu):
             self._acc_msg.data[self._actionIndices[i]] = action[i]
         self._acc_pub.publish(self._acc_msg)
         self._goal_pub.publish(self._goal_marker)
-        self._obst_pub.publish(self._obst_marker)
+        self._obst_pub.publish(self._obst_markers)
         self._rate.sleep()
         return self.ob()
 
     def stopMotion(self):
         rospy.loginfo("Stopping ros converter")
         stop_msg = std_msgs.msg.Bool(data=False)
-        print(rospy.is_shutdown())
         for i in range(10):
             rospy.loginfo("Stoping node")
             self._stop_pub.publish(stop_msg)
             self._rate.sleep()
-
-    def run(self):
-        self._rate.sleep()
-        while not rospy.is_shutdown():
-            t_before = time.time()
-            acc_des = self._planner.computeAction(self._q, self._qdot)
-            t_planning = time.time() - t_before
-            #print(t_planning)
-            for i in range(self._n):
-                self._acc_msg.data[i] = acc_des[i]
-            self._acc_pub.publish(self._acc_msg)
-            self._rate.sleep()
-        return []
-
-
-
-if __name__ == "__main__":
-    converterNode = ActionConverterNode(None, 0.01, 100, 3, 2)
-    try:
-        converterNode.run()
-    except rospy.ROSInterruptException:
-        pass
-

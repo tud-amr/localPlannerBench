@@ -120,6 +120,9 @@ class Runner(object):
     def applyAction(self, action, t_exp):
         if self._ros:
             ob, t = self._rosConverter.publishAction(action)
+            self._rosConverter.setGoal(self._experiment.primeGoal(), t=t_exp)
+            for i, obst in enumerate(self._experiment.obstacles()):
+                self._rosConverter.setObstacle(obst, i, t=t_exp)
         else:
             ob, _, _, _ = self._env.step(action)
             t = t_exp + self._experiment.dt()
@@ -129,7 +132,8 @@ class Runner(object):
         if self._ros:
             ob, t0 = self._rosConverter.ob()
             self._rosConverter.setGoal(self._experiment.primeGoal())
-            self._rosConverter.setObstacle(self._experiment.obstacles()[0])
+            for i, obst in enumerate(self._experiment.obstacles()):
+                self._rosConverter.setObstacle(obst, i)
         else:
             ob = self._env.reset(pos=q0, vel=q0dot)
             t0 = 0.0
