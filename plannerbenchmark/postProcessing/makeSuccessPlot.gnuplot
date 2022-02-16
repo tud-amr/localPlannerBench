@@ -26,7 +26,7 @@ if (planner2Type eq 'MPC') planner2 = 'MPC'
 set xtics (planner1 0, planner2 1) scale 1.0 font ',35' rotate by 90 offset 0, -14.0 nomirror
 set xrange [-0.5:1.5]
 unset ytics
-nbCases = 20
+nbCases = 100
 set y2range [0:1.6 * nbCases]
 set y2tics nomirror font ',35'
 set y2tics 0,10,nbCases rotate by 90 offset 0.5,-2.0
