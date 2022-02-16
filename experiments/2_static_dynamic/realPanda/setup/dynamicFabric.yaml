@@ -10,7 +10,7 @@ selfCol:
   exp: 1.0
   lam: 2.0
 attractor:
-  k_psi: 20.0
+  k_psi: 6.0
 limits:
   exp: 1.0
   lam: 1.0
@@ -20,6 +20,6 @@ damper:
   r_d: 0.20
   b:
     - 0.5
-    - 15.0
+    - 6.0
 dynamic: True
 

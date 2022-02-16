@@ -1,7 +1,8 @@
-T: 5000
+T: 500000
 dt: 0.005
 env: panda-reacher-acc-v0
 robot_type: panda
+dynamic: True
 n: 7
 goal:
   subgoal1:
@@ -14,13 +15,12 @@ goal:
       - 2
     parent_link: 0
     child_link: 7
-    desired_position:
-     trajFun:
-       - "0.5  - 0.1 * ca.cos(0.2 * t)"
-       - "0.3 * ca.sin(0.2 * t)"
-       - "0.6"
-    type: analytic
-    dynamic : True
+    trajectory:
+      - "0.5"
+      - "0.3 * ca.sin(0.6 * t)"
+      - "0.4 + 0.2 * ca.cos(0.6 * t)"
+    type: analyticSubGoal
+    epsilon: 0.1
 # subgoal2:
 #   prime: False
 #   m: 2
@@ -85,26 +85,5 @@ selfCollision:
 #   - [0, 5]
 #   - [0, 6]
 obstacles:
-  obst1:
-    x:
-      - 0.55
-      - -0.3
-      - 0.6
-    r: 0.15
 randomObstacles:
   number: 1
-  limits:
-    x:
-      low:
-        - 0.5
-        - -0.5
-        - 0.3
-      high:
-        - 1.0
-        - 0.5
-        - 1.0
-    r:
-      low: 0.15
-      high: 0.15
-    
-

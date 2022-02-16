@@ -1,5 +1,5 @@
 interval: 1
-type: dynamicFabric
+type: fabric
 robot_type: simPanda
 n: 7
 m_base: 1.0
@@ -21,5 +21,5 @@ damper:
   b:
     - 0.01
     - 6.5
-dynamic: True
+dynamic: False
 
