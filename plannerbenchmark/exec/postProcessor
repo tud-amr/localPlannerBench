@@ -31,7 +31,7 @@ from plannerbenchmark.postProcessing.metrics import (
 )
 
 import plannerbenchmark as pbm
-pkg_path = os.path.dirname(os.path.abspath(pbm.__path__[0])) + '/plannerbenchmark/postProcessing/'
+pkg_path = os.path.dirname(__file__) + '/../postProcessing/'
 
 plannerMap = {'fabric': 'SF', 'dynamicFabric': 'DF', 'mpc' : 'MPC'}
 kpiMap = {
