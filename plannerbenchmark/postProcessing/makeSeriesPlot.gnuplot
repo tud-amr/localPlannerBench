@@ -1,7 +1,7 @@
-set term postscript eps color size 2.0, 7.0
+set term postscript eps color size 2.0, 7.0 font "RomanSerif.ttf" 14
 seriesFolder=ARG1
-planner1=ARG2
-planner2=ARG3
+planner1Type=ARG2
+planner2Type=ARG3
 inFile=seriesFolder."results.csv"
 
 outFileBox=seriesFolder."/results.eps"
@@ -28,7 +28,13 @@ set boxwidth  0.5
 set pointsize 0.5
 set grid y2tics
 set border 9
-yLabel = sprintf("%s / %s on logscale", planner2, planner1)
+if (planner1Type eq 'StaticFabric') planner1 = 'Static Fabric'
+if (planner1Type eq 'DynamiccFabric') planner1 = 'Dynamic Fabric'
+if (planner2Type eq 'StaticFabric') planner2 = 'Static Fabric'
+if (planner2Type eq 'DynamiccFabric') planner2 = 'Dynamic Fabric'
+if (planner1Type eq 'MPC') planner1 = 'MPC'
+if (planner2Type eq 'MPC') planner2 = 'MPC'
+yLabel = sprintf("%s / %s on logarthmic scale", planner2, planner1)
 set y2label yLabel font ",35" rotate by 90
 
 unset key
@@ -40,7 +46,25 @@ do for [i=4:N] {
 }
 
 do for [i=1:ARGC-3] {
-  set xtics add (ARGV[i] i)
+  print ARGV[i]
+  if (ARGV[i] eq "SolverTime"){
+    set xtics add ("Solver Time" i);
+  }
+  if (ARGV[i] eq "IntegratedError") {
+    set xtics add ("Integrated Error" i);
+  }
+  if (ARGV[i] eq "PathLength") {
+    set xtics add ("Path Length" i);
+  }
+  if (ARGV[i] eq "Clearance") {
+    set xtics add ("Clearance" i);
+  }
+  if (ARGV[i] eq "SelfClearance") {
+    set xtics add ("Self Clearence" i);
+  }
+  if (ARGV[i] eq "TimetoGoal") {
+    set xtics add ("Time to Goal" i);
+  }
 }
 set xtics nomirror
 
