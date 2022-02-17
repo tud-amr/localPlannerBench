@@ -18,15 +18,15 @@ set style histogram rowstacked
 set border 9
 set boxwidth 0.5
 if (planner1Type eq 'StaticFabric') planner1 = 'Static Fabric'
-if (planner1Type eq 'DynamiccFabric') planner1 = 'Dynamic Fabric'
+if (planner1Type eq 'DynamicFabric') planner1 = 'Dynamic Fabric'
 if (planner2Type eq 'StaticFabric') planner2 = 'Static Fabric'
-if (planner2Type eq 'DynamiccFabric') planner2 = 'Dynamic Fabric'
+if (planner2Type eq 'DynamicFabric') planner2 = 'Dyn. Fabric'
 if (planner1Type eq 'MPC') planner1 = 'MPC'
 if (planner2Type eq 'MPC') planner2 = 'MPC'
 set xtics (planner1 0, planner2 1) scale 1.0 font ',35' rotate by 90 offset 0, -14.0 nomirror
 set xrange [-0.5:1.5]
 unset ytics
-nbCases = 100
+nbCases = 50
 set y2range [0:1.6 * nbCases]
 set y2tics nomirror font ',35'
 set y2tics 0,10,nbCases rotate by 90 offset 0.5,-2.0

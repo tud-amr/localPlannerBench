@@ -18,20 +18,25 @@ set style boxplot nooutliers
 # set style boxplot outliers pointtype -1
 set style data boxplot
 set log y2 2
-# set y2range [0.9:2.00]
+# Experiment 2
+# set y2range [0.8:1.05]
+# set y2tics (0.8, 0.9, 1)
+# Experiment Boxer
 # set y2range [0.01:6.0]
+# set y2tics (0.02, 0.1, 0.2, 0.5, 1, 2, 5)
+# Experiment 3
+set y2range [0.7:2.0]
+set y2tics (0.8, 1, 1.25, 1.5, 2)
 unset ytics
 set y2tics nomirror font ',35' rotate by 90 out offset 0.5,-1.0
-# set y2tics (0.8, 1.0, 1.25, 1.5, 2.0)
-set y2tics (0.02, 0.1, 0.2, 0.5, 1, 2, 5)
 set boxwidth  0.5
 set pointsize 0.5
 set grid y2tics
 set border 9
 if (planner1Type eq 'StaticFabric') planner1 = 'Static Fabric'
-if (planner1Type eq 'DynamiccFabric') planner1 = 'Dynamic Fabric'
+if (planner1Type eq 'DynamicFabric') planner1 = 'Dynamic Fabric'
 if (planner2Type eq 'StaticFabric') planner2 = 'Static Fabric'
-if (planner2Type eq 'DynamiccFabric') planner2 = 'Dynamic Fabric'
+if (planner2Type eq 'DynamicFabric') planner2 = 'Dynamic Fabric'
 if (planner1Type eq 'MPC') planner1 = 'MPC'
 if (planner2Type eq 'MPC') planner2 = 'MPC'
 yLabel = sprintf("%s / %s on logarthmic scale", planner2, planner1)
@@ -51,7 +56,7 @@ do for [i=1:ARGC-3] {
     set xtics add ("Solver Time" i);
   }
   if (ARGV[i] eq "IntegratedError") {
-    set xtics add ("Integrated Error" i);
+    set xtics add ("Summed Error" i);
   }
   if (ARGV[i] eq "PathLength") {
     set xtics add ("Path Length" i);
