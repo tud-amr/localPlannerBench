@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Example &mdash; Local Planner Bench  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Structure" href="structure.html" />
+    <link rel="prev" title="Local Motion Planning Benchmark Suite" href="introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> Local Planner Bench
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Local Motion Planning Benchmark Suite</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Example</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#navigate-to-example">Navigate to example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#run-the-example">Run the example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#postprocessing">Postprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#conclusion">Conclusion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="structure.html">Structure</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Local Planner Bench</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Example</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/example.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="example">
+<h1>Example<a class="headerlink" href="#example" title="Permalink to this headline"></a></h1>
+<p>We provide several experiment setups in the <code class="docutils literal notranslate"><span class="pre">experiments</span></code> folder.
+However, here we want to walk you through the most basic example without a planner that
+has a dependency on other packages.</p>
+<section id="navigate-to-example">
+<h2>Navigate to example<a class="headerlink" href="#navigate-to-example" title="Permalink to this headline"></a></h2>
+<p>First, we must ensure that everything is installed and enter the virtual environment.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> /path/to/localPlannerBench
+poetry install
+poetry shell
+<span class="nb">cd</span> experiments/example
+</pre></div>
+</div>
+<p>Nice! In this folder, you should see a <code class="docutils literal notranslate"><span class="pre">setup</span></code> directory and a <code class="docutils literal notranslate"><span class="pre">results</span></code> directory.
+The first contains the configuration files for the planner <code class="docutils literal notranslate"><span class="pre">planner.yaml</span></code> and
+the experiment <code class="docutils literal notranslate"><span class="pre">exp.yaml</span></code>. Go ahead and look a bit for yourself where the obstacles,
+goals and parameters to the planner are specified.</p>
+</section>
+<section id="run-the-example">
+<h2>Run the example<a class="headerlink" href="#run-the-example" title="Permalink to this headline"></a></h2>
+<p>Once you have familiarized yourself with the directories and files, you can run the
+example. For that execute</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>../../plannerbenchmark/exec/runner -c setup/exp.yaml -p pdbplanner setup/planner.yaml --render
+</pre></div>
+</div>
+<p>When you run the above line, the experiment starts with the configuration files you have
+provided through the command line interface, namely <code class="docutils literal notranslate"><span class="pre">-c</span> <span class="pre">setup/exp.yaml</span></code> specifies the
+experiment and <code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">pdplanner</span> <span class="pre">setup/planner.yaml</span></code> specifies the planner. The flag
+<code class="docutils literal notranslate"><span class="pre">--render</span></code> indicates that the experiment should be rendered to your screen. Once the
+experiment has finished or you have stopped it prematurely, a new folder is created in the
+<code class="docutils literal notranslate"><span class="pre">results</span></code> directory. In there, you will find all necessary information on what exactly
+happened during the expereiment and all the configuration you have set.</p>
+</section>
+<section id="postprocessing">
+<h2>Postprocessing<a class="headerlink" href="#postprocessing" title="Permalink to this headline"></a></h2>
+<p>In the previous step, you have run the experiment and you now want to access the
+performance of the particular planner. This is what the <code class="docutils literal notranslate"><span class="pre">postProcessor</span></code> is all about.
+The postprocessor uses the results folder that was created after running the experiment to
+evaluate user-specified metrics. Familiarize yourself a bit with the content of the folder
+you want to postprocess. When you are ready, you can simple invoke the postProcessor by</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>../../plannerbenchmark/exec/postProcessor --exp results/&lt;name_experiment&gt; -k time2Goal pathLength --plot
+</pre></div>
+</div>
+<p>In the above line, the argument <code class="docutils literal notranslate"><span class="pre">--exp</span> <span class="pre">results/&lt;name_experiment&gt;</span></code> tells the
+postProcessor which experiment to process. Key-performance-indicators are listed behind
+<code class="docutils literal notranslate"><span class="pre">-k</span></code> option. The flag <code class="docutils literal notranslate"><span class="pre">--plot</span></code> that a plot of the trajectory should be created. On a
+standard linux installation, this command should automatically open the folder of the
+experiment. If it does not, you have to manually navigate to the experiment folder to
+access the plots and evaluations (Consider using the <code class="docutils literal notranslate"><span class="pre">--no-open</span></code> flag in this case).
+The evaluations are stored in <code class="docutils literal notranslate"><span class="pre">postProcess.yaml</span></code>.</p>
+</section>
+<section id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Permalink to this headline"></a></h2>
+<p>Nice! You have run your first experiment for testing a local motion planning algorithm.
+Feel free to add your own method or additional functionility.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="introduction.html" class="btn btn-neutral float-left" title="Local Motion Planning Benchmark Suite" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="structure.html" class="btn btn-neutral float-right" title="Structure" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Max Spahn.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
