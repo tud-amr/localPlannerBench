@@ -102,7 +102,7 @@ class Runner(object):
                 self._planners.append(FabricPlanner(self._experiment, plannerFile))
             elif plannerType == 'mpc':
                 self._planners.append(MPCPlanner(self._experiment, plannerFile))
-            elif plannerType == 'dummy':
+            elif plannerType == 'pdplanner':
                 self._planners.append(PDPlanner(self._experiment, plannerFile))
 
     def startRosConverterNode(self):

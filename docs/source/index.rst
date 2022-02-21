@@ -11,5 +11,6 @@ Welcome to Local Planner Bench's documentation!
    :caption: Contents:
 
    introduction
+   example
    structure
 
