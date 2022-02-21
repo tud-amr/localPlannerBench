@@ -103,7 +103,7 @@ name = "fabrics"
 version = "0.2.3"
 description = "Optimization fabrics in python."
 category = "main"
-optional = false
+optional = true
 python-versions = "^3.6,<3.11"
 develop = false
 
@@ -896,7 +896,7 @@ mpc = ["robotmpcs"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6,<3.11"
-content-hash = "a53f517cf8f00aa67663f57b9b62776b4fd457b721895df4eca6371435cd27be"
+content-hash = "8ce8d8c43b082a8cb9d715f2e6a8bc0f30ff633cc310a56f0f0adf68031803e1"
 
 [metadata.files]
 alabaster = [
