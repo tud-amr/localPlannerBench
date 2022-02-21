@@ -153,7 +153,7 @@ class Runner(object):
         while completedRuns < self._numberRuns:
             self._experiment.shuffle(self._random_obst, self._random_init, self._random_goal)
             try:
-                self._experiment.checkFeasibility(checkGoalReachible=False)
+                #self._experiment.checkFeasibility(checkGoalReachible=False)
                 completedRuns += 1
             except ExperimentInfeasible as e:
                 print("Case not feasible %s" % str(e))

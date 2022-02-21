@@ -16,25 +16,25 @@ goal:
       - 2
     parent_link: 0
     child_link: 10
-    trajectory:
-        - "0.0"
-        - "1.0 - ca.cos(0.08 * t)"
-        - "1.0"
-    type: analyticSubGoal
-  subgoal2:
-    prime: False
-    m: 2
-    w: 5
-    indices:
-      - 0
-      - 1
-    parent_link: 8
-    child_link: 10
     desired_position:
-      - 0.0
-      - 0.0
-    type: staticSubGoal
-    epsilon: 0.1
+        - 0.0
+        - 1.0
+        - 1.0
+    type: staticSubGoalLLLLLL # this does not work
+# subgoal2:
+#   prime: False
+#   m: 2
+#   w: 5
+#   indices:
+#     - 0
+#     - 1
+#   parent_link: 8
+#   child_link: 10
+#   desired_position:
+#     - 0.0
+#     - 0.0
+#   type: staticSubGoal
+#   epsilon: 0.1
 initState:
   q0:
     - 0.0
@@ -93,6 +93,15 @@ obstacles:
         - 0.2
         - 0.2
       radius: 0.5
+  obst1:
+    dim: 3
+    type: analyticSphere
+    geometry:
+      trajectory:
+        - "0"
+        - "1 + -1.0 * ca.cos(0.1 * t)"
+        - "1.3"
+      radius: 0.1
 selfCollision:
   pairs:
     - [0, 10]

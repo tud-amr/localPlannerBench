@@ -109,7 +109,7 @@ class ActionConverterNode(object):
         marker.id = i
         marker.pose.position.x = obst.position(t=t)[0]
         marker.pose.position.y = obst.position(t=t)[1]
-        marker.pose.position.z = 0.1
+        marker.pose.position.z = obst.position(t=t)[2]
         marker.scale.x = obst.radius()
         marker.scale.y = obst.radius()
         marker.scale.z = obst.radius()
