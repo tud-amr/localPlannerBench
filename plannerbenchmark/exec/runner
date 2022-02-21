@@ -16,6 +16,7 @@ from plannerbenchmark.generic.logger import Logger
 # Import the planners you wish to evaluate
 from plannerbenchmark.planner.fabricPlanner import FabricPlanner
 from plannerbenchmark.planner.mpcPlanner import MPCPlanner
+from plannerbenchmark.planner.pdPlanner import PDPlanner
 
 
 def blockPrint():
@@ -101,6 +102,8 @@ class Runner(object):
                 self._planners.append(FabricPlanner(self._experiment, plannerFile))
             elif plannerType == 'mpc':
                 self._planners.append(MPCPlanner(self._experiment, plannerFile))
+            elif plannerType == 'dummy':
+                self._planners.append(PDPlanner(self._experiment, plannerFile))
 
     def startRosConverterNode(self):
         from plannerbenchmark.ros.ros_converter_node import ActionConverterNode

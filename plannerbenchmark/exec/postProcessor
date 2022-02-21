@@ -16,6 +16,7 @@ from plannerbenchmark.generic.experiment import Experiment
 # TODO: This dependency should be removed as it is not really required <27-01-22, mspahn> #
 from plannerbenchmark.planner.fabricPlanner import FabricPlanner
 from plannerbenchmark.planner.mpcPlanner import MPCPlanner
+from plannerbenchmark.planner.pdPlanner import PDPlanner
 
 from plannerbenchmark.postProcessing.metrics import (
     DistanceToPointMetric,
@@ -33,7 +34,7 @@ from plannerbenchmark.postProcessing.metrics import (
 import plannerbenchmark as pbm
 pkg_path = os.path.dirname(__file__) + '/../postProcessing/'
 
-plannerMap = {'fabric': 'SF', 'dynamicFabric': 'DF', 'mpc' : 'MPC'}
+plannerMap = {'fabric': 'SF', 'dynamicFabric': 'DF', 'mpc' : 'MPC', 'pdPlanner': 'PD'}
 kpiMap = {
     'integratedError': 'intError',
     'clearance': 'clearance',
@@ -98,6 +99,10 @@ class PostProcessor(object):
             )
         elif "/mpc_" in self._expFolder:
             self._planner = MPCPlanner(
+                self._experiment, self._expFolder + "/planner.yaml"
+            )
+        elif "/pdplanner_" in self._expFolder:
+            self._planner = PDPlanner(
                 self._experiment, self._expFolder + "/planner.yaml"
             )
         if self._experiment.robotType() == "pointRobot":
