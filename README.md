@@ -44,3 +44,16 @@ Then the experiment is run with the command line interface
 ../../../plannerbenchmark/exec/runner -c setup/exp.yaml -p fabric setup/fabric.yaml --render
 ```
 
+## Postprocessing
+
+The experiments can be postprocessed using the provide executable.
+When using poetry, make sure you are in the virtual environment.
+```bash
+poetry shell
+cd path/to/folder/of/experiment
+```
+The you can run the post processor with arguments as 
+```bash
+../../../plannerbenchmark/exec/postProcessor --exp path/to/experiment -k time2Goal pathLength --plot
+```
+
