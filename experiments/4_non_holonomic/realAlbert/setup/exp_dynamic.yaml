@@ -17,9 +17,9 @@ goal:
     parent_link: 0
     child_link: 10
     trajectory:
-        - "0.0"
-        - "1.0 - ca.cos(0.08 * t)"
-        - "1.0"
+        - "-0.7 + ca.cos(0.08 * t)"
+        - "-0.7 + ca.cos(0.08 * t)"
+        - "1.2"
     type: analyticSubGoal
   subgoal2:
     prime: False

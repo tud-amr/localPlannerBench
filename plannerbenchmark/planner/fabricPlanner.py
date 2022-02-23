@@ -125,8 +125,8 @@ class FabricPlanner(AbstractPlanner):
                     eg = WeightedGeometry(g=geo_col, le=lag_col)
                     eg_n = eg.pull(dm_n)
                     eg_rel = eg_n.pull(dm_rel)
-                    #self._planner.addWeightedGeometry(dm_col, eg_rel)
-                    self._planner.addGeometry(dm_col, lag_col.pull(dm_n).pull(dm_rel), geo_col.pull(dm_n).pull(dm_rel))
+                    self._planner.addWeightedGeometry(dm_col, eg_rel)
+                    #self._planner.addGeometry(dm_col, lag_col.pull(dm_n).pull(dm_rel), geo_col.pull(dm_n).pull(dm_rel))
                 elif isinstance(obst, SphereObstacle):
                     dm_col = CollisionMap(
                         self._q, self._qdot, fk, obst.position(), obst.radius(), r_body=r_body

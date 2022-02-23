@@ -10,7 +10,7 @@ selfCol:
   exp: 3.0
   lam: 0.5
 attractor:
-  k_psi: 7.0
+  k_psi: 15.0
 limits:
   exp: 1.0
   lam: 1.0

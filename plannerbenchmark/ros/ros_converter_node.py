@@ -75,6 +75,24 @@ class ActionConverterNode(object):
         )
         self._obst_markers = MarkerArray()
         self._obst_counter = 0
+        self.initObstMarkers(2)
+
+    def initObstMarkers(self, nbObst):
+        for i in range(nbObst):
+            m = self.initObstMarker(i)
+            self._obst_markers.markers.append(m)
+
+    def initObstMarker(self, i):
+        marker = Marker()
+        marker.header.frame_id = self._root_frame
+        marker.id = i
+        marker.type = Marker.SPHERE
+        marker.action = Marker.ADD
+        marker.color.a = 1.0
+        marker.color.r = 1.0
+        marker.color.g = 0.0
+        marker.color.b = 0.0
+        return marker
 
     def joint_state_cb(self, data):
         self._x = np.array([data.position[i] for i in self._stateIndices])
@@ -92,28 +110,14 @@ class ActionConverterNode(object):
         self._goal_marker.scale.y = goal.epsilon()
         self._goal_marker.scale.z = goal.epsilon()
 
-    def initObstMarker(self):
-        marker = Marker()
-        marker.header.frame_id = self._root_frame
-        marker.type = Marker.SPHERE
-        marker.action = Marker.ADD
-        marker.color.a = 1.0
-        marker.color.r = 1.0
-        marker.color.g = 0.0
-        marker.color.b = 0.0
-        return marker
 
     def setObstacle(self, obst: SphereObstacle, i, t=0):
-        self._obst_counter += 1
-        marker = self.initObstMarker()
-        marker.id = i
-        marker.pose.position.x = obst.position(t=t)[0]
-        marker.pose.position.y = obst.position(t=t)[1]
-        marker.pose.position.z = obst.position(t=t)[2]
-        marker.scale.x = obst.radius()
-        marker.scale.y = obst.radius()
-        marker.scale.z = obst.radius()
-        self._obst_markers.markers.append(marker)
+        self._obst_markers.markers[i].pose.position.x = obst.position(t=t)[0]
+        self._obst_markers.markers[i].pose.position.y = obst.position(t=t)[1]
+        self._obst_markers.markers[i].pose.position.z = obst.position(t=t)[2]
+        self._obst_markers.markers[i].scale.x = obst.radius()
+        self._obst_markers.markers[i].scale.y = obst.radius()
+        self._obst_markers.markers[i].scale.z = obst.radius()
 
     def publishAction(self, action):
         for i in range(self._nu):
