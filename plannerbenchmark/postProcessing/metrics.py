@@ -67,8 +67,9 @@ class IntegratedErrorMetric(Metric):
         if indices[0].size == 0:
             return {'short': 1000}
         else:
-            trackingTime = float((t[-1] - t[indices[0][0]]))
-            trackingError = float(np.sum(distances[indices[0][0]:]))/trackingTime
+            #trackingTime = float((t[-1] - t[indices[0][0]]))
+            #trackingError = float(np.sum(distances[indices[0][0]:]))/trackingTime
+            trackingError = np.average(distances[indices[0][0]:])
             return {'short': trackingError}
 
 
