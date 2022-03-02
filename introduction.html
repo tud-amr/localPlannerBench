@@ -40,6 +40,7 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Local Motion Planning Benchmark Suite</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#dependencies">Dependencies</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#run-an-experiments">Run an experiments</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#postprocessing">Postprocessing</a></li>
@@ -79,14 +80,21 @@
 local motion planning algorithms. Running and postprocessing is
 available and we aim to offer a nice interface to implement a wrapper to
 your own motion planner.</p>
+<section id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline"></a></h2>
+<p>The package generates plots using <cite>gnuplot</cite>. Gnuplot can be installed on ubuntu
+using aptitude.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt install gnuplot
+</pre></div>
+</div>
+</section>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h2>
 <p>You first have to download the repository</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone git@github.com:maxspahn/localPlannerBench.git
 </pre></div>
 </div>
-<p>The package is setup with poetry. That means you can install it globally
-using pip</p>
+<p>You can install the package using pip as:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip3 install .
 </pre></div>
 </div>

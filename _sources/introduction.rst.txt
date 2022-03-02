@@ -6,6 +6,17 @@ local motion planning algorithms. Running and postprocessing is
 available and we aim to offer a nice interface to implement a wrapper to
 your own motion planner.
 
+Dependencies
+-------------
+
+The package generates plots using `gnuplot`. Gnuplot can be installed on ubuntu
+using aptitude.
+
+.. code:: bash
+
+   sudo apt install gnuplot
+
+
 Installation
 ------------
 
@@ -15,8 +26,7 @@ You first have to download the repository
 
     git clone git@github.com:maxspahn/localPlannerBench.git
 
-The package is setup with poetry. That means you can install it globally
-using pip
+You can install the package using pip as:
 
 .. code:: bash
 
