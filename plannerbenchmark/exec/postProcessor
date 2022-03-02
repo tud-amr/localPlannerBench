@@ -13,10 +13,6 @@ import collections
 
 from plannerbenchmark.generic.experiment import Experiment
 
-# TODO: This dependency should be removed as it is not really required <27-01-22, mspahn> #
-from plannerbenchmark.planner.fabricPlanner import FabricPlanner
-from plannerbenchmark.planner.mpcPlanner import MPCPlanner
-from plannerbenchmark.planner.pdPlanner import PDPlanner
 
 from plannerbenchmark.postProcessing.metrics import (
     DistanceToPointMetric,
@@ -94,14 +90,17 @@ class PostProcessor(object):
         self.convertDataPoints(csvToRawData(self._expFolder + "/res.csv"))
         self._experiment = Experiment(self._expFolder + "/exp.yaml")
         if "/fabric_" in self._expFolder or '/dynamicFabric_' in self._expFolder:
+            from plannerbenchmark.planner.fabricPlanner import FabricPlanner
             self._planner = FabricPlanner(
                 self._experiment, self._expFolder + "/planner.yaml"
             )
         elif "/mpc_" in self._expFolder:
+            from plannerbenchmark.planner.mpcPlanner import MPCPlanner
             self._planner = MPCPlanner(
                 self._experiment, self._expFolder + "/planner.yaml"
             )
         elif "/pdplanner_" in self._expFolder:
+            from plannerbenchmark.planner.pdPlanner import PDPlanner
             self._planner = PDPlanner(
                 self._experiment, self._expFolder + "/planner.yaml"
             )
