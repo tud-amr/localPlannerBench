@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Getting started &mdash; Local Planner Bench  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Example" href="example.html" />
+    <link rel="prev" title="Local Motion Planning Benchmark Suite" href="introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> Local Planner Bench
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Local Motion Planning Benchmark Suite</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pre-requisites">Pre-requisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#optional-installation-with-poetry">Optional: Installation with poetry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tutorial">Tutorial</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="example.html">Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="structure.html">Structure</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Local Planner Bench</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Getting started</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/getting_started.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="getting-started">
+<h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline"></a></h1>
+<p>This is the guide to quickly get going with the local motion planning benchmark suite.</p>
+<section id="pre-requisites">
+<h2>Pre-requisites<a class="headerlink" href="#pre-requisites" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p>Linux Ubuntu LTS &gt;= 18.04</p></li>
+<li><p>Python &gt;3.6, &lt; 3.10</p></li>
+<li><p>pip3</p></li>
+<li><p>gnuplot (<code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt</span> <span class="pre">install</span> <span class="pre">gnuplot</span></code>)</p></li>
+<li><p>[Optional] <a class="reference external" href="https://python-poetry.org/docs/">poetry</a></p></li>
+<li><p>[Optional] <a class="reference external" href="https://www.embotech.com/products/forcespro/overview/">embotech forces pro</a> for mpc</p></li>
+</ul>
+</section>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h2>
+<p>You first have to download the repository</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone git@github.com:maxspahn/localPlannerBench.git
+</pre></div>
+</div>
+<p>Then, you can install the package using pip as:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip3 install .
+</pre></div>
+</div>
+</section>
+<section id="optional-installation-with-poetry">
+<h2>Optional: Installation with poetry<a class="headerlink" href="#optional-installation-with-poetry" title="Permalink to this headline"></a></h2>
+<p>If you want to use <a class="reference external" href="https://python-poetry.org/docs/">poetry</a>, you have
+to install it first. See their webpage for instructions
+<a class="reference external" href="https://python-poetry.org/docs/">docs</a>. Once poetry is installed, you can
+install the virtual environment with the following commands. Note that during
+the first installation <code class="docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">update</span></code> takes up to 300 secs.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>poetry update
+poetry install
+</pre></div>
+</div>
+<p>The virtual environment is entered by</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>poetry shell
+</pre></div>
+</div>
+</section>
+<section id="tutorial">
+<h2>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline"></a></h2>
+<p>The following is a very simple example case.</p>
+<p>Run an experiments:</p>
+<p>Experiments should be added in separate folder in <code class="docutils literal notranslate"><span class="pre">experiments</span></code>.
+One very simple example can be found in this folder.
+Note that you need to active your poetry shell if you have installed the package using
+poetry by</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>poetry shell
+</pre></div>
+</div>
+<p>Then you navigate there by</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> experiments/1_fabric_mpc/pointMass
+</pre></div>
+</div>
+<p>Then the experiment is run with the command line interface</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>../../../plannerbenchmark/exec/runner -c setup/exp.yaml -p fabric setup/fabric.yaml --render
+</pre></div>
+</div>
+<p>Postprocessing:</p>
+<p>The experiments can be postprocessed using the provide executable. When
+using poetry, make sure you are in the virtual environment (<code class="docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">shell</span></code>)</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> path/to/folder/of/experiment
+</pre></div>
+</div>
+<p>The you can run the post processor with arguments as</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>../../../plannerbenchmark/exec/postProcessor --exp path/to/experiment -k time2Goal pathLength --plot
+</pre></div>
+</div>
+<p>More detailed information about this example can be found in <a class="reference internal" href="example.html#example-long"><span class="std std-ref">Example</span></a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="introduction.html" class="btn btn-neutral float-left" title="Local Motion Planning Benchmark Suite" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="example.html" class="btn btn-neutral float-right" title="Example" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Max Spahn.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

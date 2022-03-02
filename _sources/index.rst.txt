@@ -11,6 +11,7 @@ Welcome to Local Planner Bench's documentation!
    :caption: Contents:
 
    introduction
+   getting_started
    example
    structure
 

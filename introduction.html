@@ -18,7 +18,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Example" href="example.html" />
+    <link rel="next" title="Getting started" href="getting_started.html" />
     <link rel="prev" title="Welcome to Local Planner Bench’s documentation!" href="index.html" /> 
 </head>
 
@@ -39,13 +39,8 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Local Motion Planning Benchmark Suite</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#dependencies">Dependencies</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#run-an-experiments">Run an experiments</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#postprocessing">Postprocessing</a></li>
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Local Motion Planning Benchmark Suite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example.html">Example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="structure.html">Structure</a></li>
 </ul>
@@ -80,63 +75,6 @@
 local motion planning algorithms. Running and postprocessing is
 available and we aim to offer a nice interface to implement a wrapper to
 your own motion planner.</p>
-<section id="dependencies">
-<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline"></a></h2>
-<p>The package generates plots using <cite>gnuplot</cite>. Gnuplot can be installed on ubuntu
-using aptitude.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt install gnuplot
-</pre></div>
-</div>
-</section>
-<section id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h2>
-<p>You first have to download the repository</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone git@github.com:maxspahn/localPlannerBench.git
-</pre></div>
-</div>
-<p>You can install the package using pip as:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip3 install .
-</pre></div>
-</div>
-<p>If you want to use <a class="reference external" href="https://python-poetry.org/docs/">poetry</a>, you have
-to install it first. See their webpage for instructions
-<a class="reference external" href="https://python-poetry.org/docs/">https://python-poetry.org/docs/</a>. Once poetry is installed, you can
-install the virtual environment with</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>poetry update
-poetry install
-</pre></div>
-</div>
-<p>The virtual environment is entered by</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>poetry shell
-</pre></div>
-</div>
-</section>
-<section id="run-an-experiments">
-<h2>Run an experiments<a class="headerlink" href="#run-an-experiments" title="Permalink to this headline"></a></h2>
-<p>Experiments should be added in separate folder in <code class="docutils literal notranslate"><span class="pre">experiments</span></code>. Some
-default experiments are setup in this repositiory. Navigate there by</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>poetry shell
-<span class="nb">cd</span> experiments/1_fabric_mpc/pointMass
-</pre></div>
-</div>
-<p>Then the experiment is run with the command line interface</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>../../../plannerbenchmark/exec/runner -c setup/exp.yaml -p fabric setup/fabric.yaml --render
-</pre></div>
-</div>
-</section>
-<section id="postprocessing">
-<h2>Postprocessing<a class="headerlink" href="#postprocessing" title="Permalink to this headline"></a></h2>
-<p>The experiments can be postprocessed using the provide executable. When
-using poetry, make sure you are in the virtual environment.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>poetry shell
-<span class="nb">cd</span> path/to/folder/of/experiment
-</pre></div>
-</div>
-<p>The you can run the post processor with arguments as</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>../../../plannerbenchmark/exec/postProcessor --exp path/to/experiment -k time2Goal pathLength --plot
-</pre></div>
-</div>
-</section>
 </section>
 
 
@@ -144,7 +82,7 @@ using poetry, make sure you are in the virtual environment.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="Welcome to Local Planner Bench’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="example.html" class="btn btn-neutral float-right" title="Example" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="getting_started.html" class="btn btn-neutral float-right" title="Getting started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
