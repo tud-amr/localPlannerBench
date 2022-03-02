@@ -6,19 +6,25 @@ to implement a wrapper to your own motion planner.
 
 ## Installation
 
+For postprocessing you have to install gnuplot. If you are running ubuntu, you could
+install it via
+```bash
+sudo apt install gnuplot
+```
+
 You first have to download the repository
 ```bash
 git clone git@github.com:maxspahn/localPlannerBench.git
 ```
 
-The package is setup with poetry. That means you can install it globally using pip
+There are two options to install the package. You can either use pip as
 ```bash
 pip3 install .
 ```
 
-If you want to use (https://python-poetry.org/docs/)[poetry], you have to install it
-first. See their webpage for instruction https://python-poetry.org/docs/.
-Once poetry  is installed, you can install the virtual environment with
+If you want to also generate the virtualenvironment and you are familiar with 
+(https://python-poetry.org/docs/)[poetry], consider using it as:
+
 ```bash
 poetry update
 poetry install

@@ -29,7 +29,7 @@ example. For that execute
 
 .. code:: bash
 
-   ../../plannerbenchmark/exec/runner -c setup/exp.yaml -p pdbplanner setup/planner.yaml --render
+   ../../plannerbenchmark/exec/runner -c setup/exp.yaml -p pdplanner setup/planner.yaml --render
 
 When you run the above line, the experiment starts with the configuration files you have
 provided through the command line interface, namely ``-c setup/exp.yaml`` specifies the

@@ -6,7 +6,7 @@ name: Integration tests for local planner bench.
 on: 
   push:
     branches:
-      - master
+      - ft-documentation
   pull_request:
     branches:
       - master
@@ -27,6 +27,11 @@ jobs:
         with:
           python-version: 3.7
       #----------------------------------------------
+      #       Install ubuntu requirements
+      #----------------------------------------------
+      - name: Install non-python requirements
+        run: sudo apt install gnuplot
+      #----------------------------------------------
       #  -----  install & configure poetry  -----
       #----------------------------------------------
       - name: Install Poetry
@@ -36,7 +41,7 @@ jobs:
           virtualenvs-in-project: true
           installer-parallel: true
 
-       #----------------------------------------------
+      #----------------------------------------------
       #       load cached venv if cache exists
       #----------------------------------------------
       - name: Load cached venv
@@ -55,11 +60,11 @@ jobs:
       # install your root project, if required
       #----------------------------------------------
       - name: Install library
-        run: poetry install --no-interaction -E scenes
+        run: poetry install --no-interaction
       #----------------------------------------------
-      #              run test suite
+      #              run example case
       #----------------------------------------------
       # Runs a set of commands using the runners shell
-      - name: Run pytest
-        run: PYTHONPATH=src/ poetry run python -m pytest tests/
+      - name: Run ci script
+        run: poetry run ./scripts/ci_script.sh
 
