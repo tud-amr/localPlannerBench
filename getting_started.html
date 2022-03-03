@@ -128,21 +128,21 @@ poetry by</p>
 </pre></div>
 </div>
 <p>Then you navigate there by</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> experiments/1_fabric_mpc/pointMass
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> experiments/example
 </pre></div>
 </div>
 <p>Then the experiment is run with the command line interface</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>../../../plannerbenchmark/exec/runner -c setup/exp.yaml -p fabric setup/fabric.yaml --render
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>../../plannerbenchmark/exec/runner -c setup/exp.yaml -p pdplanner setup/planner.yaml --render
 </pre></div>
 </div>
 <p>Postprocessing:</p>
 <p>The experiments can be postprocessed using the provide executable. When
 using poetry, make sure you are in the virtual environment (<code class="docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">shell</span></code>)</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> path/to/folder/of/experiment
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> experiments/example
 </pre></div>
 </div>
 <p>The you can run the post processor with arguments as</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>../../../plannerbenchmark/exec/postProcessor --exp path/to/experiment -k time2Goal pathLength --plot
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>../../plannerbenchmark/exec/postProcessor --exp path/to/experiment -k time2Goal pathLength --plot --no-open
 </pre></div>
 </div>
 <p>More detailed information about this example can be found in <a class="reference internal" href="example.html#example-long"><span class="std std-ref">Example</span></a></p>
