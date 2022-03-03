@@ -6,7 +6,7 @@ name: Integration tests for local planner bench.
 on: 
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   basic:
