@@ -70,13 +70,13 @@ Then you navigate there by
 
 .. code:: bash
 
-    cd experiments/1_fabric_mpc/pointMass
+    cd experiments/example
 
 Then the experiment is run with the command line interface
 
 .. code:: bash
 
-    ../../../plannerbenchmark/exec/runner -c setup/exp.yaml -p fabric setup/fabric.yaml --render
+    ../../plannerbenchmark/exec/runner -c setup/exp.yaml -p pdplanner setup/planner.yaml --render
 
 Postprocessing:
 
@@ -85,12 +85,12 @@ using poetry, make sure you are in the virtual environment (``poetry shell``)
 
 .. code:: bash
 
-    cd path/to/folder/of/experiment
+    cd experiments/example
 
 The you can run the post processor with arguments as
 
 .. code:: bash
 
-    ../../../plannerbenchmark/exec/postProcessor --exp path/to/experiment -k time2Goal pathLength --plot
+    ../../plannerbenchmark/exec/postProcessor --exp path/to/experiment -k time2Goal pathLength --plot --no-open
 
 More detailed information about this example can be found in :ref:`example_long`

@@ -1,10 +1,9 @@
 ---
-Getting Started
+Getting started
 ---
 
 This is the guide to quickly get going with the local motion planning
-benchmark suite. A detailed documentation can be found on 
-https://maxspahn.github.io/localPlannerBench/.
+benchmark suite.
 
 Pre-requisites
 ==============
@@ -71,13 +70,13 @@ poetry shell
 Then you navigate there by
 
 ``` {.sourceCode .bash}
-cd experiments/1_fabric_mpc/pointMass
+cd experiments/example
 ```
 
 Then the experiment is run with the command line interface
 
 ``` {.sourceCode .bash}
-../../../plannerbenchmark/exec/runner -c setup/exp.yaml -p fabric setup/fabric.yaml --render
+../../plannerbenchmark/exec/runner -c setup/exp.yaml -p pdplanner setup/planner.yaml --render
 ```
 
 Postprocessing:
@@ -87,13 +86,13 @@ using poetry, make sure you are in the virtual environment
 (`poetry shell`)
 
 ``` {.sourceCode .bash}
-cd path/to/folder/of/experiment
+cd experiments/example
 ```
 
 The you can run the post processor with arguments as
 
 ``` {.sourceCode .bash}
-../../../plannerbenchmark/exec/postProcessor --exp path/to/experiment -k time2Goal pathLength --plot
+../../plannerbenchmark/exec/postProcessor --exp path/to/experiment -k time2Goal pathLength --plot --no-open
 ```
 
 More detailed information about this example can be found in
