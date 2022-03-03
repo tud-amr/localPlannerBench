@@ -4,9 +4,6 @@ name: Integration tests for local planner bench.
 
 # Controls when the workflow will run
 on: 
-  push:
-    branches:
-      - ft-documentation
   pull_request:
     branches:
       - master

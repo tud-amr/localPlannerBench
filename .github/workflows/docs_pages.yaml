@@ -4,7 +4,6 @@ on:
     tags: '*'
     branches:
       - master
-      - ft-documentation
 
 jobs:
   build-docs:

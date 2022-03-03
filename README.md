@@ -96,4 +96,5 @@ The you can run the post processor with arguments as
 ```
 
 More detailed information about this example can be found in
-example\_long
+the [long explaination of the example](https://maxspahn.github.io/localPlannerBench/example.html).
+
