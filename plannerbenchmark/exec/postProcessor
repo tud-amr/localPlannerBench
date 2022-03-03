@@ -66,8 +66,9 @@ class PostProcessor(object):
             "-exp",
             type=str,
             help="Experiment result folder",
-            required=True,
+            required=False,
         )
+        self._parser.set_defaults(expFolder='results')
         self._parser.add_argument("--series", dest="series", action="store_true")
         self._parser.set_defaults(series=False)
         self._parser.add_argument("--plot", dest="plot", action="store_true")
@@ -85,6 +86,8 @@ class PostProcessor(object):
             help="List of all kpis/metrics to be evaluated",
             required=True
         )
+        self._parser.add_argument("--latest", dest="latest", action="store_true")
+        self._parser.set_defaults(latest=False)
 
     def importData(self):
         self.convertDataPoints(csvToRawData(self._expFolder + "/res.csv"))
@@ -120,6 +123,13 @@ class PostProcessor(object):
     def parseArguments(self):
         args = self._parser.parse_args()
         self._expFolder = os.getcwd() + "/" + args.expFolder
+        if args.latest:
+            import glob
+            file_type = r'/*'
+            files = glob.glob(self._expFolder + file_type)
+            if not files:
+                raise FileNotFoundError(self._expFolder)
+            self._expFolder = max(files, key=os.path.getctime)
         self._series = args.series
         self._plot = args.plot
         self._seriesPlot = args.seriesPlot or args.plot
