@@ -13,10 +13,6 @@ import signal
 from plannerbenchmark.generic.experiment import Experiment, ExperimentInfeasible
 from plannerbenchmark.generic.logger import Logger
 
-# Import the planners you wish to evaluate
-from plannerbenchmark.planner.fabricPlanner import FabricPlanner
-from plannerbenchmark.planner.mpcPlanner import MPCPlanner
-
 
 def blockPrint():
     sys.stdout = open(os.devnull, 'w')
@@ -98,9 +94,14 @@ class Runner(object):
             plannerType = args.planners[i]
             plannerFile = args.planners[i+1]
             if plannerType == 'fabric':
+                from plannerbenchmark.planner.fabricPlanner import FabricPlanner
                 self._planners.append(FabricPlanner(self._experiment, plannerFile))
             elif plannerType == 'mpc':
+                from plannerbenchmark.planner.mpcPlanner import MPCPlanner
                 self._planners.append(MPCPlanner(self._experiment, plannerFile))
+            elif plannerType == 'pdplanner':
+                from plannerbenchmark.planner.pdPlanner import PDPlanner
+                self._planners.append(PDPlanner(self._experiment, plannerFile))
 
     def startRosConverterNode(self):
         from plannerbenchmark.ros.ros_converter_node import ActionConverterNode
