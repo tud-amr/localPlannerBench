@@ -116,5 +116,7 @@ def run_integration_test_case(caseFolder):
 
 
 def test_all_cases():
-    caseFolder = "cases/pdplanner_pointMass"
-    run_integration_test_case(caseFolder)
+    absPath = os.path.dirname(os.path.abspath(__file__))
+    caseFolders = absPath + '/cases/'
+    for case in os.listdir(caseFolders):
+        run_integration_test_case('cases/' + case)
