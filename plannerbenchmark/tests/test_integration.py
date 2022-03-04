@@ -6,7 +6,7 @@ import pytest
 
 
 def verify_resultDirExists():
-    resDirName = os.path.dirname(os.path.abspath(__file__)) + "/tempResults"
+    resDirName = "tempResults"
     resultFolderFound = False
     for fname in os.listdir(resDirName):
         if os.path.isdir(os.path.join(resDirName, fname)):
@@ -23,76 +23,78 @@ def verify_resultDirExists():
 
 def verify_configFiles(caseFolder):
     curDirName = os.path.dirname(os.path.abspath(__file__))
-    resDirName = curDirName + '/tempResults'
+    resDirName = "tempResults"
     for fname in os.listdir(resDirName):
-        if os.path.isdir(os.path.join(resDirName,fname)):
+        if os.path.isdir(os.path.join(resDirName, fname)):
             resultFolder = os.path.join(resDirName, fname)
     # verify planner config file
-    plannerFile = os.path.join(resultFolder, 'planner.yaml')
-    with open(plannerFile, 'r') as plannerStream:
+    plannerFile = os.path.join(resultFolder, "planner.yaml")
+    with open(plannerFile, "r") as plannerStream:
         plannerDict = yaml.safe_load(plannerStream)
     expectedResultFolder = curDirName + "/" + caseFolder + "/default_result"
-    plannerDefaultFile = os.path.join(expectedResultFolder, 'planner.yaml')
-    with open(plannerDefaultFile, 'r') as plannerStream:
+    plannerDefaultFile = os.path.join(expectedResultFolder, "planner.yaml")
+    with open(plannerDefaultFile, "r") as plannerStream:
         plannerDefaultDict = yaml.safe_load(plannerStream)
     assert plannerDict == plannerDefaultDict
     # verify exp config file
-    expFile = os.path.join(resultFolder, 'exp.yaml')
-    with open(expFile, 'r') as expStream:
+    expFile = os.path.join(resultFolder, "exp.yaml")
+    with open(expFile, "r") as expStream:
         expDict = yaml.safe_load(expStream)
-    expectedResultFolder = curDirName + "/" +  caseFolder + '/default_result'
-    expDefaultFile = os.path.join(expectedResultFolder, 'exp.yaml')
-    with open(expDefaultFile, 'r') as expStream:
+    expectedResultFolder = curDirName + "/" + caseFolder + "/default_result"
+    expDefaultFile = os.path.join(expectedResultFolder, "exp.yaml")
+    with open(expDefaultFile, "r") as expStream:
         expDefaultDict = yaml.safe_load(expStream)
     assert expDict == expDefaultDict
 
 
 def verify_plotting():
-    curDirName = os.path.dirname(os.path.abspath(__file__))
-    resDirName = curDirName + '/tempResults'
+    resDirName = "tempResults"
     for fname in os.listdir(resDirName):
-        if os.path.isdir(os.path.join(resDirName,fname)):
+        if os.path.isdir(os.path.join(resDirName, fname)):
             resultFolder = os.path.join(resDirName, fname)
-    plotFolder = os.path.join(resultFolder, 'plots')
+    plotFolder = os.path.join(resultFolder, "plots")
     filenamesInPlot = os.listdir(plotFolder)
-    assert 'trajectory.eps' in filenamesInPlot
+    assert "trajectory.eps" in filenamesInPlot
 
 
 def verify_resFile(caseFolder):
     curDirName = os.path.dirname(os.path.abspath(__file__))
-    resDirName = curDirName + '/tempResults'
+    resDirName = "tempResults"
     for fname in os.listdir(resDirName):
-        if os.path.isdir(os.path.join(resDirName,fname)):
+        if os.path.isdir(os.path.join(resDirName, fname)):
             resultFolder = os.path.join(resDirName, fname)
-    resFileName = os.path.join(resultFolder, 'res.csv')
-    expectedResultFolder = curDirName + "/" +  caseFolder + '/default_result'
-    resDefaultFileName = os.path.join(expectedResultFolder, 'res.csv')
-    resArray = np.genfromtxt(resFileName, delimiter=',', skip_header=1)
-    resDefaultArray = np.genfromtxt(resDefaultFileName, delimiter=',', skip_header=1)
+    resFileName = os.path.join(resultFolder, "res.csv")
+    expectedResultFolder = curDirName + "/" + caseFolder + "/default_result"
+    resDefaultFileName = os.path.join(expectedResultFolder, "res.csv")
+    resArray = np.genfromtxt(resFileName, delimiter=",", skip_header=1)
+    resDefaultArray = np.genfromtxt(resDefaultFileName, delimiter=",", skip_header=1)
     np.testing.assert_array_almost_equal(resArray[:, 2:], resDefaultArray[:, 2:])
-    
+
+
 def run_integration_test_case(caseFolder):
     print("\n------------------------------------------------------------------------")
     print(f"Running case from {caseFolder}")
     print("------------------------------------------------------------------------")
+    tests_path = os.path.dirname(os.path.abspath(__file__))
+    execPath = tests_path + "/../exec/"
     # run case
     cmdRunner = [
         "poetry",
         "run",
-        "../exec/runner",
+        execPath + "runner",
         "-c",
-        caseFolder + "/setup/exp.yaml",
+        tests_path + "/" + caseFolder + "/setup/exp.yaml",
         "-p",
         "pdplanner",
-        caseFolder + "/setup/planner.yaml",
+        tests_path + "/" + caseFolder + "/setup/planner.yaml",
         "--res-folder",
-        "tempResults"
+        "tempResults",
     ]
     Popen(cmdRunner, stdout=DEVNULL).wait()
     cmdPostProcessor = [
         "poetry",
         "run",
-        "../exec/postProcessor",
+        execPath + "postProcessor",
         "--exp",
         "tempResults",
         "-k",
@@ -101,7 +103,7 @@ def run_integration_test_case(caseFolder):
         "time2Goal",
         "--plot",
         "--no-open",
-        "--latest"
+        "--latest",
     ]
     Popen(cmdPostProcessor, stdout=DEVNULL).wait()
     # run integration test
