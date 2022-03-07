@@ -22,6 +22,12 @@ class CaseEvaluation(object):
             self._metrics = []
             self._experiment = Experiment(self._folder + "/exp.yaml")
 
+    def getInterval(self):
+        plannerFile = self._folder + "/planner.yaml"
+        with open(plannerFile, "r") as file:
+            self._plannerSetup = yaml.safe_load(file)
+        return self._plannerSetup['interval']
+
     def decodeFolderName(self):
         pattern = re.compile(r'.*\/(.*)_(\d{8}_\d{6})')
         match = re.match(pattern, self._folder)
@@ -33,7 +39,7 @@ class CaseEvaluation(object):
 
     def setMetrics(self, metricNames):
         if not self._recycle:
-            self._metrics = createMetricsFromNames(metricNames, self._experiment)
+            self._metrics = createMetricsFromNames(metricNames, self._experiment, interval=self.getInterval())
 
     def readData(self):
         fileName = self._folder + "/res.csv"

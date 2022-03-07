@@ -16,10 +16,11 @@ class SeriesComparison(SeriesEvaluation):
             match = re.match(pattern, fname)
             if match:
                 plannerNames.add(match.group(1))
-        return list(plannerNames)
+        return sorted(list(plannerNames))
 
     def process(self):
         super().process()
+        super().writeResults()
         self.compare()
     
     def compare(self):

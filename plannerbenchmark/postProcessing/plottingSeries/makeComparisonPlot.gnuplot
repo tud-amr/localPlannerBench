@@ -19,8 +19,7 @@ set style boxplot nooutliers
 set log y2 2
 # set style boxplot outliers pointtype -1
 set style data boxplot
-# set log y2 2
-set y2range [0.0:5.00]
+#set y2range [0.0:5.00]
 unset ytics
 set y2tics nomirror font ',35' rotate by 90 out offset 0.5,-1.0
 set y2tics (0.02, 0.1, 0.2, 0.5, 1, 2, 5)
