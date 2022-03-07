@@ -17,13 +17,22 @@ set style data histogram
 set style histogram rowstacked
 set border 9
 set boxwidth 0.5
-set xtics (planner1Type 0, planner2Type 1) scale 1.0 font ',35' rotate by 90 offset 0, -7.0 nomirror
-set xrange [-0.5:1.5]
+planner1 = ""
+planner2 = ""
+if (planner1Type eq 'fabric') planner1 = 'Static Fabric'
+if (planner1Type eq 'dynamicFabric') planner1 = 'Dynamic Fabric'
+if (planner2Type eq 'fabric') planner2 = 'Static Fabric'
+if (planner2Type eq 'dynamicFabric') planner2 = 'Dyn. Fabric'
+if (planner1Type eq 'mpc') planner1 = 'MPC'
+if (planner2Type eq 'mpc') planner2 = 'MPC'
+set xtics (planner1 0, planner2 1) scale 1.0 font ',35' rotate by 90 offset 0, -14.0 nomirror
 unset ytics
-nbCases=100
+nbPlanner=1
+nbCases=25
+set xrange [-0.5:nbPlanner - 0.5]
 set y2range [0:1.6 * nbCases]
 set y2tics nomirror font ',35'
-set y2tics 0,20,nbCases rotate by 90 offset 0.5,-2.0
+set y2tics 0,10,nbCases rotate by 90 offset 0.5,-2.0
 set y2label '#Cases' font ',35'
 
 set key autotitle columnhead
@@ -32,11 +41,11 @@ unset key
 #set key font ',20'
 #set key outside horiz
 #set key top
-x = 0.2
-x2 = 0.6
-x3 = 1.0
+x = -0.2
+dx = 0.1 * nbPlanner
+x2 = x + 2 * dx
+x3 = x2 + 2 * dx
 y = 1.05 * nbCases
-dx = 0.2
 dy = 0.05 * nbCases
 set label 2 'Success' at x,y+dy rotate by 90 offset 6*dx,1 font ',35'
 set object rectangle from x,y to x+dx,y+dy fc rgb 'green' fs transparent solid 0.5
