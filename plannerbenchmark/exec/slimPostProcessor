@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+import argparse
+import os
+
+from plannerbenchmark.postProcessing.caseEvaluation import CaseEvaluation
+from plannerbenchmark.postProcessing.seriesEvaluation import SeriesEvaluation
+from plannerbenchmark.postProcessing.casePlotting import CasePlotting
+from plannerbenchmark.postProcessing.seriesPlotting import SeriesPlotting
+from plannerbenchmark.postProcessing.helpers import createMetricsFromNames
+
+class SlimPostProcessor(object):
+
+    """Docstring for SlimPostProcessor. """
+
+    def __init__(self):
+        self._parser = argparse.ArgumentParser(
+            "Run post processing for motion planning experiment"
+        )
+        self._parser.add_argument(
+            "--expFolder",
+            "-exp",
+            type=str,
+            help="Experiment result folder",
+            required=True,
+        )
+        self._parser.add_argument(
+            "--kpis", "-k",
+            type=str,
+            nargs="+",
+            help="List of all kpis/metrics to be evaluated",
+            required=True
+        )
+        self._parser.add_argument("--series", dest="series", action="store_true")
+        self._parser.add_argument("--plot", dest="plot", action="store_true")
+        self._parser.add_argument("--recycle", dest="recycle", action="store_true")
+        self._parser.set_defaults(series=False, plot=False, recycle=False)
+
+    def run(self):
+        args = self._parser.parse_args()
+        kpis = sorted(args.kpis)
+        nbMetrics = len(kpis)
+        folder = os.getcwd() + "/" + args.expFolder
+
+        if not args.series:
+            evaluator = CaseEvaluation(folder, recycle=args.recycle)
+        else:
+            evaluator = SeriesEvaluation(folder, recycle=args.recycle)
+        evaluator.setMetrics(kpis)
+        evaluator.process()
+        evaluator.writeResults()
+        if args.plot and not args.series:
+            plotter = CasePlotting(folder)
+            plotter.plot()
+        if args.plot and args.series:
+            plotter = SeriesPlotting(folder, nbMetrics)
+            plotter.plot()
+
+if __name__ == "__main__":
+    pp = SlimPostProcessor()
+    pp.run()

@@ -23,6 +23,9 @@ class Metric(object):
     def computeMetric(self, data):
         return
 
+    def name(self):
+        return self._name
+
 
 class DistanceToPointMetric(Metric):
     def computeMetric(self, data):
@@ -75,7 +78,7 @@ class IntegratedErrorMetric(Metric):
 class ClearanceMetric(Metric):
     def computeMetric(self, data):
         obstacles = self._params["obstacles"]
-        m = self._params["m"]
+        m = obstacles[0].dim()
         n = self._params["n"]
         r_body = self._params["r_body"]
         rawData = np.stack([data[name] for name in self._measNames])
@@ -93,7 +96,7 @@ class ClearanceMetric(Metric):
                 minDistances.append(minDistToObst)
                 distanceToObsts["obst" + str(i) + "_fk" + str(i_fk)] = {
                     "dist": minDistToObst,
-                    "loc": obst.position(),
+                    "loc": list(obst.position()),
                     "r": obst.radius(),
                 }
         return {"short": float(min(minDistances)), "allMinDist": distanceToObsts}
@@ -160,7 +163,7 @@ class SolverTimesMetric(Metric):
     def computeMetric(self, data):
         interval = self._params["interval"]
         t_planning = data[self._measNames[0]]
-        return {'short': float(np.mean(t_planning[0::interval]))}
+        return {'short': 1000 * float(np.mean(t_planning[0::interval]))}
 
 
 class PathLengthMetric(Metric):
