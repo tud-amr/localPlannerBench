@@ -5,3 +5,4 @@ planner1=${2}
 planner2=${3}
 N=${4}
 gnuplot -c "makeComparisonPlot.gnuplot" $seriesFolder $planner1 $planner2 $N
+gnuplot -c "makeSuccessPlot.gnuplot" $seriesFolder $planner1 $planner2

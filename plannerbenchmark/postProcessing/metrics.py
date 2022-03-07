@@ -179,7 +179,7 @@ class SuccessMetric(Metric):
         minClearance = self._params["minClearance"]
         reachingFlag = self._params["reachingFlag"]
         if reachingFlag < 0:
-            return {'short': False, 'flag': -2}
+            return {'short': -2}
         if minClearance < 0:
-            return {'short': False, 'flag': -1}
-        return {'short': True, 'flag': 0}
+            return {'short': -1}
+        return {'short': 1}

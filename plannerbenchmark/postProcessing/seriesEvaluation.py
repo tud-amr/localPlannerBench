@@ -63,14 +63,31 @@ class SeriesEvaluation(object):
         return filteredMetricNames
 
     def writeResultTables(self):
+        successes = {}
         for plannerKey in self._kpis:
+            success = {-2: 0, -1:0, 1: 0}
             resultsTableFile = self._folder + "/resultsTable_" + plannerKey + ".csv"
             with open(resultsTableFile, "w") as file:
                 csv_writer = csv.writer(file, delimiter=" ")
                 csv_header = self.filterMetricNames()
                 csv_writer.writerow(csv_header)
                 for timeStampKey in self._kpis[plannerKey]:
-                    if self.success(plannerKey, timeStampKey):
+                    success[self.success(plannerKey, timeStampKey)] += 1
+                    if self.success(plannerKey, timeStampKey) > 0:
                         kpis_timeStamp = self.filterKpis(self._kpis[plannerKey][timeStampKey])
                         csv_writer.writerow([timeStampKey] + kpis_timeStamp)
-
+            successes[plannerKey] = success
+        successTableFile = self._folder + "/successTable.csv"
+        with open(successTableFile, "w") as file:
+            csv_writer = csv.writer(file, delimiter=" ")
+            csv_header = ['planner', -2, -1, 1]
+            csv_writer.writerow(csv_header)
+            for planner in successes.keys():
+                csv_writer.writerow(
+                    [
+                        planner,
+                        successes[planner][-2],
+                        successes[planner][-1],
+                        successes[planner][1]
+                    ]
+                )
