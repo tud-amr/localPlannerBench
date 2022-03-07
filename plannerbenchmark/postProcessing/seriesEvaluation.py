@@ -38,7 +38,7 @@ class SeriesEvaluation(object):
 
     def writeResults(self):
         self.writeKpis()
-        self.writeResultTable()
+        self.writeResultTables()
 
     def writeKpis(self):
         postProcessFile = self._folder + "/postProcess.yaml"
@@ -62,8 +62,7 @@ class SeriesEvaluation(object):
                 filteredMetricNames.append(name)
         return filteredMetricNames
 
-
-    def writeResultTable(self):
+    def writeResultTables(self):
         for plannerKey in self._kpis:
             resultsTableFile = self._folder + "/resultsTable_" + plannerKey + ".csv"
             with open(resultsTableFile, "w") as file:
