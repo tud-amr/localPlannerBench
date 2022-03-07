@@ -1,4 +1,4 @@
-set term postscript eps color size 1, 7
+set term postscript eps color size 1, 7 font "RomanSerif.ttf" 14
 seriesFolder=ARG1
 planner=ARG2
 N=ARG3
@@ -26,7 +26,24 @@ set xtics () scale 1.0 font ",35" rotate by 90 out offset -0.5, -14.0
 set xtics nomirror
 do for [i=2:N] {
   metricName = word(firstrow, i)
-  set xtics add (metricName i)
+  if (metricName eq "solverTime"){
+    set xtics add ("Solver Time" i);
+  }
+  if (metricName eq "integratedError") {
+    set xtics add ("Summed Error" i);
+  }
+  if (metricName eq "pathLength") {
+    set xtics add ("Path Length" i);
+  }
+  if (metricName eq "clearance") {
+    set xtics add ("Clearance" i);
+  }
+  if (metricName eq "selfClearance") {
+    set xtics add ("Self Clearence" i);
+  }
+  if (metricName eq "time2Goal") {
+    set xtics add ("Time to Goal" i);
+  }
   outFileBox=seriesFolder."/results_".planner."_".metricName.".eps"
   set output outFileBox
   plot inFile using (i):i lw 2 axes x1y2

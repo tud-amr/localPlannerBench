@@ -1,4 +1,4 @@
-set term postscript eps color size 2.0, 7.0
+set term postscript eps color size 2.0, 7.0 font "RomanSerif.ttf" 14
 seriesFolder=ARG1
 planner1Type=ARG2
 planner2Type=ARG3
