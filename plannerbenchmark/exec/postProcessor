@@ -32,13 +32,13 @@ pkg_path = os.path.dirname(__file__) + '/../postProcessing/'
 
 plannerMap = {'fabric': 'SF', 'dynamicFabric': 'DF', 'mpc' : 'MPC', 'pdPlanner': 'PD'}
 kpiMap = {
-    'integratedError': 'intError',
-    'clearance': 'clearance',
-    'dynamicClearance': 'clearance',
-    'solverTime': 'solverTime',
-    'time2Goal': 'time2Goal',
-    'pathLength': 'pathLength',
-    'selfClearance': 'selfClear',
+    'integratedError': "IntegratedError",
+    'clearance': "Clearance",
+    'dynamicClearance': "Clearance",
+    'solverTime': "SolverTime",
+    'time2Goal': "TimetoGoal",
+    'pathLength': "PathLength",
+    'selfClearance': "SelfClearance",
 }
 
 def csvToRawData(fileName):
