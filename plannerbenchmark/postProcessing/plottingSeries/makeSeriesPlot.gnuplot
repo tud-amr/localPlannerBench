@@ -31,7 +31,7 @@ do for [i=2:N] {
   outFileBox=seriesFolder."/results_".planner."_".metricName.".eps"
   set output outFileBox
   if (metricName eq "solverTime"){
-    set xtics add ("Solver Time [s]" i);
+    set xtics add ("Solver Time [ms]" i);
     set y2tics nomirror font ',35' rotate by 90 out offset 0.5,-2.5
     set y2range [0.6:0.80]
     set y2tics (0.65, 0.7, 0.75)
