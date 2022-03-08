@@ -23,21 +23,30 @@ plot inFile using 1:"goal_0_0" with lines lt rgb "#FFCECF" lw 10 title '~x{0.3\~
   inFile using 1:"fk7_y" with lines lt rgb "green" lw 5  title 'x_{1}', \
   inFile using 1:"fk7_z" with lines lt rgb "blue" lw 5 title 'x_{2}'
 
-
-
 print "Done creating trajectory plot, saved to"
 print outFile
 
-# goal_x_1 = "goal_0_1"
-# goal_y_1 = "goal_1_1"
-# goal_z_1 = "goal_2_1"
-# goal_x_2 = "goal_0_2"
-# goal_y_2 = "goal_1_2"
-# goal_z_2 = "goal_2_2"
-# plotting goal derivatives
-#  inFile using 1:goal_x_1 with lines lt rgb "#FFCECF" lw 2 title 'goal_0_1', \
-#  inFile using 1:goal_y_1 with lines lt rgb "#CFFFCF"lw 2 title 'goal_1_1', \
-#  inFile using 1:goal_z_1 with lines lt rgb "#CFD1FF" lw 2 title 'goal_2_1', \
-#  inFile using 1:goal_x_2 with lines lt rgb "#FFCECF" lw 1 title 'goal_0_2', \
-#  inFile using 1:goal_y_2 with lines lt rgb "#CFFFCF"lw 1 title 'goal_1_2', \
-#  inFile using 1:goal_z_2 with lines lt rgb "#CFD1FF" lw 1 title 'goal_2_2', \
+# 3dPlot
+#outfile=resFolder."/plots/trajectory_3d.eps"
+#set output outfile
+
+#set xrange [-0.0: 0.75]
+#set yrange [-1.0: 1.0]
+#set zrange [0.0: 1.0]
+#set xtics (0.0, 0.25, 0.5)
+#set ytics (-1.0, 0.0, 0.0)
+#set ztics (0.0, 1.0)
+#set view 30, 30, 1, 1
+#set grid xtics
+#set grid ytics
+#set grid ztics
+#set xlabel "x_{ee}"
+#set ylabel "y_{ee}"
+#set zlabel "z_{ee}"
+
+#splot inFile using "goal_0_0":"goal_1_0":"goal_2_0" with lines lt rgb "green" lw 2 title '~x{0.3\~}_0', \
+#  inFile using "fk7_x":"fk7_y":"fk7_z" with lines lt rgb "red" lw 5 title '~x{0.3\~}_0', \
+
+
+#print "Done creating trajectory plot, saved to"
+#print outFile

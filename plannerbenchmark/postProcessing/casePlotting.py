@@ -54,3 +54,10 @@ class CasePlotting(object):
                 cwd=createPlotFolder,
                 stdout=subprocess.PIPE,
             ).wait()
+        elif self._experiment.robotType() == 'albert':
+            createPlotFolder = curPath + 'plottingAlbert/'
+            subprocess.Popen(
+                ["./createPlot", self._folder],
+                cwd=createPlotFolder,
+                stdout=subprocess.PIPE,
+            ).wait()
