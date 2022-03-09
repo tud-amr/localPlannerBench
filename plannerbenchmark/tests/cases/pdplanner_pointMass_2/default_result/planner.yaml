@@ -3,3 +3,4 @@ n: 2
 p: 0.2
 robot_type: pointRobot
 type: pdplanner
+interval: 1

@@ -174,7 +174,6 @@ class Runner(object):
                 logger = Logger(self._res_folder, timeStamp)
                 logger.setSetups(self._experiment, planner)
                 t = 0.0
-                input("Enter to start")
                 for i in range(self._experiment.T()):
                     if self._aborted:
                         break
