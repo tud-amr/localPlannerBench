@@ -27,7 +27,9 @@ jobs:
       #       Install ubuntu requirements
       #----------------------------------------------
       - name: Install non-python requirements
-        run: sudo apt install gnuplot
+        run: |
+         sudo apt update
+         sudo apt install gnuplot
       #----------------------------------------------
       #  -----  install & configure poetry  -----
       #----------------------------------------------
