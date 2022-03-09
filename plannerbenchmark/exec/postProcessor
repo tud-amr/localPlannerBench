@@ -27,6 +27,16 @@ class SlimPostProcessor(object):
             help="Experiment result folder",
             required=True,
         )
+        self._parser.add_argument("--series", dest="series", action="store_true")
+        self._parser.set_defaults(series=False)
+        self._parser.add_argument("--plot", dest="plot", action="store_true")
+        self._parser.set_defaults(plot=False)
+        self._parser.add_argument("--series-plot", dest="seriesPlot", action="store_true")
+        self._parser.set_defaults(seriesPlot=False)
+        self._parser.add_argument("--verbose", dest="verbose", action="store_true")
+        self._parser.set_defaults(verbose=False)
+        self._parser.add_argument("--no-open", dest="openFile", action="store_false")
+        self._parser.set_defaults(openFile=True)
         self._parser.add_argument(
             "--kpis", "-k",
             type=str,
@@ -34,6 +44,9 @@ class SlimPostProcessor(object):
             help="List of all kpis/metrics to be evaluated",
             required=True
         )
+        self._parser.add_argument("--latest", dest="latest", action="store_true")
+        self._parser.set_defaults(latest=False)
+
         self._parser.add_argument("--series", dest="series", action="store_true")
         self._parser.add_argument("--plot", dest="plot", action="store_true")
         self._parser.add_argument("--recycle", dest="recycle", action="store_true")
@@ -46,6 +59,14 @@ class SlimPostProcessor(object):
         kpis = sorted(args.kpis)
         nbMetrics = len(kpis)
         folder = os.getcwd() + "/" + args.expFolder
+        if args.latest:
+            import glob
+            file_type = r'/*'
+            files = glob.glob(self._expFolder + file_type)
+            if not files:
+                raise FileNotFoundError(self._expFolder)
+            folder = max(files, key=os.path.getctime)
+
 
         if args.series:
             evaluator = SeriesEvaluation(folder, recycle=args.recycle)
