@@ -28,7 +28,7 @@ class Metric(ABC):
         self._params: dict = params
         self._measNames: list = measNames
 
-    @abc.abstractmethod
+    @abstractmethod
     def computeMetric(self, data: dict):
         return
 
