@@ -10,4 +10,4 @@ weights:
   ws: 1e10
   wu: 15.0
   wvel: 15.0
-  wx: 3.0
+  wx: 5.0
