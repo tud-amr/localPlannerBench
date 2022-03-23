@@ -48,15 +48,21 @@ class FabricPlanner(AbstractPlanner):
 
     def reset(self):
         if self._exp.robotType() in ['groundRobot', 'boxer', 'albert']:
-            self._planner = DefaultNonHolonomicPlanner(self.n(), m_base=self.mBase(), m_ratio=self.m_ratio(), debug=False)
+            self._planner = DefaultNonHolonomicPlanner(
+                self.n(), m_base=self.mBase(), m_rot=self.m_rot(), m_arm=self.m_arm(), debug=False)
         else:
             self._planner = DefaultFabricPlanner(self.n(), m_base=self.mBase(), debug=False)
         self._q, self._qdot = self._planner.var()
 
-    def m_ratio(self):
-        if 'm_ratio' in self._setup.keys():
-            return self._setup['m_ratio']
-        return 0.1
+    def m_rot(self):
+        if 'm_rot' in self._setup.keys():
+            return self._setup['m_rot']
+        return 1.0
+
+    def m_arm(self):
+        if 'm_arm' in self._setup.keys():
+            return self._setup['m_arm']
+        return 1.0
 
     def interval(self):
         return self._setup["interval"]
@@ -104,9 +110,9 @@ class FabricPlanner(AbstractPlanner):
                 x_rel = ca.SX.sym("x_rel", m_obst)
                 xdot_rel = ca.SX.sym("xdot_rel", m_obst)
             for j in range(1, self.n() + 1):
-                if self._exp.robotType() == "pointRobot" and j == 1:
+                if self._exp.robotType() in ["pointRobot", 'groundRobot', 'alber'] and j == 1:
                     continue
-                if self._exp.robotType() == "groundRobot" and j == 1:
+                if self._exp.robotType() == 'albert' and j <=3:
                     continue
                 fk = self._exp.fk(self._q, j, positionOnly=True)
                 if self._exp.robotType() == 'boxer':

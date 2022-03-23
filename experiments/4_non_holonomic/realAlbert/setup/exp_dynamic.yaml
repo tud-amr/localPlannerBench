@@ -17,10 +17,24 @@ goal:
     parent_link: 0
     child_link: 10
     trajectory:
-        - "1.0 * (-2 + 0.5 * ca.sin(0.1 * t))"
-        - "1.0 * (-1.5 - 0.5 * ca.cos(0.1 * t))"
-        - "1.2 + 0.4 * ca.sin(0.10 * t)"
+        - "-0.7 + ca.cos(0.08 * t)"
+        - "-0.7 + ca.cos(0.08 * t)"
+        - "1.2"
     type: analyticSubGoal
+  subgoal2:
+    prime: False
+    m: 2
+    w: 5
+    indices:
+      - 0
+      - 1
+    parent_link: 8
+    child_link: 10
+    desired_position:
+      - 0.0
+      - 0.0
+    type: staticSubGoal
+    epsilon: 0.1
 initState:
   q0:
     - 0.0
@@ -66,7 +80,7 @@ limits:
     - 2.8973
     - 3.7525
     - 2.8973
-r_body: 0.25
+r_body: 0.05
 randomObstacles:
   number: 5
 obstacles:
@@ -75,12 +89,14 @@ obstacles:
     type: sphereObstacle
     geometry:
       position: 
-        - 0.0
-        - 15
+        - 1.6
+        - 0.2
         - 0.2
       radius: 0.5
 selfCollision:
   pairs:
     - [0, 10]
+    - [7, 9]
+    - [8, 10]
     
 

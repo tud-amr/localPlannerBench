@@ -24,18 +24,21 @@ class ActionConverterNode(object):
             self._actionIndices = [2, 3, 4, 5, 6, 7, 8]
             self._stateIndices = [5, 6, 7, 8, 9, 10, 11]
             self._qdotIndices = []
+            self._root_frame = "panda_link0"
         elif robotType == 'boxer':
             self._n = 3
             self._nu = 2
             self._actionIndices = [0, 1]
             self._stateIndices = [0, 1, 2]
             self._qdotIndices = [3, 4]
+            self._root_frame = "map"
         elif robotType == 'albert':
             self._n = 10
             self._nu = 9
             self._actionIndices = [0, 1, 2, 3, 4, 5, 6, 7, 8]
             self._stateIndices = [0, 1, 2, 5, 6, 7, 8, 9, 10, 11]
             self._qdotIndices = [3, 4]
+            self._root_frame = "map"
         self._joint_state_sub = rospy.Subscriber("/joint_states_filtered", JointState, self.joint_state_cb)
         self._acc_pub = rospy.Publisher(
             '/joint_acc_des', 
@@ -59,7 +62,7 @@ class ActionConverterNode(object):
             Marker, queue_size=10
         )
         self._goal_marker = Marker()
-        self._goal_marker.header.frame_id = "map"
+        self._goal_marker.header.frame_id = self._root_frame
         self._goal_marker.type = Marker.SPHERE
         self._goal_marker.action = Marker.ADD
         self._goal_marker.color.a = 1.0
@@ -72,6 +75,24 @@ class ActionConverterNode(object):
         )
         self._obst_markers = MarkerArray()
         self._obst_counter = 0
+        self.initObstMarkers(2)
+
+    def initObstMarkers(self, nbObst):
+        for i in range(nbObst):
+            m = self.initObstMarker(i)
+            self._obst_markers.markers.append(m)
+
+    def initObstMarker(self, i):
+        marker = Marker()
+        marker.header.frame_id = self._root_frame
+        marker.id = i
+        marker.type = Marker.SPHERE
+        marker.action = Marker.ADD
+        marker.color.a = 1.0
+        marker.color.r = 1.0
+        marker.color.g = 0.0
+        marker.color.b = 0.0
+        return marker
 
     def joint_state_cb(self, data):
         self._x = np.array([data.position[i] for i in self._stateIndices])
@@ -89,28 +110,14 @@ class ActionConverterNode(object):
         self._goal_marker.scale.y = goal.epsilon()
         self._goal_marker.scale.z = goal.epsilon()
 
-    def initObstMarker(self):
-        marker = Marker()
-        marker.header.frame_id = "map"
-        marker.type = Marker.SPHERE
-        marker.action = Marker.ADD
-        marker.color.a = 1.0
-        marker.color.r = 1.0
-        marker.color.g = 0.0
-        marker.color.b = 0.0
-        return marker
 
     def setObstacle(self, obst: SphereObstacle, i, t=0):
-        self._obst_counter += 1
-        marker = self.initObstMarker()
-        marker.id = i
-        marker.pose.position.x = obst.position(t=t)[0]
-        marker.pose.position.y = obst.position(t=t)[1]
-        marker.pose.position.z = 0.1
-        marker.scale.x = obst.radius()
-        marker.scale.y = obst.radius()
-        marker.scale.z = obst.radius()
-        self._obst_markers.markers.append(marker)
+        self._obst_markers.markers[i].pose.position.x = obst.position(t=t)[0]
+        self._obst_markers.markers[i].pose.position.y = obst.position(t=t)[1]
+        self._obst_markers.markers[i].pose.position.z = obst.position(t=t)[2]
+        self._obst_markers.markers[i].scale.x = obst.radius()
+        self._obst_markers.markers[i].scale.y = obst.radius()
+        self._obst_markers.markers[i].scale.z = obst.radius()
 
     def publishAction(self, action):
         for i in range(self._nu):

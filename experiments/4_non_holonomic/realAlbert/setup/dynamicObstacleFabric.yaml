@@ -1,19 +1,18 @@
 interval: 1
-type: fabric
+type: dynamicFabric
 robot_type: albert
 n: 10
-m_base: 0.5
+m_base: 1.5
 m_rot: 1.0
-m_arm: 1.0
-m_arm: 0.05
+m_arm: 0.15
 obst:
-  exp: 2.0
-  lam: 0.02
+  exp: 1.0
+  lam: 10.00
 selfCol:
   exp: 2.0
   lam: 0.5
 attractor:
-  k_psi: 3.0
+  k_psi: 5.0
 speed:
   ex_factor: 1.0
 limits:
@@ -24,5 +23,5 @@ damper:
   b: 
    - 0.20
    - 15.0
-dynamic: False
+dynamic: True
 
