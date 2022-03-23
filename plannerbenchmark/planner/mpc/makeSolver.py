@@ -5,9 +5,9 @@ from robotmpcs.models.pandaMpcModel import PandaMpcModel
 
 
 def createSolver():
-    robotType = "boxer"
+    robotType = "panda"
     debug = False
-    slack = False
+    slack = True
     dt = 0.1
     N = 30
     if robotType == 'planarArm':

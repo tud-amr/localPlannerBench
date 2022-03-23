@@ -20,15 +20,15 @@ goal:
     parent_link: 0
     child_link: 7
     desired_position:
-      - 0.9
-      - 0.5
-      - 0.0
-      - -1.50
-      - 0.0
-      - 1.8675
-      - 0.0
-    type: static
-    dynamic : False
+      - 0.81
+      - 0.4177
+      - -0.2605
+      - -1.841
+      - 0.092
+      - 2.2
+      - -0.24
+    epsilon: 0.1
+    type: staticJointSpaceSubGoal
 # subgoal2:
 #   prime: False
 #   m: 1
@@ -93,7 +93,7 @@ limits:
     - 2.8973
     - 3.7525
     - 2.8973
-r_body: 0.04
+r_body: 0.15
 selfCollision:
   pairs:
     - [0, 3]
@@ -109,26 +109,29 @@ selfCollision:
     - [2, 6]
     - [2, 7]
 obstacles:
-  obst1:
-    x:
-      - 100.4
-      - 0.3
-      - 0.6
-    r: 0.15
-randomObstacles:
-  number: 5
-  limits:
-    x:
-      low:
+  obst0:
+    geometry:
+      position:
+        - 0.4
         - 0.0
+        - 0.25
+      radius: 0.1
+    type: sphereObstacle
+    dim: 3
+    low:
+      position:
+        - -1.0
         - -1.0
         - 0.0
-      high:
+      radius: 0.0
+    high:
+      position:
         - 1.0
+        - 0.3
         - 1.0
-        - 1.2
-    r:
-      low: 0.15
-      high: 0.15
+      radius: 0.2
+randomObstacles:
+  number: 5
+dynamic: False
     
 

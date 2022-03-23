@@ -155,9 +155,9 @@ class Experiment(object):
 
     def addScene(self, env):
         for obst in self._obstacles:
-            env.addObstacle(obst)
+            env.add_obstacle(obst)
         try:
-            env.addGoal(self.goal())
+            env.add_goal(self.goal())
         except Exception as e:
             print(e)
 

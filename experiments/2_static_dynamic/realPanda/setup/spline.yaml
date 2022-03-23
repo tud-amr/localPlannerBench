@@ -1,14 +1,14 @@
-T: 15000
+T: 2500
 dynamic: True
 dt: 0.01
 env: panda-reacher-acc-v0
 robot_type: panda
 n: 7
 goal:
-  subgoal1:
+  subgoal0:
     prime: True
     m: 3
-    w: 1
+    w: 5
     indices:
      - 0
      - 1
@@ -16,29 +16,19 @@ goal:
     parent_link: 0
     child_link: 7
     trajectory:
-     - "0.4  + 0.1 * ca.sin(0.2 * t)"
-     - "0.4 * ca.cos(0.2 * t)"
-     - "0.4"
-    type: analyticSubGoal
+      controlPoints:
+        - [0.42, 0.55, 0.35]
+        - [0.30, 0.6, 0.37]
+        - [0.50, 0.0, 0.47]
+        - [0.15, -0.6, 0.37]
+      degree: 2
+      duration: 20
+    type: splineSubGoal
     epsilon: 0.02
-  subgoal2:
-    prime: False
-    m: 2
-    w: 10
-    indices:
-     - 0
-     - 1
-    parent_link: 5
-    child_link: 7
-    epsilon: 0.05
-    desired_position:
-     - 0.0
-     - 0.0
-    type: staticSubGoal
 initState:
   q0: 
-    - 0.8
-    - 0.0
+    - 0.9
+    - 0.5
     - 0.0
     - -1.50
     - 0.0
@@ -86,19 +76,19 @@ selfCollision:
     - [2, 7]
 obstacles:
   obst0:
-    dim: 3
     type: sphereObstacle
+    dim: 3
     geometry:
       position:
-        - 100000.6
-        - 0.1
         - 0.4
-      radius: 0.10
+        - 0.0
+        - 0.7
+      radius: 0.15
     low:
       position:
         - 0.3
         - -0.5
-        - 0.0
+        - 0.2
       radius: 0.0
     high:
       position:

@@ -4,7 +4,7 @@ robot_type: simPanda
 n: 7
 m_base: 1.0
 obst:
-  exp: 1.0
+  exp: 2.0
   lam: 1.0
 selfCol:
   exp: 3.0

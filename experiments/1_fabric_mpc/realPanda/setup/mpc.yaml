@@ -8,6 +8,6 @@ slack: true
 type: mpc
 weights:
   ws: 1e10
-  wu: 5.0
-  wvel: 5.0
-  wx: 5.0
+  wu: 15.0
+  wvel: 15.0
+  wx: 3.0
