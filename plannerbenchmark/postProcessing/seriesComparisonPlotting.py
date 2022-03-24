@@ -22,7 +22,7 @@ class SeriesComparisonPlotting(object):
             match = re.match(pattern, fname)
             if match:
                 plannerNames.add(match.group(1))
-        return list(plannerNames)
+        return sorted(list(plannerNames))
 
     def plot(self) -> None:
         """Call the correct gnuplot script.

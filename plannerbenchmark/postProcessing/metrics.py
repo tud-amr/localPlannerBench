@@ -103,7 +103,7 @@ class IntegratedErrorMetric(Metric):
             # trackingTime = float((t[-1] - t[indices[0][0]]))
             # trackingError = float(np.sum(distances[indices[0][0]:]))/trackingTime
             trackingError = np.average(distances[indices[0][0] :])
-            return {"short": trackingError}
+            return {"short": float(trackingError)}
 
 
 class ClearanceMetric(Metric):
@@ -143,7 +143,7 @@ class ClearanceMetric(Metric):
                     "loc": list(obst.position()),
                     "r": obst.radius(),
                 }
-        return {"short": float(min(minDistances)), "allMinDist": distanceToObsts}
+        return {"short": 1.0/float(min(minDistances)), "allMinDist": distanceToObsts}
 
 
 class DynamicClearanceMetric(Metric):

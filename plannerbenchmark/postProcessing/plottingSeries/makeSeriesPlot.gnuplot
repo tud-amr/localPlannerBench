@@ -16,7 +16,7 @@ set style boxplot nooutliers
 # set style boxplot outliers pointtype -1
 set style data boxplot
 # set log y2 2
-# set y2range [0.9:2.00]
+set y2range [0.0:0.20]
 set grid y2tics
 unset ytics
 
@@ -26,7 +26,7 @@ unset key
 unset xtics
 set xtics () scale 1.0 font ",35" rotate by 90 out offset -0.5, -18.0
 set xtics nomirror
-do for [i=2:N] {
+do for [i=2:(N+2)] {
   metricName = word(firstrow, i)
   outFileBox=seriesFolder."/results_".planner."_".metricName.".eps"
   set output outFileBox
@@ -39,6 +39,8 @@ do for [i=2:N] {
   }
   if (metricName eq "integratedError") {
     set xtics add ("Summed Error" i);
+    set y2range [0.0:0.20]
+    set y2tics (0.0, 0.1, 0.15)
     colorName = 'dark-blue'
   }
   if (metricName eq "pathLength") {
@@ -49,7 +51,7 @@ do for [i=2:N] {
     colorName = 'violet'
   }
   if (metricName eq "clearance") {
-    set xtics add ("Clearance [m]" i);
+    set xtics add ("Clearance^{-1} [1/m]" i);
     set y2range [0.0:1.00]
     set y2tics (0.0, 0.25, 0.5, 0.75, 1.0)
     set y2tics nomirror font ',35' rotate by 90 out offset 0.5,-2.5
