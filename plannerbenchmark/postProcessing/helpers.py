@@ -4,6 +4,7 @@ from plannerbenchmark.postProcessing.metrics import (
     TimeToReachGoalMetric,
     PathLengthMetric,
     SuccessMetric,
+    IntegratedErrorMetric,
 )
 from plannerbenchmark.generic.experiment import Experiment
 
@@ -74,4 +75,12 @@ def createMetricsFromNames(
             )
         if name == "pathLength":
             metrics.append(PathLengthMetric(name, eeNames, {}))
+        if name == "integratedError":
+            metrics.append(
+                IntegratedErrorMetric(
+                    name,
+                    eeNames + goalNames + ["t"],
+                    {"m": m, "des_distance": 10* experiment.primeGoal().epsilon()},
+                )
+            )
     return metrics
