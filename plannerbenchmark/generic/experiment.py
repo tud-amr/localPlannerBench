@@ -7,11 +7,11 @@ import casadi as ca
 import planarenvs.pointRobot
 import planarenvs.nLinkReacher
 import planarenvs.groundRobots
-import urdfenvs.tiagoReacher
-import urdfenvs.pandaReacher
-import urdfenvs.mobileReacher
-import urdfenvs.albertReacher
-import urdfenvs.boxerRobot
+import urdfenvs.tiago_reacher
+import urdfenvs.panda_reacher
+import urdfenvs.mobile_reacher
+import urdfenvs.albert_reacher
+import urdfenvs.boxer_robot
 
 from forwardkinematics.fksCommon.fk_creator import FkCreator
 from MotionPlanningEnv.obstacleCreator import ObstacleCreator
@@ -155,9 +155,9 @@ class Experiment(object):
 
     def addScene(self, env):
         for obst in self._obstacles:
-            env.addObstacle(obst)
+            env.add_obstacle(obst)
         try:
-            env.addGoal(self.goal())
+            env.add_goal(self.goal())
         except Exception as e:
             print(e)
 
