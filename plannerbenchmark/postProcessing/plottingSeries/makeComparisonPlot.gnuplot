@@ -19,12 +19,13 @@ set style boxplot nooutliers
 set log y2 2
 # set style boxplot outliers pointtype -1
 set style data boxplot
-set y2range [0.7:1.2]
+set y2range [0.75:1.2]
 unset ytics
-set y2tics nomirror font ',35' rotate by 90 out offset 0.5,-1.0
-#set y2tics (0.02, 0.1, 0.2, 0.5, 1, 2, 5)
-set y2tics (0.8, 0.9, 1, 1.1)
+set y2tics nomirror font ',35' rotate by 90 out offset 0.5,-2.0
+set y2tics (0.8, 0.9, 1.0, 1.25)
+#set y2tics (0.8, 0.9, 1, 1.1)
 set grid y2tics
+set border 9
 
 # Planner names
 if (planner1Type eq 'fabric') planner1 = 'Static Fabric'
@@ -42,11 +43,8 @@ firstrow = system('head -1 '.inFile)
 unset key
 set xtics () scale 1.0 font ",35" rotate by 90 out offset -0.5, -14.0
 set xtics nomirror
-print firstrow
-print N
 do for [i=2:(N+2)] {
   metricName = word(firstrow, i)
-  print metricName
   if (metricName eq "solverTime"){
     set xtics add ("Solver Time" i);
   }
@@ -59,6 +57,9 @@ do for [i=2:(N+2)] {
   if (metricName eq "clearance") {
     set xtics add ("Clearance^{-1}" i);
   }
+  if (metricName eq "dynamicClearance") {
+    set xtics add ("Clearance^{-1}" i);
+  }
   if (metricName eq "selfClearance") {
     set xtics add ("Self Clearence" i);
   }
@@ -66,5 +67,6 @@ do for [i=2:(N+2)] {
     set xtics add ("Time to Goal" i);
   }
 }
-plot for [i=2:(N+1)] inFile using (i):i lw 2 axes x1y2, \
-  1 with lines dt 3 lw 6 lt rgb "red" notitle axes x1y2
+plot 1 with lines dt 3 lw 6 lt rgb "red" notitle axes x1y2, \
+  for [i=2:(N+1)] inFile using (i):i lw 2 lt rgb "gray30" axes x1y2
+

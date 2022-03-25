@@ -5,6 +5,7 @@ from plannerbenchmark.postProcessing.metrics import (
     PathLengthMetric,
     SuccessMetric,
     IntegratedErrorMetric,
+    DynamicClearanceMetric,
 )
 from plannerbenchmark.generic.experiment import Experiment
 
@@ -42,6 +43,10 @@ def createMetricsFromNames(
     fksNames = []
     eeNames = []
     goalNames = []
+    r_obsts = []
+    for obst in experiment.obstacles():
+        if obst.type() != 'sphereObstacle':
+            r_obsts.append(obst.radius())
     for i in range(1, n + 1):
         for j in range(m):
             fksNames.append("fk" + str(i) + "_" + indexMap[j])
@@ -63,6 +68,19 @@ def createMetricsFromNames(
                         "n": experiment.n(),
                         "r_body": experiment.rBody(),
                     },
+                )
+            )
+        if name == "dynamicClearance":
+            metrics.append(
+                DynamicClearanceMetric(
+                    "clearance", 
+                    fksNames + ['t'],
+                    {
+                        'r_body': experiment.rBody(),
+                        'r_obsts': r_obsts, 
+                        'm': m,
+                        'n': experiment.n()
+                    }
                 )
             )
         if name == "time2Goal":

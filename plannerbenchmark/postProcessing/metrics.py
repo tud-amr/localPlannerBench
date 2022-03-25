@@ -143,7 +143,7 @@ class ClearanceMetric(Metric):
                     "loc": list(obst.position()),
                     "r": obst.radius(),
                 }
-        return {"short": 1.0/float(min(minDistances)), "allMinDist": distanceToObsts}
+        return {"short": 1.0 / float(min(minDistances)), "allMinDist": distanceToObsts}
 
 
 class DynamicClearanceMetric(Metric):
@@ -186,7 +186,7 @@ class DynamicClearanceMetric(Metric):
                     "r_body": r_body,
                     "r_obst": r_obsts[i],
                 }
-        return {"short": float(min(minDistances)), "allMinDist": distanceToObsts}
+        return {"short": 1.0/float(min(minDistances)), "allMinDist": distanceToObsts}
 
 
 class SelfClearanceMetric(Metric):

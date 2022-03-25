@@ -22,7 +22,7 @@ class SeriesPlotting(object):
             match = re.match(pattern, fname)
             if match:
                 plannerNames.add(match.group(1))
-        return plannerNames
+        return sorted(plannerNames)
 
     def plot(self) -> None:
         """Calls the script to generate the series plots."""

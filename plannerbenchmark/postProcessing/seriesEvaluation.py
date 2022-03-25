@@ -40,6 +40,7 @@ class SeriesEvaluation(object):
         for fullPath in fullPaths:
             if not os.path.isdir(fullPath):
                 continue
+            print(f"Evaluating experiment from folder : {fullPath}")
             totalExps += 1
             case = CaseEvaluation(fullPath, recycle=self._recycle)
             case.setMetrics(self._metricNames)
@@ -106,7 +107,7 @@ class SeriesEvaluation(object):
             csv_writer = csv.writer(file, delimiter=" ")
             csv_header = ["planner", -2, -1, 1]
             csv_writer.writerow(csv_header)
-            for planner in successes.keys():
+            for planner in sorted(successes.keys()):
                 csv_writer.writerow(
                     [
                         planner,

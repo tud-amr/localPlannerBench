@@ -111,6 +111,7 @@ class CaseEvaluation(object):
             )
             self._kpis["success"] = successMetric.computeMetric(self._res)
         except KeyError:
+            print("Success assumed.")
             self._kpis["success"] = {'short': 1}
 
     def process(self) -> None:
