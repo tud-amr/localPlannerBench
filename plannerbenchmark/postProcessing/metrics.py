@@ -71,14 +71,14 @@ class TimeToReachGoalMetric(Metric):
         m = self._params["m"]
         fks = np.stack([data[name] for name in self._measNames[:m]]).T
         goal = np.stack([data[name] for name in self._measNames[m:-1]]).T
-        t = data[self._measNames[-1]]
+        time_steps= data[self._measNames[-1]]
         des_distance = self._params["des_distance"]
         distances = computeDistances(fks, goal)
         indices = np.where(distances < des_distance)
         if indices[0].size == 0:
             return {"short": -1, "flag": -1}
         else:
-            return {"short": float(t[np.min(indices)]), "flag": 0}
+            return {"short": float(time_steps[np.min(indices)]), "flag": 0}
 
 
 class IntegratedErrorMetric(Metric):
@@ -94,13 +94,13 @@ class IntegratedErrorMetric(Metric):
         des_distance = self._params["des_distance"]
         fks = np.stack([data[name] for name in self._measNames[:m]]).T
         goal = np.stack([data[name] for name in self._measNames[m:-1]]).T
-        t = np.array(data[self._measNames[-1]])
+        time_steps = np.array(data[self._measNames[-1]])
         distances = computeDistances(fks, goal)
         indices = np.where(distances < des_distance)
         if indices[0].size == 0:
             return {"short": 1000}
         else:
-            # trackingTime = float((t[-1] - t[indices[0][0]]))
+            # trackingTime = float((time_steps[-1] - time_steps[indices[0][0]]))
             # trackingError = float(np.sum(distances[indices[0][0]:]))/trackingTime
             trackingError = np.average(distances[indices[0][0] :])
             return {"short": float(trackingError)}
@@ -180,7 +180,7 @@ class DynamicClearanceMetric(Metric):
         for i in range(nb_obst):
             obstNames = [f"obst_{i}_{j}_0" for j in range(m)]
             obsts.append(np.stack([data[name] for name in obstNames]).T)
-        t = np.array(data[self._measNames[-1]])
+        time_steps = np.array(data[self._measNames[-1]])
         minDistances = []
         distanceToObsts = {}
         for i, obst in enumerate(obsts):
