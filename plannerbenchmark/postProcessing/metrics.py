@@ -143,7 +143,19 @@ class ClearanceMetric(Metric):
                     "loc": list(obst.position()),
                     "r": obst.radius(),
                 }
-        return {"short": 1.0 / float(min(minDistances)), "allMinDist": distanceToObsts}
+        return {"short": float(min(minDistances)), "allMinDist": distanceToObsts}
+
+class InverseClearanceMetric(ClearanceMetric):
+
+    """Metric to compute the inverse of the minimum clearance from any obstacle.
+
+    InverseClearance is the inverse of ClearanceMetric.
+    """
+
+    def computeMetric(self, data):
+        evaluation = super().computeMetric(data)
+        evaluation['short'] = 1.0 / evaluation['short']
+        return evaluation
 
 
 class DynamicClearanceMetric(Metric):

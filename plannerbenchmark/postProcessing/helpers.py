@@ -1,6 +1,7 @@
 from plannerbenchmark.postProcessing.metrics import (
     SolverTimesMetric,
     ClearanceMetric,
+    InverseClearanceMetric,
     TimeToReachGoalMetric,
     PathLengthMetric,
     SuccessMetric,
@@ -61,6 +62,18 @@ def createMetricsFromNames(
         if name == "clearance":
             metrics.append(
                 ClearanceMetric(
+                    name,
+                    fksNames,
+                    {
+                        "obstacles": experiment.obstacles(),
+                        "n": experiment.n(),
+                        "r_body": experiment.rBody(),
+                    },
+                )
+            )
+        if name == "invClearance":
+            metrics.append(
+                InverseClearanceMetric(
                     name,
                     fksNames,
                     {

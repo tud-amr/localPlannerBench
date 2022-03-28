@@ -55,6 +55,9 @@ do for [i=2:(N+2)] {
     set xtics add ("Path Length" i);
   }
   if (metricName eq "clearance") {
+    set xtics add ("Clearance" i);
+  }
+  if (metricName eq "invClearance") {
     set xtics add ("Clearance^{-1}" i);
   }
   if (metricName eq "dynamicClearance") {
