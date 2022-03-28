@@ -100,7 +100,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
 name = "forwardkinematics"
-version = "0.5.6"
+version = "0.5.8"
 description = "\"Light-weight implementation of forward kinematics using casadi.\""
 category = "main"
 optional = false
@@ -117,7 +117,7 @@ urdf_parser_py = ">=0.0.3"
 type = "git"
 url = "https://git@github.com/maxspahn/forwardKinematics.git"
 reference = "main"
-resolved_reference = "e020be5a6af14da6e4ca97a8c3d0a8bc3f857ace"
+resolved_reference = "72113b4a0e37304c0904f7d8282bb778f94fd391"
 
 [[package]]
 name = "freetype-py"
@@ -359,7 +359,7 @@ scenes = ["motion-planning-scenes (>=0.1.0,<0.2.0)"]
 type = "git"
 url = "https://git@github.com/maxspahn/gym_envs_planar.git"
 reference = "master"
-resolved_reference = "1a202926407cf213b7f890e43c9e893434341252"
+resolved_reference = "6e9f0636d907d29cb0ef549c9f42f70043748140"
 
 [[package]]
 name = "pluggy"
@@ -782,7 +782,7 @@ pyyaml = "*"
 
 [[package]]
 name = "urdfenvs"
-version = "0.1.7"
+version = "0.1.8"
 description = "Simple simulation environment for robots, based on the urdf files."
 category = "main"
 optional = false
@@ -806,7 +806,7 @@ docs = ["Sphinx (==4.2.0)", "sphinx-rtd-theme (==1.0.0)", "sphinxcontrib-napoleo
 type = "git"
 url = "https://git@github.com/maxspahn/gym_envs_urdf.git"
 reference = "master"
-resolved_reference = "273ccfc104d963ef81ae3ba73a45bc5347782172"
+resolved_reference = "86421c72caeea944ac1579ca03bc3b212a5b1a9e"
 
 [[package]]
 name = "urdfpy"
