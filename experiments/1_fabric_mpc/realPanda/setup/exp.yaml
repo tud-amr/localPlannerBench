@@ -16,25 +16,25 @@ goal:
     parent_link: 0
     child_link: 7
     desired_position:
-      - 0.6
+      - 0.8
       - -0.05
       - 0.40
     type: staticSubGoal
     epsilon: 0.05
-# subgoal2:
-#   prime: False
-#   m: 2
-#   w: 15
-#   indices:
-#     - 0
-#     - 1
-#   parent_link: 5
-#   child_link: 7
-#   desired_position:
-#     - 0.0
-#     - 0.0
-#   type: staticSubGoal
-#   epsilon: 0.05
+  subgoal2:
+    prime: False
+    m: 2
+    w: 15
+    indices:
+      - 0
+      - 1
+    parent_link: 5
+    child_link: 7
+    desired_position:
+      - 0.0
+      - 0.0
+    type: staticSubGoal
+    epsilon: 0.05
 initState:
   q0: 
     - 1.0
