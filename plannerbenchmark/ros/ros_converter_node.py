@@ -69,13 +69,17 @@ class ActionConverterNode(object):
         self._goal_marker.color.r = 0.0
         self._goal_marker.color.g = 1.0
         self._goal_marker.color.b = 0.0
+        self._goal_marker.pose.orientation.w = 1
+        self._goal_marker.pose.orientation.x = 0
+        self._goal_marker.pose.orientation.y = 0
+        self._goal_marker.pose.orientation.z = 0
         self._obst_pub = rospy.Publisher(
             '/bench/obst', 
             MarkerArray, queue_size=10
         )
         self._obst_markers = MarkerArray()
         self._obst_counter = 0
-        self.initObstMarkers(2)
+        self.initObstMarkers(3)
 
     def initObstMarkers(self, nbObst):
         for i in range(nbObst):
@@ -92,6 +96,10 @@ class ActionConverterNode(object):
         marker.color.r = 1.0
         marker.color.g = 0.0
         marker.color.b = 0.0
+        marker.pose.orientation.w = 1
+        marker.pose.orientation.x = 0
+        marker.pose.orientation.y = 0
+        marker.pose.orientation.z = 0
         return marker
 
     def joint_state_cb(self, data):
@@ -115,9 +123,9 @@ class ActionConverterNode(object):
         self._obst_markers.markers[i].pose.position.x = obst.position(t=t)[0]
         self._obst_markers.markers[i].pose.position.y = obst.position(t=t)[1]
         self._obst_markers.markers[i].pose.position.z = obst.position(t=t)[2]
-        self._obst_markers.markers[i].scale.x = obst.radius()
-        self._obst_markers.markers[i].scale.y = obst.radius()
-        self._obst_markers.markers[i].scale.z = obst.radius()
+        self._obst_markers.markers[i].scale.x = 2 * obst.radius()
+        self._obst_markers.markers[i].scale.y = 2 * obst.radius()
+        self._obst_markers.markers[i].scale.z = 2 * obst.radius()
 
     def publishAction(self, action):
         for i in range(self._nu):

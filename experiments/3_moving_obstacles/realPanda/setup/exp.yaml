@@ -1,4 +1,4 @@
-T: 20000 #1049
+T: 50000 #1049
 dt: 0.002
 env: panda-reacher-acc-v0
 robot_type: panda
@@ -7,7 +7,7 @@ goal:
   subgoal1:
     prime: True
     m: 3
-    w: 1
+    w: 5
     indices:
       - 0
       - 1
@@ -15,9 +15,9 @@ goal:
     parent_link: 0
     child_link: 7
     desired_position:
-      - 0.5
-      - -0.2
-      - 0.8
+      - 0.0
+      - -0.7
+      - 0.4
     low:
       - 0.2
       - -0.3
@@ -29,21 +29,21 @@ goal:
     type: staticSubGoal
     dynamic : False
     epsilon: 0.05
-# subgoal2:
-#   prime: False
-#   m: 2
-#   w: 10
-#   indices:
-#     - 0
-#     - 1
-#   parent_link: 5
-#   child_link: 7
-#   desired_position:
-#     - 0.0
-#     - 0.0
-#   type: staticSubGoal
-#   epsilon: 0.1
-#   dynamic: False
+  subgoal2:
+    prime: False
+    m: 2
+    w: 10
+    indices:
+      - 0
+      - 1
+    parent_link: 5
+    child_link: 7
+    desired_position:
+      - 0.0
+      - 0.0
+    type: staticSubGoal
+    epsilon: 0.1
+    dynamic: False
 initState:
   q0: 
     - 0.0
@@ -94,24 +94,33 @@ selfCollision:
     - [2, 6]
     - [2, 7]
 obstacles:
+# obst0:
+#   dim: 3
+#   type: analyticSphere
+#   geometry:
+#     trajectory:
+#       - "0.6"
+#       - "4.0 - 0.3 * t"
+#       - "0.4"
+#     radius: 0.1
   obst0:
     dim: 3
     type: analyticSphere
     geometry:
       trajectory:
-        - "0.6"
-        - "-4.0 + 0.5 * t"
+        - "-0.10"
+        - "-1.6 + 0.2 * t"
         - "0.7"
       radius: 0.1
-# obst1:
-#   dim: 3
-#   geometry:
-#     position:
-#       - 0.4
-#       - 0.5
-#       - 0.3
-#     radius: 0.1
-#   type: sphereObstacle
+  obst2:
+    dim: 3
+    geometry:
+      position:
+        - 0.6
+        - 0.0
+        - -0.2
+      radius: 0.4
+    type: sphereObstacle
 randomObstacles:
   number: 5
 dynamic: True
