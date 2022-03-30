@@ -5,7 +5,7 @@ description = "Benchmark suite for local planner in dynamic environment."
 authors = ["Max Spahn <m.spahn@tudelft.nl>"]
 
 [tool.poetry.dependencies]
-python = "^3.6,<3.11"
+python = "^3.6.2,<3.11"
 forwardkinematics = {git = "https://git@github.com/maxspahn/forwardKinematics.git", rev = "main"}
 planarenvs = {git = "https://git@github.com/maxspahn/gym_envs_planar.git", rev = "master"}
 urdfenvs = {git = "https://git@github.com/maxspahn/gym_envs_urdf.git", rev = "master"}
@@ -23,6 +23,9 @@ mpc = ['robotmpcs']
 docs = ["Sphinx", "sphinx-rtd-theme", "sphinxcontrib-napoleon"]
 
 [tool.poetry.dev-dependencies]
+black = "^22.3.0"
+pytest = "^6.2"
+pylint = "^2.13.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
