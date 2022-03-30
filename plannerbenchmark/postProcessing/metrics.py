@@ -168,6 +168,18 @@ class DynamicClearanceMetric(Metric):
     robot links and all obstacles are computed and the returned.
     """
 
+class InverseDynamicClearanceMetric(ClearanceMetric):
+
+    """Metric to compute the inverse of the minimum clearance from any obstacle.
+
+    InverseClearance is the inverse of ClearanceMetric.
+    """
+
+    def computeMetric(self, data):
+        evaluation = super().computeMetric(data)
+        evaluation['short'] = 1.0 / evaluation['short']
+        return evaluation
+
     def computeMetric(self, data):
         m = self._params["m"]
         n = self._params["n"]

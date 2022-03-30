@@ -59,6 +59,12 @@ do for [i=2:(N+2)] {
     set y2tics (0.0, 0.25, 0.5, 0.75, 1.0)
     set y2tics nomirror font ',35' rotate by 90 out offset 0.5,-2.5
   }
+  if (metricName eq "invDynamicClearance") {
+    set xtics add ("Clearance^{-1} [1/m]" i);
+    set y2range [0.0:1.00]
+    set y2tics (0.0, 0.25, 0.5, 0.75, 1.0)
+    set y2tics nomirror font ',35' rotate by 90 out offset 0.5,-2.5
+  }
   if (metricName eq "selfClearance") {
     set xtics add ("Self Clearence [m]" i);
   }

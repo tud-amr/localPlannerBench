@@ -3,7 +3,6 @@ seriesFolder=ARG1
 planner1Type=ARG2
 planner2Type=ARG3
 N=ARG4
-print N
 inFile=seriesFolder."resultsTable_comparison.csv"
 outFileBox=seriesFolder."/results_comparison.eps"
 set output outFileBox
@@ -19,10 +18,10 @@ set style boxplot nooutliers
 set log y2 2
 # set style boxplot outliers pointtype -1
 set style data boxplot
-set y2range [0.75:1.2]
+set y2range [0.3:1.8]
 unset ytics
 set y2tics nomirror font ',35' rotate by 90 out offset 0.5,-2.0
-set y2tics (0.8, 0.9, 1.0, 1.25)
+set y2tics (0.3, 0.5, 0.8, 1.0, 1.25, 1.5)
 #set y2tics (0.8, 0.9, 1, 1.1)
 set grid y2tics
 set border 9
@@ -61,6 +60,9 @@ do for [i=2:(N+2)] {
     set xtics add ("Clearance^{-1}" i);
   }
   if (metricName eq "dynamicClearance") {
+    set xtics add ("Clearance" i);
+  }
+  if (metricName eq "invDynamicClearance") {
     set xtics add ("Clearance^{-1}" i);
   }
   if (metricName eq "selfClearance") {

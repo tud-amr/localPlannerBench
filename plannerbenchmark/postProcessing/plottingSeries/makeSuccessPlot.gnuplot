@@ -30,7 +30,7 @@ if (planner2Type eq 'mpc') planner2 = 'MPC'
 set xtics (planner1 0, planner2 1) scale 1.0 font ',35' rotate by 90 offset 0, -14.0 nomirror
 unset ytics
 nbPlanner=2
-nbCases=100
+nbCases=40
 set xrange [-0.5:nbPlanner - 0.5]
 set y2range [0:1.6 * nbCases]
 set y2tics nomirror font ',35'
@@ -56,5 +56,5 @@ set object rectangle from x2,y to x2+dx,y+dy fc rgb 'black' fs transparent solid
 set label 4 'Not Reached' at x3,y+dy rotate by 90 offset 6*dx,1 font ',35'
 set object rectangle from x3,y to x3+dx,y+dy fc rgb 'gray' fs transparent solid 0.5
 plot inFile using 4 notitle lc rgbcolor 'white' axes x1y2, \
-   '' using 2 notitle lc rgb 'black' axes x1y2, \
-   '' using 3 notitle lc rgb 'gray' axes x1y2
+   '' using 3 notitle lc rgb 'black' axes x1y2, \
+   '' using 2 notitle lc rgb 'gray' axes x1y2

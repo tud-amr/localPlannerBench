@@ -7,6 +7,7 @@ from plannerbenchmark.postProcessing.metrics import (
     SuccessMetric,
     IntegratedErrorMetric,
     DynamicClearanceMetric,
+    InverseDynamicClearanceMetric,
 )
 from plannerbenchmark.generic.experiment import Experiment
 
@@ -81,6 +82,19 @@ def createMetricsFromNames(
                         "n": experiment.n(),
                         "r_body": experiment.rBody(),
                     },
+                )
+            )
+        if name == "invDynamicClearance":
+            metrics.append(
+                InverseDynamicClearanceMetric(
+                    "clearance", 
+                    fksNames + ['t'],
+                    {
+                        'r_body': experiment.rBody(),
+                        'r_obsts': r_obsts, 
+                        'm': m,
+                        'n': experiment.n()
+                    }
                 )
             )
         if name == "dynamicClearance":
