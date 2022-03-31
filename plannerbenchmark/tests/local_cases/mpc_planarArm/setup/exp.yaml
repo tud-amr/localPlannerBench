@@ -1,4 +1,4 @@
-T: 2000
+T: 1000
 dynamic: False
 dt: 0.05
 env: nLink-reacher-acc-v0
@@ -25,18 +25,6 @@ goal:
       - 5.0
     type: staticSubGoal
     epsilon: 0.15
-  subgoal2:
-    prime: False
-    m: 1
-    w: 10
-    indices:
-      - 1
-    parent_link: 4
-    child_link: 5
-    desired_position:
-      - 0.0
-    type: staticSubGoal
-    epsilon: 0.01
 initState:
   q0:
     - 1.57
