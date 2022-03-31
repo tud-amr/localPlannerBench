@@ -1,0 +1,7 @@
+#!/bin/bash
+abspath=`realpath "$0"`
+plotFolder="${abspath/\/createPlot/}"
+resFile=$1
+resPlotFolder="$resFile/plots"
+mkdir -p $resPlotFolder
+gnuplot -c "$plotFolder/makeTrajectoryPlot.gnuplot" $resFile

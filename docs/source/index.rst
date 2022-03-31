@@ -14,4 +14,5 @@ Welcome to Local Planner Bench's documentation!
    getting_started
    example
    structure
+   api
 

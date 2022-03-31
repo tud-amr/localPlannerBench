@@ -80,7 +80,7 @@ obstacles:
     dim: 3
     geometry:
       position:
-        - 0.4
+        - 0.5
         - 0.0
         - 0.7
       radius: 0.15

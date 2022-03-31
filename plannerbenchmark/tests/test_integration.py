@@ -102,7 +102,6 @@ def run_integration_test_case(caseFolder):
         "clearance",
         "time2Goal",
         "--plot",
-        "--no-open",
         "--latest",
     ]
     Popen(cmdPostProcessor, stdout=DEVNULL).wait()

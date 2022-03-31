@@ -4,9 +4,9 @@ import gym
 import numpy as np
 import casadi as ca
 
-import planarenvs.pointRobot
-import planarenvs.nLinkReacher
-import planarenvs.groundRobots
+import planarenvs.point_robot
+import planarenvs.n_link_reacher
+import planarenvs.ground_robots
 import urdfenvs.tiago_reacher
 import urdfenvs.panda_reacher
 import urdfenvs.mobile_reacher
@@ -155,9 +155,9 @@ class Experiment(object):
 
     def addScene(self, env):
         for obst in self._obstacles:
-            env.addObstacle(obst)
+            env.add_obstacle(obst)
         try:
-            env.addGoal(self.goal())
+            env.add_goal(self.goal())
         except Exception as e:
             print(e)
 
