@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API &mdash; Local Planner Bench  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Structure" href="structure.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> Local Planner Bench
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Local Motion Planning Benchmark Suite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example.html">Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="structure.html">Structure</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#runner">Runner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#post-processing">Post Processing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#metrics">Metrics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#evaluation">Evaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#plotting">Plotting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#helpers">Helpers</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Local Planner Bench</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>API</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/api.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="api">
+<h1>API<a class="headerlink" href="#api" title="Permalink to this headline"></a></h1>
+<section id="runner">
+<h2>Runner<a class="headerlink" href="#runner" title="Permalink to this headline"></a></h2>
+</section>
+<section id="post-processing">
+<h2>Post Processing<a class="headerlink" href="#post-processing" title="Permalink to this headline"></a></h2>
+<section id="metrics">
+<h3>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.metrics.Metric">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">plannerbenchmark.postProcessing.metrics.</span></span><span class="sig-name descname"><span class="pre">Metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measNames</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#plannerbenchmark.postProcessing.metrics.Metric" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Abstract metric to assess the performance of the motion planner.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.metrics.Metric._name">
+<span class="sig-name descname"><span class="pre">_name</span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.metrics.Metric._name" title="Permalink to this definition"></a></dt>
+<dd><p>Name of the metric.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.metrics.Metric._params">
+<span class="sig-name descname"><span class="pre">_params</span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.metrics.Metric._params" title="Permalink to this definition"></a></dt>
+<dd><p>Additional information and data is passed through the dictonary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.metrics.Metric._measNames">
+<span class="sig-name descname"><span class="pre">_measNames</span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.metrics.Metric._measNames" title="Permalink to this definition"></a></dt>
+<dd><p>List of keys that are needed from the results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.metrics.SolverTimesMetric">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">plannerbenchmark.postProcessing.metrics.</span></span><span class="sig-name descname"><span class="pre">SolverTimesMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measNames</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#plannerbenchmark.postProcessing.metrics.SolverTimesMetric" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#plannerbenchmark.postProcessing.metrics.Metric" title="plannerbenchmark.postProcessing.metrics.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">plannerbenchmark.postProcessing.metrics.Metric</span></code></a></p>
+<p>Metric to compute the average solver time of the motion planner.</p>
+<p>Requires the interval at which the planner was invoked.
+Computes the solvertime in miliseconds.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.metrics.TimeToReachGoalMetric">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">plannerbenchmark.postProcessing.metrics.</span></span><span class="sig-name descname"><span class="pre">TimeToReachGoalMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measNames</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#plannerbenchmark.postProcessing.metrics.TimeToReachGoalMetric" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#plannerbenchmark.postProcessing.metrics.Metric" title="plannerbenchmark.postProcessing.metrics.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">plannerbenchmark.postProcessing.metrics.Metric</span></code></a></p>
+<p>Metric to compute the time it took to reach the goal.</p>
+<p>Requires the threshold, <cite>des_distance</cite>.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.metrics.IntegratedErrorMetric">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">plannerbenchmark.postProcessing.metrics.</span></span><span class="sig-name descname"><span class="pre">IntegratedErrorMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measNames</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#plannerbenchmark.postProcessing.metrics.IntegratedErrorMetric" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#plannerbenchmark.postProcessing.metrics.Metric" title="plannerbenchmark.postProcessing.metrics.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">plannerbenchmark.postProcessing.metrics.Metric</span></code></a></p>
+<p>Metric to compute the integrated deviation error from reference trajectory.</p>
+<p>Requires the threshold, <cite>des_distance</cite>.
+This metric computes the averaged deviation error from the first time the
+threshold was reached.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.metrics.ClearanceMetric">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">plannerbenchmark.postProcessing.metrics.</span></span><span class="sig-name descname"><span class="pre">ClearanceMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measNames</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#plannerbenchmark.postProcessing.metrics.ClearanceMetric" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#plannerbenchmark.postProcessing.metrics.Metric" title="plannerbenchmark.postProcessing.metrics.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">plannerbenchmark.postProcessing.metrics.Metric</span></code></a></p>
+<p>Metric to compute the minimum clearance from any obstacle.</p>
+<p>Requires the dimension of obstacles, <cite>m</cite>, the dimension
+of the configuration space, <cite>n</cite>,
+all obstacles present in the scenario, <cite>obstacles</cite> and
+the link inflation <cite>r_body</cite>.
+Based on the forward kinematics, the distance between all links and all
+obstacles is computed. The clearance is the minumum of all those values.
+The output of this metric provides information about the minimum
+distance between every link and every obstacle.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.metrics.DynamicClearanceMetric">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">plannerbenchmark.postProcessing.metrics.</span></span><span class="sig-name descname"><span class="pre">DynamicClearanceMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measNames</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#plannerbenchmark.postProcessing.metrics.DynamicClearanceMetric" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#plannerbenchmark.postProcessing.metrics.Metric" title="plannerbenchmark.postProcessing.metrics.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">plannerbenchmark.postProcessing.metrics.Metric</span></code></a></p>
+<p>Metric to compute the clearance with dynamic obstacles.</p>
+<p>Requires the dimension of obstacles, <cite>m</cite>, the dimension
+of the configuration space, <cite>n</cite>,
+the inflation radius of the robot links, <cite>r_body</cite> and the radius
+of the dynamic obstacles, <cite>r_obsts</cite>. Minimum distances between all
+robot links and all obstacles are computed and the returned.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.metrics.PathLengthMetric">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">plannerbenchmark.postProcessing.metrics.</span></span><span class="sig-name descname"><span class="pre">PathLengthMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measNames</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#plannerbenchmark.postProcessing.metrics.PathLengthMetric" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#plannerbenchmark.postProcessing.metrics.Metric" title="plannerbenchmark.postProcessing.metrics.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">plannerbenchmark.postProcessing.metrics.Metric</span></code></a></p>
+<p>Metric to compute the pathlength of the trajectory in workspace.</p>
+<p>The path length is computed in the work space and not the configuration space.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.metrics.SelfClearanceMetric">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">plannerbenchmark.postProcessing.metrics.</span></span><span class="sig-name descname"><span class="pre">SelfClearanceMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measNames</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#plannerbenchmark.postProcessing.metrics.SelfClearanceMetric" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#plannerbenchmark.postProcessing.metrics.Metric" title="plannerbenchmark.postProcessing.metrics.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">plannerbenchmark.postProcessing.metrics.Metric</span></code></a></p>
+<p>Metric to compute clearance between different links on the robot.</p>
+<p>Requires the dimension of obstacles, <cite>m</cite>, the dimension of the
+configuration space, <cite>n</cite>, the inflation radius of the hrobot links,
+<cite>r_body</cite> and the list of pairs that should be evaluated, <cite>pairs</cite>.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.metrics.SuccessMetric">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">plannerbenchmark.postProcessing.metrics.</span></span><span class="sig-name descname"><span class="pre">SuccessMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measNames</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#plannerbenchmark.postProcessing.metrics.SuccessMetric" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#plannerbenchmark.postProcessing.metrics.Metric" title="plannerbenchmark.postProcessing.metrics.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">plannerbenchmark.postProcessing.metrics.Metric</span></code></a></p>
+<p>Metric to compute if the experiment was successful.</p>
+<p>Requires minimum clearance and information whether the goal
+was reached. Both can be computed using one of the above metrics.
+An experiment is considered sucessful if the goal was reached
+and the clearance was always positive.</p>
+</dd></dl>
+
+</section>
+<section id="evaluation">
+<h3>Evaluation<a class="headerlink" href="#evaluation" title="Permalink to this headline"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">plannerbenchmark.postProcessing.caseEvaluation.</span></span><span class="sig-name descname"><span class="pre">CaseEvaluation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recycle</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Evaluation class for a single case</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.decodeFolderName">
+<span class="sig-name descname"><span class="pre">decodeFolderName</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.decodeFolderName" title="Permalink to this definition"></a></dt>
+<dd><p>Decodes the folder name into planner and timeStamp using regex.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.evaluateMetrics">
+<span class="sig-name descname"><span class="pre">evaluateMetrics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.evaluateMetrics" title="Permalink to this definition"></a></dt>
+<dd><p>Evaluates all metrics specified for this experiment.</p>
+<p>The evaulations of the metrics are stored in the self._kpis didctonary.
+Note that all metrics evaluations are dictonaries themselves with a
+required key <cite>short</cite> that summarizes the result of this metric.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.evaluateSuccess">
+<span class="sig-name descname"><span class="pre">evaluateSuccess</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.evaluateSuccess" title="Permalink to this definition"></a></dt>
+<dd><p>Evaluatios whether the planning problem was sucessfully solved.</p>
+<p>A problem was sucessfully solved if the goal was reached and no
+collision occured during execution (minClearance &gt; 0).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.experiment">
+<span class="sig-name descname"><span class="pre">experiment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">plannerbenchmark.generic.experiment.Experiment</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.experiment" title="Permalink to this definition"></a></dt>
+<dd><p>Gets expermient instance of the experiment.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.interval">
+<span class="sig-name descname"><span class="pre">interval</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.interval" title="Permalink to this definition"></a></dt>
+<dd><p>Gets time interval of the planner in this experiment.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.kpis">
+<span class="sig-name descname"><span class="pre">kpis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">short</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.kpis" title="Permalink to this definition"></a></dt>
+<dd><p>Gets key performance indicators.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>short</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag specifying whether only the kpi summaries should be returned.
+(by default the detailed description is returned)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.plannerName">
+<span class="sig-name descname"><span class="pre">plannerName</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.plannerName" title="Permalink to this definition"></a></dt>
+<dd><p>Gets planner name  of the experiment as string.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.process">
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.process" title="Permalink to this definition"></a></dt>
+<dd><p>Processing the experiment.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.readData">
+<span class="sig-name descname"><span class="pre">readData</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.readData" title="Permalink to this definition"></a></dt>
+<dd><p>Reads in results csv-file as dictonary.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.readResults">
+<span class="sig-name descname"><span class="pre">readResults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.readResults" title="Permalink to this definition"></a></dt>
+<dd><p>Read results from previous evaluations.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.setMetrics">
+<span class="sig-name descname"><span class="pre">setMetrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metricNames</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.setMetrics" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the metrics for case evaluation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>metricNames</strong> (<em>list</em>) – List of metrics that should be evaluated.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.timeStamp">
+<span class="sig-name descname"><span class="pre">timeStamp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.timeStamp" title="Permalink to this definition"></a></dt>
+<dd><p>Gets time stamp of the experiment as string.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.writeKpis">
+<span class="sig-name descname"><span class="pre">writeKpis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.writeKpis" title="Permalink to this definition"></a></dt>
+<dd><p>Writes kpis to postProcess.yaml file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.writeResults">
+<span class="sig-name descname"><span class="pre">writeResults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.caseEvaluation.CaseEvaluation.writeResults" title="Permalink to this definition"></a></dt>
+<dd><p>Writes results to yaml files.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesEvaluation.SeriesEvaluation">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">plannerbenchmark.postProcessing.seriesEvaluation.</span></span><span class="sig-name descname"><span class="pre">SeriesEvaluation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recycle</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesEvaluation.SeriesEvaluation" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Evaluation class for a series</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesEvaluation.SeriesEvaluation._folder">
+<span class="sig-name descname"><span class="pre">_folder</span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesEvaluation.SeriesEvaluation._folder" title="Permalink to this definition"></a></dt>
+<dd><p>Full path to the series folder.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesEvaluation.SeriesEvaluation._recycle">
+<span class="sig-name descname"><span class="pre">_recycle</span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesEvaluation.SeriesEvaluation._recycle" title="Permalink to this definition"></a></dt>
+<dd><p>Flag that tell the evaluation if old evaluation can be recycled.
+(by default this is set to false)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesEvaluation.SeriesEvaluation.filterKpis">
+<span class="sig-name descname"><span class="pre">filterKpis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kpiDict</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesEvaluation.SeriesEvaluation.filterKpis" title="Permalink to this definition"></a></dt>
+<dd><p>Transforms kpis to list and excludes success metric.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesEvaluation.SeriesEvaluation.filterMetricNames">
+<span class="sig-name descname"><span class="pre">filterMetricNames</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesEvaluation.SeriesEvaluation.filterMetricNames" title="Permalink to this definition"></a></dt>
+<dd><p>Filters metric names to exclude success metric name.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesEvaluation.SeriesEvaluation.process">
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesEvaluation.SeriesEvaluation.process" title="Permalink to this definition"></a></dt>
+<dd><p>Performs post postprocessing for series of experiments.</p>
+<p>For every experiment folder inside the series folder, a case
+evaluation is performed. Then, a summary of all cases is composed
+in this class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesEvaluation.SeriesEvaluation.success">
+<span class="sig-name descname"><span class="pre">success</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plannerName</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeStamp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesEvaluation.SeriesEvaluation.success" title="Permalink to this definition"></a></dt>
+<dd><p>Gets evaluation of success metric.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesEvaluation.SeriesEvaluation.writeKpis">
+<span class="sig-name descname"><span class="pre">writeKpis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesEvaluation.SeriesEvaluation.writeKpis" title="Permalink to this definition"></a></dt>
+<dd><p>Writes kpis to postProcess.yaml file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesEvaluation.SeriesEvaluation.writeResultTables">
+<span class="sig-name descname"><span class="pre">writeResultTables</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesEvaluation.SeriesEvaluation.writeResultTables" title="Permalink to this definition"></a></dt>
+<dd><p>Write result table to successTable.csv-file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesEvaluation.SeriesEvaluation.writeResults">
+<span class="sig-name descname"><span class="pre">writeResults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesEvaluation.SeriesEvaluation.writeResults" title="Permalink to this definition"></a></dt>
+<dd><p>Writes results to yaml files.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesComparison.SeriesComparison">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">plannerbenchmark.postProcessing.seriesComparison.</span></span><span class="sig-name descname"><span class="pre">SeriesComparison</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recycle</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesComparison.SeriesComparison" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#plannerbenchmark.postProcessing.seriesEvaluation.SeriesEvaluation" title="plannerbenchmark.postProcessing.seriesEvaluation.SeriesEvaluation"><code class="xref py py-class docutils literal notranslate"><span class="pre">plannerbenchmark.postProcessing.seriesEvaluation.SeriesEvaluation</span></code></a></p>
+<p>Series comparison between two planners.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesComparison.SeriesComparison.compare">
+<span class="sig-name descname"><span class="pre">compare</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesComparison.SeriesComparison.compare" title="Permalink to this definition"></a></dt>
+<dd><p>Compares the performance of two planners.</p>
+<p>Two planners are compared by computing the ratio for all individual
+metrics for every experiment in the series.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesComparison.SeriesComparison.filterKpis">
+<span class="sig-name descname"><span class="pre">filterKpis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kpiDict</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesComparison.SeriesComparison.filterKpis" title="Permalink to this definition"></a></dt>
+<dd><p>Transforms kpis to list and excludes success metric.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesComparison.SeriesComparison.filterMetricNames">
+<span class="sig-name descname"><span class="pre">filterMetricNames</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesComparison.SeriesComparison.filterMetricNames" title="Permalink to this definition"></a></dt>
+<dd><p>Filters metric names to exclude success metric name.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesComparison.SeriesComparison.getCasesSolvedByBoth">
+<span class="sig-name descname"><span class="pre">getCasesSolvedByBoth</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesComparison.SeriesComparison.getCasesSolvedByBoth" title="Permalink to this definition"></a></dt>
+<dd><p>Gets timestamps of all cases that were solved by both solvers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List containing all time stamps as strings that were solved by both methods.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesComparison.SeriesComparison.getPlannerNames">
+<span class="sig-name descname"><span class="pre">getPlannerNames</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesComparison.SeriesComparison.getPlannerNames" title="Permalink to this definition"></a></dt>
+<dd><p>Gets planner names.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesComparison.SeriesComparison.process">
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesComparison.SeriesComparison.process" title="Permalink to this definition"></a></dt>
+<dd><p>Process series, writes results and compares different planners.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesComparison.SeriesComparison.readResults">
+<span class="sig-name descname"><span class="pre">readResults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesComparison.SeriesComparison.readResults" title="Permalink to this definition"></a></dt>
+<dd><p>Reads results from previous evaluations.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesComparison.SeriesComparison.success">
+<span class="sig-name descname"><span class="pre">success</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plannerName</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeStamp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesComparison.SeriesComparison.success" title="Permalink to this definition"></a></dt>
+<dd><p>Gets evaluation of success metric.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesComparison.SeriesComparison.writeComparison">
+<span class="sig-name descname"><span class="pre">writeComparison</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesComparison.SeriesComparison.writeComparison" title="Permalink to this definition"></a></dt>
+<dd><p>Writes comparison resultTable_comparison.csv-file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesComparison.SeriesComparison.writeKpis">
+<span class="sig-name descname"><span class="pre">writeKpis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesComparison.SeriesComparison.writeKpis" title="Permalink to this definition"></a></dt>
+<dd><p>Writes kpis to postProcess.yaml file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesComparison.SeriesComparison.writeResultTables">
+<span class="sig-name descname"><span class="pre">writeResultTables</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesComparison.SeriesComparison.writeResultTables" title="Permalink to this definition"></a></dt>
+<dd><p>Write result table to successTable.csv-file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesComparison.SeriesComparison.writeResults">
+<span class="sig-name descname"><span class="pre">writeResults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesComparison.SeriesComparison.writeResults" title="Permalink to this definition"></a></dt>
+<dd><p>Writes results to yaml files.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="plotting">
+<h3>Plotting<a class="headerlink" href="#plotting" title="Permalink to this headline"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.casePlotting.CasePlotting">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">plannerbenchmark.postProcessing.casePlotting.</span></span><span class="sig-name descname"><span class="pre">CasePlotting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#plannerbenchmark.postProcessing.casePlotting.CasePlotting" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Wrapper to direct to the correct gnuplot script for plotting the results
+of the experiment to an appropriate format.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.casePlotting.CasePlotting.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.casePlotting.CasePlotting.plot" title="Permalink to this definition"></a></dt>
+<dd><p>Call the correct gnuplot script based on the robot type.</p>
+<p>The gnuplot scripts are called using subprocess.Popen to avoid
+additional libraries. Depending on the robot type, the gnuplot scripts
+take a different number of arguments. Output from the gnuplot scripts
+is passed to the subprocess.PIPE.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesPlotting.SeriesPlotting">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">plannerbenchmark.postProcessing.seriesPlotting.</span></span><span class="sig-name descname"><span class="pre">SeriesPlotting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nbMetrics</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesPlotting.SeriesPlotting" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>SeriesPlotting compares different planners on the same experiments.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesPlotting.SeriesPlotting.getPlannerNames">
+<span class="sig-name descname"><span class="pre">getPlannerNames</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesPlotting.SeriesPlotting.getPlannerNames" title="Permalink to this definition"></a></dt>
+<dd><p>Extracts the different planners present in the series.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesPlotting.SeriesPlotting.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesPlotting.SeriesPlotting.plot" title="Permalink to this definition"></a></dt>
+<dd><p>Calls the script to generate the series plots.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesComparisonPlotting.SeriesComparisonPlotting">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">plannerbenchmark.postProcessing.seriesComparisonPlotting.</span></span><span class="sig-name descname"><span class="pre">SeriesComparisonPlotting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nbMetrics</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesComparisonPlotting.SeriesComparisonPlotting" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Plotting wrapper for series comparisons.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesComparisonPlotting.SeriesComparisonPlotting.getPlannerNames">
+<span class="sig-name descname"><span class="pre">getPlannerNames</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesComparisonPlotting.SeriesComparisonPlotting.getPlannerNames" title="Permalink to this definition"></a></dt>
+<dd><p>Gets planner names.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.seriesComparisonPlotting.SeriesComparisonPlotting.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.seriesComparisonPlotting.SeriesComparisonPlotting.plot" title="Permalink to this definition"></a></dt>
+<dd><p>Call the correct gnuplot script.</p>
+<p>The gnuplot scripts are called using subprocess.Popen to avoid
+additional libraries. Depending on the robot type, the gnuplot scripts
+take a different number of arguments. Output from the gnuplot scripts
+is passed to the subprocess.PIPE.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="helpers">
+<h3>Helpers<a class="headerlink" href="#helpers" title="Permalink to this headline"></a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="plannerbenchmark.postProcessing.helpers.createMetricsFromNames">
+<span class="sig-prename descclassname"><span class="pre">plannerbenchmark.postProcessing.helpers.</span></span><span class="sig-name descname"><span class="pre">createMetricsFromNames</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">plannerbenchmark.generic.experiment.Experiment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#plannerbenchmark.postProcessing.helpers.createMetricsFromNames" title="Permalink to this definition"></a></dt>
+<dd><p>Create metrics from the names.</p>
+<p>For every metric different information of the experiment is needed. This
+function extracts the right information of the experiment and the planner
+to form the metrics based on their names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>names</strong> (<em>str</em>) – metric names</p></li>
+<li><p><strong>experiment</strong> (<em>Experiment</em>) – Experiment instance for which the metrics should be added.</p></li>
+<li><p><strong>interval</strong> (<em>int</em>) – Interval of the planner. This is needed for the solverTime metric.
+(by default it is set to 1, indicating that the planner was
+executed at every time step)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Returns a list of all metrics for which the name was specified.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="structure.html" class="btn btn-neutral float-left" title="Structure" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Max Spahn.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
