@@ -1,0 +1,24 @@
+attractor:
+  k_psi: 3.0
+damper:
+  b:
+  - 0.1
+  - 6.5
+  r_d: 0.8
+dynamic: false
+interval: 1
+limits:
+  exp: 3.0
+  lam: 10.0
+m_base: 0.2
+n: 2
+obst:
+  exp: 1.0
+  lam: 1.0
+robot_type: pointRobot
+selfCol:
+  exp: 1.0
+  lam: 2.0
+speed:
+  ex_factor: 1.0
+type: fabric
