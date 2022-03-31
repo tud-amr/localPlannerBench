@@ -31,8 +31,6 @@ class Logger(object):
                 fk = self._exp.fk(q, n_i, positionOnly=True)
                 resDict['fk' + str(n_i) + "_x"] = fk[0]
                 resDict['fk' + str(n_i) + "_y"] = fk[1]
-                if self._exp.robotType() == 'planarArm':
-                    resDict['fk' + str(n_i) + "_theta"] = fk[2]
         for i_der, goal_der in enumerate(goal):
             for j_dim, goal_dim in enumerate(goal_der):
                 resDict['goal_' + str(j_dim) + '_' + str(i_der)] = goal_dim
