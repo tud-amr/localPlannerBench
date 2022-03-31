@@ -4,9 +4,9 @@ import gym
 import numpy as np
 import casadi as ca
 
-import planarenvs.pointRobot
-import planarenvs.nLinkReacher
-import planarenvs.groundRobots
+import planarenvs.point_robot
+import planarenvs.n_link_reacher
+import planarenvs.ground_robots
 import urdfenvs.tiago_reacher
 import urdfenvs.panda_reacher
 import urdfenvs.mobile_reacher

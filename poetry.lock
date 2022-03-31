@@ -10,7 +10,7 @@ python-versions = "*"
 name = "astroid"
 version = "2.11.2"
 description = "An abstract syntax tree for Python with inference support."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6.2"
 
@@ -166,7 +166,7 @@ python-versions = ">=2.6, !=3.0.*, !=3.1.*"
 name = "dill"
 version = "0.3.4"
 description = "serialize all of python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*"
 
@@ -198,7 +198,7 @@ pytest-coverage = "^0.0"
 urdf_parser_py = ">=0.0.3"
 
 [package.extras]
-env = ["urdfenvs", "motion-planning-scenes"]
+env = ["urdfenvs @ git+https://git@github.com/maxspahn/gym_envs_urdf.git@master", "motion-planning-scenes @ git+https://git@github.com/maxspahn/motion_planning_scenes.git@main"]
 
 [package.source]
 type = "git"
@@ -317,7 +317,7 @@ python-versions = "*"
 name = "isort"
 version = "5.10.1"
 description = "A Python utility / library to sort Python imports."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6.1,<4.0"
 
@@ -345,7 +345,7 @@ i18n = ["Babel (>=2.7)"]
 name = "lazy-object-proxy"
 version = "1.7.1"
 description = "A fast and thorough lazy object proxy."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -375,7 +375,7 @@ python-versions = ">=3.6"
 name = "mccabe"
 version = "0.7.0"
 description = "McCabe checker, plugin for flake8"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -470,11 +470,11 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "planarenvs"
-version = "0.1.3"
+version = "0.1.4"
 description = "Lightweight open-ai gym environments for planar kinematic chains."
 category = "main"
 optional = false
-python-versions = "^3.6,<3.11"
+python-versions = "^3.6.2,<3.11"
 develop = false
 
 [package.dependencies]
@@ -483,6 +483,7 @@ forwardkinematics = "^0.5.0"
 gym = "^0.21.0"
 numpy = "^1.5.1"
 pyglet = "^1.5.21"
+pylint = "^2.13.3"
 scipy = "^1.5"
 
 [package.extras]
@@ -492,13 +493,13 @@ scenes = ["motion-planning-scenes (>=0.1.0,<0.2.0)"]
 type = "git"
 url = "https://git@github.com/maxspahn/gym_envs_planar.git"
 reference = "master"
-resolved_reference = "4ce7210592cfeb503cb6972211260b5d71527ff1"
+resolved_reference = "354288a67b7185843dcb2c917ade86974ac18607"
 
 [[package]]
 name = "platformdirs"
 version = "2.4.0"
 description = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -553,7 +554,7 @@ PyYAML = "*"
 
 [[package]]
 name = "pybullet"
-version = "3.2.1"
+version = "3.2.2"
 description = "Official Python Interface for the Bullet Physics SDK specialized for Robotics Simulation and Reinforcement Learning"
 category = "main"
 optional = false
@@ -576,7 +577,7 @@ validation = ["lxml"]
 
 [[package]]
 name = "pyglet"
-version = "1.5.22"
+version = "1.5.23"
 description = "Cross-platform windowing and multimedia library"
 category = "main"
 optional = false
@@ -592,9 +593,9 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "pylint"
-version = "2.13.3"
+version = "2.13.4"
 description = "python code static checker"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6.2"
 
@@ -726,7 +727,7 @@ six = ">=1.5"
 
 [[package]]
 name = "pytz"
-version = "2021.3"
+version = "2022.1"
 description = "World timezone definitions, modern and historical"
 category = "main"
 optional = true
@@ -775,7 +776,7 @@ pyaml = "^21.10.1"
 requests = "^2.27.1"
 
 [package.extras]
-agents = ["planarenvs", "motion-planning-scenes (>=0.1.0,<0.2.0)"]
+agents = ["planarenvs @ git+https://git@github.com/maxspahn/gym_envs_planar.git@master", "motion-planning-scenes (>=0.1.0,<0.2.0)"]
 
 [package.source]
 type = "git"
@@ -957,7 +958,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "trimesh"
-version = "3.10.2"
+version = "3.10.7"
 description = "Import, export, process, analyze and view triangular meshes."
 category = "main"
 optional = false
@@ -967,15 +968,15 @@ python-versions = "*"
 numpy = "*"
 
 [package.extras]
-all = ["meshio", "pyglet", "msgpack", "psutil", "lxml", "xatlas", "svg.path", "setuptools", "python-fcl", "chardet", "requests", "glooey", "sympy", "networkx", "jsonschema", "xxhash", "shapely", "pycollada", "colorlog", "mapbox-earcut", "scikit-image", "scipy", "triangle", "rtree", "pillow"]
-easy = ["jsonschema", "pyglet", "msgpack", "xxhash", "shapely", "pycollada", "lxml", "colorlog", "svg.path", "requests", "setuptools", "chardet", "scipy", "sympy", "rtree", "networkx", "pillow"]
-test = ["pytest", "pytest-cov", "ezdxf", "pyinstrument", "coveralls"]
+all = ["scikit-image", "sympy", "xatlas", "shapely", "xxhash", "networkx", "requests", "mapbox-earcut", "psutil", "meshio", "pillow", "svg.path", "python-fcl", "setuptools", "triangle", "msgpack", "scipy", "lxml", "pycollada", "colorlog", "pyglet", "jsonschema", "chardet", "glooey", "rtree"]
+easy = ["msgpack", "sympy", "shapely", "scipy", "networkx", "xxhash", "requests", "lxml", "pycollada", "colorlog", "chardet", "pyglet", "jsonschema", "pillow", "svg.path", "setuptools", "rtree"]
+test = ["pytest-cov", "ezdxf", "coveralls", "pyinstrument", "pytest"]
 
 [[package]]
 name = "typed-ast"
 version = "1.5.2"
 description = "a fork of Python 2 and 3 ast modules with type comment support"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -1025,7 +1026,7 @@ docs = ["Sphinx (==4.2.0)", "sphinx-rtd-theme (==1.0.0)", "sphinxcontrib-napoleo
 type = "git"
 url = "https://git@github.com/maxspahn/gym_envs_urdf.git"
 reference = "master"
-resolved_reference = "86421c72caeea944ac1579ca03bc3b212a5b1a9e"
+resolved_reference = "223dd45653a41b7c533dd9bf85d02bd8a7e75256"
 
 [[package]]
 name = "urdfpy"
@@ -1059,14 +1060,14 @@ resolved_reference = "e49a93acabd4ca1df30967b0d3763aecaefb8853"
 
 [[package]]
 name = "urllib3"
-version = "1.26.8"
+version = "1.26.9"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 category = "main"
 optional = true
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4"
 
 [package.extras]
-brotli = ["brotlipy (>=0.6.0)"]
+brotli = ["brotlicffi (>=0.8.0)", "brotli (>=1.0.9)", "brotlipy (>=0.6.0)"]
 secure = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "certifi", "ipaddress"]
 socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
@@ -1074,7 +1075,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 name = "wrapt"
 version = "1.14.0"
 description = "Module for decorators, wrappers and monkey patching."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 
@@ -1608,28 +1609,29 @@ pyaml = [
     {file = "pyaml-21.10.1.tar.gz", hash = "sha256:c6519fee13bf06e3bb3f20cacdea8eba9140385a7c2546df5dbae4887f768383"},
 ]
 pybullet = [
-    {file = "pybullet-3.2.1-cp27-cp27m-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:a7558b63c754ee13e5937d348a6a1e496bc317983b0229a0351f896bd5678ed7"},
-    {file = "pybullet-3.2.1-cp27-cp27mu-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:ed73517895eee6b238e5bc140040edab9fd6883b49fce2fed03f8fe87877e36d"},
-    {file = "pybullet-3.2.1-cp35-cp35m-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:86ea0d85d538ffdbdc4684708fc81bff3371b14b5ad2207e67d653b5083879d2"},
-    {file = "pybullet-3.2.1-cp36-cp36m-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:10f0b947eeea4d42f324a727be701bef1cfebf3cb532332a9c7549cf34b76475"},
-    {file = "pybullet-3.2.1-cp37-cp37m-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:8c3cfff5f2c3797891ccfdfe5893945be9545c44596034f7240a2c766b1f4d73"},
-    {file = "pybullet-3.2.1-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:ef8101bcac2f618b4b9fdd926394d5611b0c7c8df8217f98b728da254b597cb6"},
-    {file = "pybullet-3.2.1-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:6196110885debf7528f03ab9aecd5f61d5de4654a39c8cbea3ce496220ea6e4f"},
+    {file = "pybullet-3.2.2-cp27-cp27m-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:9f6f01c8826110312694a30a1af59644792a923826cee182cffebdb1beafd89c"},
+    {file = "pybullet-3.2.2-cp27-cp27mu-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:28479038a42f3e3207d345202ac956181ccd9f2e0be0831fe52e311b9fc326a7"},
+    {file = "pybullet-3.2.2-cp35-cp35m-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:e99139a177695a57df8f754363e974065d1673e497834cdbd22c8ee1789d692b"},
+    {file = "pybullet-3.2.2-cp36-cp36m-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:63f4f09d14d0d0bd5e1bbf6c245986ad704578e77013463b7b66255d4b4adc70"},
+    {file = "pybullet-3.2.2-cp37-cp37m-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:c774195ce42a22e71ee0c62519c9419a1f45faaa1a5d87f2ebf1fbeeead0f4f1"},
+    {file = "pybullet-3.2.2-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:3b9c651fd0cc518b6215d038e2ba71550a3302634e6b82ed36e8ed12ecfdca5a"},
+    {file = "pybullet-3.2.2-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:3b07233c3d613bf7efff540a106b5f61c23ca4fa671a199af5052692968f8daf"},
+    {file = "pybullet-3.2.2.tar.gz", hash = "sha256:46dab6459d828e04b661bb80e014bcfb13c9f1ba40c022e5eb1132efcfe0b8e0"},
 ]
 pycollada = [
     {file = "pycollada-0.6.tar.gz", hash = "sha256:fcd6f38fd981e350f9ec754d9671834017accd600e967d6d299a6cfdae5ba4f4"},
 ]
 pyglet = [
-    {file = "pyglet-1.5.22-py3-none-any.whl", hash = "sha256:19d1e4a5fba4c31861fd38664e96f60e3f05aa64c55ac7cebc350f6793bd9548"},
-    {file = "pyglet-1.5.22.zip", hash = "sha256:5630dc36ea00fdc11ad3a8394c676417ec365b25fdd9af57a107e19adc411b0f"},
+    {file = "pyglet-1.5.23-py3-none-any.whl", hash = "sha256:086317c022612bf0aa28f32134a8cbe3d11de96787f5412d38d9c6abb6cfc771"},
+    {file = "pyglet-1.5.23.zip", hash = "sha256:dee920203cf306159c503babb62f38787268708977f5c945d28337594b797c46"},
 ]
 pygments = [
     {file = "Pygments-2.11.2-py3-none-any.whl", hash = "sha256:44238f1b60a76d78fc8ca0528ee429702aae011c265fe6a8dd8b63049ae41c65"},
     {file = "Pygments-2.11.2.tar.gz", hash = "sha256:4e426f72023d88d03b2fa258de560726ce890ff3b630f88c21cbb8b2503b8c6a"},
 ]
 pylint = [
-    {file = "pylint-2.13.3-py3-none-any.whl", hash = "sha256:c8837b6ec6440e3490ab8f066054b0645a516a29ca51ce442f16f7004f711a70"},
-    {file = "pylint-2.13.3.tar.gz", hash = "sha256:12ed2520510c40db647e4ec7f747b07e0d669b33ab41479c2a07bb89b92877db"},
+    {file = "pylint-2.13.4-py3-none-any.whl", hash = "sha256:8672cf7441b81410f5de7defdf56e2d559c956fd0579652f2e0a0a35bea2d546"},
+    {file = "pylint-2.13.4.tar.gz", hash = "sha256:7cc6d0c4f61dff440f9ed8b657f4ecd615dcfe35345953eb7b1dc74afe901d7a"},
 ]
 pyopengl = [
     {file = "PyOpenGL-3.1.0.tar.gz", hash = "sha256:9b47c5c3a094fa518ca88aeed35ae75834d53e4285512c61879f67a48c94ddaf"},
@@ -1665,8 +1667,8 @@ python-dateutil = [
     {file = "python_dateutil-2.8.2-py2.py3-none-any.whl", hash = "sha256:961d03dc3453ebbc59dbdea9e4e11c5651520a876d0f4db161e8674aae935da9"},
 ]
 pytz = [
-    {file = "pytz-2021.3-py2.py3-none-any.whl", hash = "sha256:3672058bc3453457b622aab7a1c3bfd5ab0bdae451512f6cf25f64ed37f5b87c"},
-    {file = "pytz-2021.3.tar.gz", hash = "sha256:acad2d8b20a1af07d4e4c9d2e9285c5ed9104354062f275f3fcd88dcef4f1326"},
+    {file = "pytz-2022.1-py2.py3-none-any.whl", hash = "sha256:e68985985296d9a66a881eb3193b0906246245294a881e7c8afe623866ac6a5c"},
+    {file = "pytz-2022.1.tar.gz", hash = "sha256:1e760e2fe6a8163bc0b3d9a19c4f84342afa0a2affebfaa84b01b978a02ecaa7"},
 ]
 pyyaml = [
     {file = "PyYAML-6.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:d4db7c7aef085872ef65a8fd7d6d09a14ae91f691dec3e87ee5ee0539d516f53"},
@@ -1788,8 +1790,8 @@ tomli = [
     {file = "tomli-1.2.3.tar.gz", hash = "sha256:05b6166bff487dc068d322585c7ea4ef78deed501cc124060e0f238e89a9231f"},
 ]
 trimesh = [
-    {file = "trimesh-3.10.2-py3-none-any.whl", hash = "sha256:9482cc1d519f3ba1809724760278d605df740c0ee379a314b8c329688b8887a7"},
-    {file = "trimesh-3.10.2.tar.gz", hash = "sha256:3dc47ce256ba6498eda63838586554932649a954fc19eeef8e4f745fa812b40a"},
+    {file = "trimesh-3.10.7-py3-none-any.whl", hash = "sha256:fae7270e6ee8bb9a97bd0aca042d8e2eeaf5814acd51f9d5326e2e8ccfdb0961"},
+    {file = "trimesh-3.10.7.tar.gz", hash = "sha256:398a2bf83409924431f02e44d2999e19aca68981322a4b8a04ba75da392b852f"},
 ]
 typed-ast = [
     {file = "typed_ast-1.5.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:183b183b7771a508395d2cbffd6db67d6ad52958a5fdc99f450d954003900266"},
@@ -1827,8 +1829,8 @@ urdf-parser-py = [
 urdfenvs = []
 urdfpy = []
 urllib3 = [
-    {file = "urllib3-1.26.8-py2.py3-none-any.whl", hash = "sha256:000ca7f471a233c2251c6c7023ee85305721bfdf18621ebff4fd17a8653427ed"},
-    {file = "urllib3-1.26.8.tar.gz", hash = "sha256:0e7c33d9a63e7ddfcb86780aac87befc2fbddf46c58dbb487e0855f7ceec283c"},
+    {file = "urllib3-1.26.9-py2.py3-none-any.whl", hash = "sha256:44ece4d53fb1706f667c9bd1c648f5469a2ec925fcf3a776667042d645472c14"},
+    {file = "urllib3-1.26.9.tar.gz", hash = "sha256:aabaf16477806a5e1dd19aa41f8c2b7950dd3c746362d7e3223dbe6de6ac448e"},
 ]
 wrapt = [
     {file = "wrapt-1.14.0-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:5a9a1889cc01ed2ed5f34574c90745fab1dd06ec2eee663e8ebeefe363e8efd7"},
