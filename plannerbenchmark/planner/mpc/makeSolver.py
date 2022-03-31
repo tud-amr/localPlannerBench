@@ -5,7 +5,7 @@ from robotmpcs.models.pandaMpcModel import PandaMpcModel
 
 
 def createSolver():
-    robotType = "boxer"
+    robotType = "pointRobot"
     debug = False
     slack = False
     dt = 0.1

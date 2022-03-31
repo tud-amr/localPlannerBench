@@ -1,0 +1,24 @@
+attractor:
+  k_psi: 5.0
+damper:
+  b:
+  - 0.01
+  - 6.5
+  r_d: 0.2
+dynamic: true
+interval: 1
+limits:
+  exp: 1.0
+  lam: 1.0
+m_base: 1.0
+n: 7
+obst:
+  exp: 2.0
+  lam: 5.0
+robot_type: simPanda
+selfCol:
+  exp: 3.0
+  lam: 1.5
+speed:
+  ex_factor: 1.0
+type: dynamicFabric
