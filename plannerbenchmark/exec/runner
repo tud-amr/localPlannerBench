@@ -13,6 +13,8 @@ import signal
 from plannerbenchmark.generic.experiment import Experiment, ExperimentInfeasible
 from plannerbenchmark.generic.logger import Logger
 
+from plannerbenchmark.generic.planner  import PlannerRegistry
+
 
 def blockPrint():
     sys.stdout = open(os.devnull, 'w')
@@ -92,7 +94,8 @@ class Runner(object):
             self._env = self._experiment.env(render=self._render)
         for i in range(0, len(args.planners), 2):
             plannerFile = args.planners[i]
-            __import__('pdb').set_trace()
+            plannerType = 'fabric'
+            planner = PlannerRegistry.create_planner('FabricPlanner', self._experiment, plannerFile)
             if plannerType == 'fabric':
                 from plannerbenchmark.planner.fabricPlanner import FabricPlanner
                 self._planners.append(FabricPlanner(self._experiment, plannerFile))

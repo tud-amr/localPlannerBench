@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from plannerbenchmark.generic.planner_registry import PlannerRegistry
 
 class PlannerSettingIncomplete(Exception):
