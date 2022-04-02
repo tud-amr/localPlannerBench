@@ -1,4 +1,4 @@
-type: pd
+name: pd
 robot_type: pointRobot
 n: 2
 k: 0.8

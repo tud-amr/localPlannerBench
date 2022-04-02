@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 import yaml
 from plannerbenchmark.generic.planner_registry import PlannerRegistry
 
@@ -16,13 +16,18 @@ class PlannerConfig():
 class Planner(metaclass=PlannerRegistry):
     def __init__(self, exp, **kwargs):
         self._exp = exp
+        self._config = PlannerConfig()
 
     @abstractmethod
     def reset(self):
         pass
 
+    @property
+    def config(self):
+        return self._config
+
     def plannerType(self):
-        return self._setup['type']
+        return self.config.name
 
     def checkCompleteness(self):
         incomplete = False
@@ -60,7 +65,7 @@ class Planner(metaclass=PlannerRegistry):
 
     def save(self, folderPath):
         with open(folderPath + "/planner.yaml", 'w') as file:
-            yaml.dump(self._setup, file)
+            yaml.dump(asdict(self.config), file)
 
     @abstractmethod
     def computeAction(self, q, qdot):

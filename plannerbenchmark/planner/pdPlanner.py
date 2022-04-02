@@ -1,28 +1,22 @@
+from dataclasses import dataclass
 import numpy as np
 
-from plannerbenchmark.generic.planner import Planner
+from plannerbenchmark.generic.planner import Planner, PlannerConfig
+
+@dataclass
+class PdConfig(PlannerConfig):
+    k: float = 0.8
+    p: float = 0.2
 
 
 class PDPlanner(Planner):
-    def __init__(self, exp, setupFile):
-        required_keys = ["type", "n", 'k', 'p']
-        super().__init__(exp, setupFile, required_keys)
-        self._curError = np.zeros(self.n())
-
-    def interval(self):
-        return 1
-
-    def n(self):
-        return self._setup['n']
+    def __init__(self, exp, **kwargs):
+        super().__init__(exp, **kwargs)
+        self._config = PdConfig(**kwargs)
+        self._curError = np.zeros(self.config.n)
 
     def dt(self):
         return self._exp.dt()
-
-    def k(self):
-        return self._setup['k']
-
-    def p(self):
-        return self._setup['p']
 
     def reset(self):
         pass
@@ -50,5 +44,5 @@ class PDPlanner(Planner):
 
     def computeAction(self, *args):
         self.evalError(args[0])
-        return self.p() * self._curError + self.k() * self._curErrorDot
+        return self.config.p * self._curError + self.config.k * self._curErrorDot
 

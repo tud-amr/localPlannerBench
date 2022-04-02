@@ -49,12 +49,8 @@ class FabricPlanner(Planner):
     def __init__(self, exp, **kwargs):
         super().__init__(exp, **kwargs)
         self._config = FabricConfig(**kwargs)
-        self._exp = exp
         self.reset()
 
-    @property
-    def config(self):
-        return self._config
 
     def reset(self):
         if self._exp.robotType() in ['groundRobot', 'boxer', 'albert']:
