@@ -1,5 +1,5 @@
 interval: 1
-type: fabric
+name: fabric
 robot_type: planarArm
 n: 2
 m_base: 1.0

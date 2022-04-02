@@ -5,7 +5,7 @@ n: 7
 obst:
   nbObst: 5
 slack: true
-type: mpc
+name: mpc
 weights:
   ws: 1e10
   wu: 5.0

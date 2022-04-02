@@ -1,5 +1,5 @@
 interval: 1
-type: fabric
+name: fabric
 robot_type: groundRobot
 n: 4
 m_base: 5.0
