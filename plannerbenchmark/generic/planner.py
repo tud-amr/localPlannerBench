@@ -1,25 +1,25 @@
 from abc import abstractmethod
+from dataclasses import dataclass
 import yaml
 from plannerbenchmark.generic.planner_registry import PlannerRegistry
 
 class PlannerSettingIncomplete(Exception):
     pass
 
+@dataclass
+class PlannerConfig():
+    interval: int = 1
+    n: int = 2
+    name: str = 'Planner'
+    robot_type: str = 'pointRobot'
+
 class Planner(metaclass=PlannerRegistry):
-    def __init__(self, exp, setupFile, required_keys):
+    def __init__(self, exp, **kwargs):
         self._exp = exp
-        self._setupFile = setupFile
-        self._required_keys = required_keys
-        self.parseSetup()
 
     @abstractmethod
     def reset(self):
         pass
-
-    def parseSetup(self):
-        with open(self._setupFile, "r") as setupStream:
-            self._setup = yaml.safe_load(setupStream)
-        self.checkCompleteness()
 
     def plannerType(self):
         return self._setup['type']
@@ -52,6 +52,10 @@ class Planner(metaclass=PlannerRegistry):
 
     @abstractmethod
     def concretize(self):
+        pass
+
+    @abstractmethod
+    def config_as_dict(self):
         pass
 
     def save(self, folderPath):
