@@ -28,6 +28,6 @@ class PlannerRegistry(type):
     @classmethod
     def create_planner(cls, exp, setup, **kwargs):
         cls.parseSetup(setup)
-        name = cls._setup['type']
+        name = cls._setup['name']
         planner = cls.REGISTRY[name]
-        return planner(exp, setup)
+        return planner(exp, **cls._setup)

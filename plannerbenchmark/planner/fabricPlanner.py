@@ -1,4 +1,6 @@
 # General dependencies
+from dataclasses import dataclass, field
+from typing import Dict
 import casadi as ca
 import numpy as np
 
@@ -27,74 +29,42 @@ from MotionPlanningEnv.dynamicSphereObstacle import DynamicSphereObstacle
 from MotionPlanningEnv.sphereObstacle import SphereObstacle
 
 # Dependencies on plannerbenchmark
-from plannerbenchmark.generic.planner import Planner
+from plannerbenchmark.generic.planner import Planner, PlannerConfig
+
+@dataclass
+class FabricConfig(PlannerConfig):
+    m_base: float = 0.2
+    m_ratio: float = 1.0
+    obst: Dict[str, float] = field(default_factory = lambda: ({'exp': 1.0, 'lam': 1.0}))
+    selfCol: Dict[str, float] = field(default_factory = lambda: ({'exp': 1.0, 'lam': 1.0}))
+    attractor: Dict[str, float] = field(default_factory = lambda: ({'k_psi': 3.0}))
+    speed: Dict[str, float] = field(default_factory = lambda : ({'ex_factor': 1.0}))
+    dynamic: bool = False
+    limits: Dict[str, float] = field(default_factory = lambda: ({'exp': 1.0, 'lam': 1.0}))
+    damper: Dict[str, object] = field(default_factory = lambda :({'r_d': 0.8, 'b': [0.1, 6.5]}))
+
 
 class FabricPlanner(Planner):
 
-    def __init__(self, exp, setupFile):
-        required_keys = [
-            "type",
-            "n",
-            "obst",
-            "attractor",
-            "speed",
-            "damper",
-            "limits",
-            "selfCol",
-            "interval",
-            "dynamic",
-        ]
-        super().__init__(exp, setupFile, required_keys)
+    def __init__(self, exp, **kwargs):
+        super().__init__(exp, **kwargs)
+        self._config = FabricConfig(**kwargs)
         self.reset()
+
 
     def reset(self):
         if self._exp.robotType() in ['groundRobot', 'boxer', 'albert']:
-            self._planner = DefaultNonHolonomicPlanner(self.n(), m_base=self.mBase(), m_ratio=self.m_ratio(), debug=False)
+            self._planner = DefaultNonHolonomicPlanner(self.config.n, m_base=self.config.m_base, m_ratio=self.config.m_ratio, debug=False)
         else:
-            self._planner = DefaultFabricPlanner(self.n(), m_base=self.mBase(), debug=False)
+            self._planner = DefaultFabricPlanner(self.config.n, m_base=self.config.m_base, debug=False)
         self._q, self._qdot = self._planner.var()
-
-    def m_ratio(self):
-        if 'm_ratio' in self._setup.keys():
-            return self._setup['m_ratio']
-        return 0.1
-
-    def interval(self):
-        return self._setup["interval"]
-
-    def n(self):
-        return self._setup["n"]
-
-    def mBase(self):
-        return self._setup["m_base"]
-
-    def dynamic(self):
-        return self._setup["dynamic"]
-
-    def configObst(self):
-        return self._setup["obst"]
-
-    def configSelfColAvoidance(self):
-        return self._setup["selfCol"]
-
-    def configAttractor(self):
-        return self._setup["attractor"]
-
-    def configSpeed(self):
-        return self._setup["speed"]
-
-    def configLimits(self):
-        return self._setup["limits"]
-
-    def configDamper(self):
-        return self._setup["damper"]
 
     def setObstacles(self, obsts, r_body):
         x = ca.SX.sym("x", 1)
         xdot = ca.SX.sym("xdot", 1)
         lag_col = CollisionLagrangian(x, xdot)
         geo_col = CollisionGeometry(
-            x, xdot, exp=self.configObst()["exp"], lam=self.configObst()["lam"]
+            x, xdot, exp=self.config.obst['exp'], lam=self.config.obst["lam"]
         )
         for i, obst in enumerate(obsts):
             m_obst = obst.dim()
@@ -104,7 +74,7 @@ class FabricPlanner(Planner):
                 xdot_col = ca.SX.sym("xdot_col", m_obst)
                 x_rel = ca.SX.sym("x_rel", m_obst)
                 xdot_rel = ca.SX.sym("xdot_rel", m_obst)
-            for j in range(1, self.n() + 1):
+            for j in range(1, self.config.n + 1):
                 if self._exp.robotType() == "pointRobot" and j == 1:
                     continue
                 if self._exp.robotType() == "groundRobot" and j == 1:
@@ -137,8 +107,8 @@ class FabricPlanner(Planner):
         geo_selfCol = CollisionGeometry(
             x,
             xdot,
-            exp=self.configSelfColAvoidance()["exp"],
-            lam=self.configSelfColAvoidance()["lam"],
+            exp=self.config.selfCol['exp'],
+            lam=self.config.selfCol['lam'],
         )
         for pair in self._exp.selfCollisionPairs():
             fk_1 = self._exp.fk(self._q, pair[0], positionOnly=True)
@@ -151,9 +121,9 @@ class FabricPlanner(Planner):
         xdot = ca.SX.sym("xdot", 1)
         lag_col = CollisionLagrangian(x, xdot)
         geo_col = LimitGeometry(
-            x, xdot, lam=self.configLimits()["lam"], exp=self.configLimits()["exp"],
+            x, xdot, lam=self.config.limits["lam"], exp=self.config.limits["exp"],
         )
-        for i in range(self.n()):
+        for i in range(self.config.n):
             dm_col = UpperLimitMap(self._q, self._qdot, limits[1][i], i)
             self._planner.addGeometry(dm_col, lag_col, geo_col)
             dm_col = LowerLimitMap(self._q, self._qdot, limits[0][i], i)
@@ -170,13 +140,13 @@ class FabricPlanner(Planner):
             if subGoal.type() == "analyticSubGoal":
                 goalSymbolicTraj = AnalyticSymbolicTrajectory(ca.SX(np.identity(subGoal.m())), subGoal.m(), traj=subGoal.traj())
                 dm_psi, lag_psi, geo_psi, x_psi, xdot_psi = defaultDynamicAttractor(
-                    self._q, self._qdot, fk, goalSymbolicTraj, k_psi=self.configAttractor()['k_psi'] * subGoal.weight()
+                    self._q, self._qdot, fk, goalSymbolicTraj, k_psi=self.config.attractor['k_psi'] * subGoal.weight()
                 )
                 self._planner.addForcingGeometry(dm_psi, lag_psi, geo_psi, goalVelocity=goalSymbolicTraj.xdot())
             elif subGoal.type() == "splineSubGoal": 
                 goalSymbolicTraj = AnalyticSymbolicTrajectory(ca.SX(np.identity(subGoal.m())), subGoal.m(), traj=subGoal.traj())
                 dm_psi, lag_psi, geo_psi, x_psi, xdot_psi = defaultDynamicAttractor(
-                    self._q, self._qdot, fk, goalSymbolicTraj, k_psi=self.configAttractor()['k_psi'] * subGoal.weight()
+                    self._q, self._qdot, fk, goalSymbolicTraj, k_psi=self.config.attractor['k_psi'] * subGoal.weight()
                 )
                 self._planner.addForcingGeometry(dm_psi, lag_psi, geo_psi, goalVelocity=goalSymbolicTraj.xdot())
             else:
@@ -184,7 +154,7 @@ class FabricPlanner(Planner):
                     self._q, self._qdot, subGoal.position(), fk
                 )
                 geo_psi = GoalGeometry(
-                    x_psi, xdot_psi, k_psi=self.configAttractor()["k_psi"] * subGoal.weight()
+                    x_psi, xdot_psi, k_psi=self.config.attractor["k_psi"] * subGoal.weight()
                 )
                 self._planner.addForcingGeometry(dm_psi, lag_psi, geo_psi)
             if subGoal.isPrimeGoal():
@@ -198,14 +168,14 @@ class FabricPlanner(Planner):
         self._planner.setExecutionEnergy(exLag)
         # Speed control
         # self._planner.setConstantSpeedControl(beta=2.0)
-        ex_factor = self.configSpeed()["ex_factor"]
+        ex_factor = self.config.speed["ex_factor"]
         self._planner.setDefaultSpeedControl(
             self._x_psi,
             self._dm_psi,
             exLag,
             ex_factor,
-            r_b=self.configDamper()["r_d"],
-            b=self.configDamper()["b"],
+            r_b=self.config.damper["r_d"],
+            b=self.config.damper["b"],
         )
         self._planner.concretize()
 

@@ -1,5 +1,5 @@
 interval: 1
-type: fabric
+name: fabric
 robot_type: pointRobot
 n: 2
 m_base: 0.4

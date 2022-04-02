@@ -177,7 +177,7 @@ class Runner(object):
                     qdot = ob['xdot']
                     if self._experiment.dynamic():
                         envEval = self._experiment.evaluate(t)
-                        if not planner.dynamic():
+                        if not planner.config.dynamic:
                             envEval[1] = np.zeros(envEval[1].size)
                             envEval[2] = np.zeros(envEval[2].size)
                         observation = [q, qdot] + envEval

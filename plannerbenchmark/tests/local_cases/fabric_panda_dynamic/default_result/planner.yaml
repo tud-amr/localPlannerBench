@@ -11,6 +11,7 @@ limits:
   exp: 1.0
   lam: 1.0
 m_base: 1.0
+m_ratio: 1.0
 n: 7
 obst:
   exp: 2.0
@@ -21,4 +22,4 @@ selfCol:
   lam: 1.5
 speed:
   ex_factor: 1.0
-type: dynamicFabric
+name: dynamicFabric

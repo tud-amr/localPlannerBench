@@ -2,5 +2,5 @@ k: 1.8
 n: 2
 p: 0.2
 robot_type: pointRobot
-type: pd
+name: pd
 interval: 1

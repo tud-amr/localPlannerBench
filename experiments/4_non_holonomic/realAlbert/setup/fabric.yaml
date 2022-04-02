@@ -1,5 +1,5 @@
 interval: 1
-type: fabric
+name: fabric
 robot_type: albert
 n: 10
 m_base: 0.5
