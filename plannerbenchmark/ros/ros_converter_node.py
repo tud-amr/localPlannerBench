@@ -19,6 +19,7 @@ class ActionConverterNode(object):
         self._dt = dt
 
         if robotType == 'panda':
+            self._frame_id = 'panda_link0'
             self._n = 7
             self._nu = 7
             self._actionIndices = [2, 3, 4, 5, 6, 7, 8]
@@ -31,6 +32,7 @@ class ActionConverterNode(object):
             self._stateIndices = [0, 1, 2]
             self._qdotIndices = [3, 4]
         elif robotType == 'albert':
+            self._frame_id = 'map'
             self._n = 10
             self._nu = 9
             self._actionIndices = [0, 1, 2, 3, 4, 5, 6, 7, 8]
@@ -59,7 +61,7 @@ class ActionConverterNode(object):
             Marker, queue_size=10
         )
         self._goal_marker = Marker()
-        self._goal_marker.header.frame_id = "map"
+        self._goal_marker.header.frame_id = self._frame_id
         self._goal_marker.type = Marker.SPHERE
         self._goal_marker.action = Marker.ADD
         self._goal_marker.color.a = 1.0
@@ -91,7 +93,7 @@ class ActionConverterNode(object):
 
     def initObstMarker(self):
         marker = Marker()
-        marker.header.frame_id = "map"
+        marker.header.frame_id = self._frame_id
         marker.type = Marker.SPHERE
         marker.action = Marker.ADD
         marker.color.a = 1.0
