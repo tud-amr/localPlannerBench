@@ -1,2 +1,3 @@
 from plannerbenchmark.planner.fabricPlanner import FabricPlanner
 from plannerbenchmark.planner.mpcPlanner import MPCPlanner
+from plannerbenchmark.planner.pdPlanner import PDPlanner

@@ -1,9 +1,9 @@
 import numpy as np
 
-from plannerbenchmark.generic.abstractPlanner import AbstractPlanner
+from plannerbenchmark.generic.planner import Planner
 
 
-class PDPlanner(AbstractPlanner):
+class PDPlanner(Planner):
     def __init__(self, exp, setupFile):
         required_keys = ["type", "n", 'k', 'p']
         super().__init__(exp, setupFile, required_keys)
