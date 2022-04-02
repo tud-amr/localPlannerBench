@@ -4,10 +4,11 @@ interval: 2
 n: 2
 obst:
   nbObst: 5
-type: mpc
+name: mpc
 weights:
   ws: 1e10
   wu: 1.0
   wvel: 1.0
   wx: 1.0
 slack: false
+robot_type: pointRobot

@@ -5,9 +5,11 @@ n: 5
 obst:
   nbObst: 5
 slack: false
-type: mpc
+name: mpc
 weights:
   ws: 1e10
   wu: 5.0
   wvel: 5.0
   wx: 1.0
+robot_type: planarArm
+dynamic: false

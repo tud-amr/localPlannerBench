@@ -4,7 +4,7 @@ interval: 10
 n: 2
 obst:
   nbObst: 5
-type: mpc
+name: mpc
 weights:
   ws: 1e10
   wu: 1.0
