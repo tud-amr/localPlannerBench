@@ -76,7 +76,7 @@ cd experiments/example
 Then the experiment is run with the command line interface
 
 ``` {.sourceCode .bash}
-../../plannerbenchmark/exec/runner -c setup/exp.yaml -p pdplanner setup/planner.yaml --render
+../../plannerbenchmark/exec/runner -c setup/exp.yaml -p setup/planner.yaml --render
 ```
 
 Postprocessing:

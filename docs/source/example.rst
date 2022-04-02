@@ -31,11 +31,11 @@ example. For that execute
 
 .. code:: bash
 
-   ../../plannerbenchmark/exec/runner -c setup/exp.yaml -p pdplanner setup/planner.yaml --render
+   ../../plannerbenchmark/exec/runner -c setup/exp.yaml -p setup/planner.yaml --render
 
 When you run the above line, the experiment starts with the configuration files you have
 provided through the command line interface, namely ``-c setup/exp.yaml`` specifies the
-experiment and ``-p pdplanner setup/planner.yaml`` specifies the planner. The flag
+experiment and ``-p setup/planner.yaml`` specifies the planner. The flag
 ``--render`` indicates that the experiment should be rendered to your screen. Once the
 experiment has finished or you have stopped it prematurely, a new folder is created in the
 ``results`` directory. In there, you will find all necessary information on what exactly
@@ -56,10 +56,9 @@ you want to postprocess. When you are ready, you can simple invoke the postProce
 
 In the above line, the argument ``--exp results/<name_experiment>`` tells the
 postProcessor which experiment to process. Key-performance-indicators are listed behind
-``-k`` option. The flag ``--plot`` that a plot of the trajectory should be created. On a
-standard linux installation, this command should automatically open the folder of the
-experiment. If it does not, you have to manually navigate to the experiment folder to
-access the plots and evaluations (Consider using the ``--no-open`` flag in this case). 
+``-k`` option. The flag ``--plot`` that a plot of the trajectory should be created.
+Navigate to the experiment folder in your explorer to
+access the plots and evaluations.
 The evaluations are stored in ``postProcess.yaml``.
 
 

@@ -1,11 +1,11 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 import yaml
+from plannerbenchmark.generic.planner_registry import PlannerRegistry
 
 class PlannerSettingIncomplete(Exception):
     pass
 
-class AbstractPlanner(ABC):
-
+class Planner(metaclass=PlannerRegistry):
     def __init__(self, exp, setupFile, required_keys):
         self._exp = exp
         self._setupFile = setupFile
