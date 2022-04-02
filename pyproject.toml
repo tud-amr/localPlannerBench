@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "plannerbenchmark"
-version = "0.1.3"
+version = "0.1.4"
 description = "Benchmark suite for local planner in dynamic environment."
 authors = ["Max Spahn <m.spahn@tudelft.nl>"]
 
