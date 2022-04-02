@@ -27,9 +27,10 @@ from MotionPlanningEnv.dynamicSphereObstacle import DynamicSphereObstacle
 from MotionPlanningEnv.sphereObstacle import SphereObstacle
 
 # Dependencies on plannerbenchmark
-from plannerbenchmark.generic.abstractPlanner import AbstractPlanner
+from plannerbenchmark.generic.planner import Planner
 
-class FabricPlanner(AbstractPlanner):
+class FabricPlanner(Planner):
+
     def __init__(self, exp, setupFile):
         required_keys = [
             "type",

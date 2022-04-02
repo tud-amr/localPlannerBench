@@ -78,7 +78,6 @@ def run_integration_test_case(caseFolder):
     print("------------------------------------------------------------------------")
     tests_path = os.path.dirname(os.path.abspath(__file__))
     execPath = tests_path + "/../exec/"
-    plannerName = re.match(r'.*\/([a-z]*)_.*', caseFolder).group(1)
     # run case
     cmdRunner = [
         "poetry",
@@ -87,7 +86,6 @@ def run_integration_test_case(caseFolder):
         "-c",
         tests_path + "/" + caseFolder + "/setup/exp.yaml",
         "-p",
-        plannerName,
         tests_path + "/" + caseFolder + "/setup/planner.yaml",
         "--res-folder",
         "tempResults",

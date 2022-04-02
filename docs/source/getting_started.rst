@@ -76,7 +76,7 @@ Then the experiment is run with the command line interface
 
 .. code:: bash
 
-    ../../plannerbenchmark/exec/runner -c setup/exp.yaml -p pdplanner setup/planner.yaml --render
+    ../../plannerbenchmark/exec/runner -c setup/exp.yaml -p setup/planner.yaml --render
 
 Postprocessing:
 
@@ -91,6 +91,6 @@ The you can run the post processor with arguments as
 
 .. code:: bash
 
-    ../../plannerbenchmark/exec/postProcessor --exp path/to/experiment -k time2Goal pathLength --plot --no-open
+    ../../plannerbenchmark/exec/postProcessor --exp path/to/experiment -k time2Goal pathLength --plot
 
 More detailed information about this example can be found in :ref:`example_long`

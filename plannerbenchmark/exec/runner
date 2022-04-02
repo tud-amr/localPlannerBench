@@ -13,6 +13,9 @@ import signal
 from plannerbenchmark.generic.experiment import Experiment, ExperimentInfeasible
 from plannerbenchmark.generic.logger import Logger
 
+from plannerbenchmark.generic.planner  import PlannerRegistry
+from plannerbenchmark.planner import *
+
 
 def blockPrint():
     sys.stdout = open(os.devnull, 'w')
@@ -90,18 +93,9 @@ class Runner(object):
             self.startRosConverterNode()
         else:
             self._env = self._experiment.env(render=self._render)
-        for i in range(0, len(args.planners), 2):
-            plannerType = args.planners[i]
-            plannerFile = args.planners[i+1]
-            if plannerType == 'fabric':
-                from plannerbenchmark.planner.fabricPlanner import FabricPlanner
-                self._planners.append(FabricPlanner(self._experiment, plannerFile))
-            elif plannerType == 'mpc':
-                from plannerbenchmark.planner.mpcPlanner import MPCPlanner
-                self._planners.append(MPCPlanner(self._experiment, plannerFile))
-            elif plannerType == 'pdplanner':
-                from plannerbenchmark.planner.pdPlanner import PDPlanner
-                self._planners.append(PDPlanner(self._experiment, plannerFile))
+        for planner_file in args.planners:
+            planner = PlannerRegistry.create_planner(self._experiment, planner_file)
+            self._planners.append(planner)
 
     def startRosConverterNode(self):
         from plannerbenchmark.ros.ros_converter_node import ActionConverterNode
