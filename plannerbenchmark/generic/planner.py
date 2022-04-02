@@ -1,4 +1,5 @@
 from abc import abstractmethod
+import yaml
 from plannerbenchmark.generic.planner_registry import PlannerRegistry
 
 class PlannerSettingIncomplete(Exception):

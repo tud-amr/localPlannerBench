@@ -4,8 +4,7 @@ import os
 import sys
 import forcespro
 
-import plannerbenchmark
-from plannerbenchmark.generic.abstractPlanner import AbstractPlanner
+from plannerbenchmark.generic.planner import Planner
 from plannerbenchmark.planner.mpc.parameterMap import getParameterMap
 
 path_name = (
@@ -26,7 +25,7 @@ class EmptyObstacle():
         return 3
 
 
-class MPCPlanner(AbstractPlanner):
+class MPCPlanner(Planner):
     def __init__(self, exp, setupFile):
         required_keys = ["type", "n", "obst", "weights", "interval", "H", "dt"]
         super().__init__(exp, setupFile, required_keys)

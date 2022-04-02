@@ -27,12 +27,9 @@ from MotionPlanningEnv.dynamicSphereObstacle import DynamicSphereObstacle
 from MotionPlanningEnv.sphereObstacle import SphereObstacle
 
 # Dependencies on plannerbenchmark
-from plannerbenchmark.generic.abstractPlanner import AbstractPlanner
+from plannerbenchmark.generic.planner import Planner
 
-class FabricPlanner(AbstractPlanner):
-    def __new__(cls, *args, **kwargs):
-        __import__('pdb').set_trace()
-        return super(FabricPlanner, cls).__new__(cls, *args, **kwargs)
+class FabricPlanner(Planner):
 
     def __init__(self, exp, setupFile):
         required_keys = [
