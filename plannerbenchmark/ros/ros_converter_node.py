@@ -79,7 +79,7 @@ class ActionConverterNode(object):
         )
         self._obst_markers = MarkerArray()
         self._obst_counter = 0
-        self.initObstMarkers(3)
+        self.initObstMarkers(10)
 
     def initObstMarkers(self, nbObst):
         for i in range(nbObst):

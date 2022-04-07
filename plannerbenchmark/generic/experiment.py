@@ -87,7 +87,7 @@ class Experiment(object):
     def evaluate(self, t):
         evalObsts = self.evaluateObstacles(t=t)
         evalGoal = self._motionPlanningGoal.evaluate(t=t)
-        return evalGoal + evalObsts
+        return evalObsts + evalGoal
 
     def evaluateObstacles(self, t):
         evals = []

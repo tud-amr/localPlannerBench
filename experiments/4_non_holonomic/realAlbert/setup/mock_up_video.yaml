@@ -9,7 +9,7 @@ goal:
     prime: True
     m: 3
     w: 1.0
-    epsilon: 0.05
+    epsilon: 0.1
     indices:
       - 0
       - 1
@@ -17,9 +17,9 @@ goal:
     parent_link: 0
     child_link: 10
     desired_position:
-        - 1.0
-        - 0.5
-        - 1.3
+        - 0.8
+        - -1.1
+        - 1.25
     low:
       - -2.0
       - -2.0
@@ -98,22 +98,82 @@ obstacles:
     type: sphereObstacle
     geometry:
       position: 
-        - 10000.6
+        - 0.6
+        - -1.3
         - 0.2
+      radius: 0.1
+  obst1:
+    dim: 3
+    type: sphereObstacle
+    geometry:
+      position: 
+        - 0.8
+        - -1.3
         - 0.2
-      radius: 0.5
-    low:
-      position:
-        - -7.0
-        - -7.0
+      radius: 0.1
+  obst2:
+    dim: 3
+    type: sphereObstacle
+    geometry:
+      position: 
+        - 1.0
+        - -1.3
+        - 0.2
+      radius: 0.1
+  obst3:
+    dim: 3
+    type: sphereObstacle
+    geometry:
+      position: 
+        - 1.2
+        - -1.3
+        - 0.2
+      radius: 0.1
+  obst4:
+    dim: 3
+    type: sphereObstacle
+    geometry:
+      position: 
+        - 0.4
+        - -1.3
+        - 0.2
+      radius: 0.1
+  obst5:
+    dim: 3
+    type: sphereObstacle
+    geometry:
+      position: 
+        - 0.2
+        - -1.3
+        - 0.2
+      radius: 0.1
+  obst6:
+    dim: 3
+    type: sphereObstacle
+    geometry:
+      position: 
         - 0.0
-      radius: 0.0
-    high:
-      position:
-        - 7.0
-        - 7.0
-        - 2.0
-      radius: 1.0
+        - -1.3
+        - 0.2
+      radius: 0.1
+  obst7:
+    dim: 3
+    type: sphereObstacle
+    geometry:
+      position: 
+        - -0.7
+        - 1.
+        - 0.2
+      radius: 0.1
+  obst8:
+    dim: 3
+    type: sphereObstacle
+    geometry:
+      position: 
+        - 0.5
+        - 2.3
+        - 0.2
+      radius: 0.1
 selfCollision:
   pairs:
     - [5, 10]
