@@ -113,6 +113,8 @@ class PostProcessor(object):
             self.defineMetricesPlanarArm()
         elif self._experiment.robotType() == "panda":
             self.defineMetricesPanda()
+        elif self._experiment.robotType() == "albert":
+            self.defineMetricesPanda()
         elif self._experiment.robotType() == "mobilePanda":
             self.defineMetricesMobilePanda()
         elif self._experiment.robotType() == 'groundRobot':
@@ -561,6 +563,13 @@ class PostProcessor(object):
                 stdout=subprocess.PIPE,
             )
         elif self._experiment.robotType() == "panda":
+            createPlotFolder = curPath + "plottingPanda/"
+            subprocess.Popen(
+                ["./createPlot", self._expFolder],
+                cwd=createPlotFolder,
+                stdout=subprocess.PIPE,
+            )
+        elif self._experiment.robotType() == "albert":
             createPlotFolder = curPath + "plottingPanda/"
             subprocess.Popen(
                 ["./createPlot", self._expFolder],

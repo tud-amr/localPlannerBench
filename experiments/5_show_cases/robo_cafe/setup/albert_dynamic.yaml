@@ -1,0 +1,93 @@
+T: 300000
+dt: 0.002
+dynamic: True
+env: albert-reacher-acc-v0
+robot_type: albert
+n: 10
+goal:
+  subgoal0:
+    prime: True
+    m: 3
+    w: 1.0
+    epsilon: 0.1
+    indices:
+      - 0
+      - 1
+      - 2
+    parent_link: 0
+    child_link: 10
+    trajectory:
+        - "1.0 + 0.5 * ca.cos(0.08 * t)"
+        - "0"
+        - "0.9"
+    type: analyticSubGoal
+  subgoal2:
+    prime: False
+    m: 2
+    w: 5
+    indices:
+      - 0
+      - 1
+    parent_link: 8
+    child_link: 10
+    desired_position:
+      - 0.0
+      - 0.0
+    type: staticSubGoal
+    epsilon: 0.1
+initState:
+  q0:
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - -1.501
+    - 0.0
+    - 1.8675
+    - 0.5
+  q0dot:
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+limits:
+  low:
+    - -15.0
+    - -15.0
+    - -300.00
+    - -2.8973
+    - -1.7628
+    - -2.8973
+    - -3.0718
+    - -2.8973
+    - -0.0175
+    - -2.8973
+  high:
+    - 15.0
+    - 15.0
+    - 300.00
+    - 2.8973
+    - 1.7628
+    - 2.8973
+    - 0.0698
+    - 2.8973
+    - 3.7525
+    - 2.8973
+r_body: 0.05
+randomObstacles:
+  number: 5
+obstacles:
+selfCollision:
+  pairs:
+    - [0, 10]
+    - [7, 9]
+    - [8, 10]
+    
+

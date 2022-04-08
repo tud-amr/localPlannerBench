@@ -1,0 +1,69 @@
+T: 15000
+dynamic: False
+dt: 0.01
+env: panda-reacher-acc-v0
+robot_type: panda
+n: 7
+goal:
+  subgoal1:
+    prime: True
+    m: 3
+    w: 1
+    indices:
+      - 0
+      - 1
+      - 2
+    parent_link: 0
+    child_link: 7
+    desired_position:
+      - 0.8
+      - -0.05
+      - 0.40
+    type: staticSubGoal
+    epsilon: 0.05
+initState:
+  q0:
+    - 1.0
+    - 0.0
+    - 0.0
+    - -1.50
+    - 0.0
+    - 1.8675
+    - 0.0
+  q0dot:
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+limits:
+  low:
+    - -2.8973
+    - -1.7628
+    - -2.8973
+    - -3.0718
+    - -2.8973
+    - -0.0175
+    - -2.8973
+  high:
+    - 2.8973
+    - 1.7628
+    - 2.8973
+    - 0.0698
+    - 2.8973
+    - 3.7525
+    - 2.8973
+r_body: 0.10
+selfCollision:
+  pairs:
+    - [0, 6]
+    - [0, 7]
+    - [1, 6]
+    - [1, 7]
+    - [2, 6]
+    - [2, 7]
+obstacles:
+randomObstacles:
+  number: 1
