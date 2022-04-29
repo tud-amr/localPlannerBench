@@ -42,6 +42,9 @@ class FabricConfig(PlannerConfig):
     dynamic: bool = False
     limits: Dict[str, float] = field(default_factory = lambda: ({'exp': 1.0, 'lam': 1.0}))
     damper: Dict[str, object] = field(default_factory = lambda :({'r_d': 0.8, 'b': [0.1, 6.5]}))
+    l_offset: float = 0.2
+    m_arm: float = 1.0
+    m_rot: float = 1.0
 
 
 class FabricPlanner(Planner):
@@ -54,7 +57,15 @@ class FabricPlanner(Planner):
 
     def reset(self):
         if self._exp.robotType() in ['groundRobot', 'boxer', 'albert']:
-            self._planner = DefaultNonHolonomicPlanner(self.config.n, m_base=self.config.m_base, m_ratio=self.config.m_ratio, debug=False)
+            self._planner = DefaultNonHolonomicPlanner(
+                    self.config.n, 
+                    m_rot=self.config.m_rot,
+                    l_offset=self.config.l_offset,
+                    m_arm=self.config.m_arm,
+                    m_ratio=self.config.m_ratio,
+                    m_base=self.config.m_base,
+                    debug=False
+            )
         else:
             self._planner = DefaultFabricPlanner(self.config.n, m_base=self.config.m_base, debug=False)
         self._q, self._qdot = self._planner.var()
@@ -184,4 +195,6 @@ class FabricPlanner(Planner):
         if self._planner._debug:
             debugEval = self._planner.debugEval(*args)
             print(debugEval)
+        action = np.clip(-np.ones(9), np.ones(9), action)
+
         return action
