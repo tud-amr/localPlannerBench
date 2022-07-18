@@ -1,17 +1,17 @@
 [tool.poetry]
 name = "plannerbenchmark"
-version = "0.1.4"
+version = "0.2.0"
 description = "Benchmark suite for local planner in dynamic environment."
 authors = ["Max Spahn <m.spahn@tudelft.nl>"]
 
 [tool.poetry.dependencies]
-python = "^3.6.2,<3.11"
-forwardkinematics = {git = "https://git@github.com/maxspahn/forwardKinematics.git", rev = "main"}
+python = "^3.6.2,<3.10"
+forwardkinematics = {git = "https://git@github.com/maxspahn/forwardKinematics.git", rev = "release-1.0"}
 planarenvs = {git = "https://git@github.com/maxspahn/gym_envs_planar.git", rev = "master"}
 urdfenvs = {git = "https://git@github.com/maxspahn/gym_envs_urdf.git", rev = "master"}
-robotmpcs = {git = "https://git@github.com/maxspahn/robot_mpcs.git", rev = "main", optional = true}
+#robotmpcs = {git = "https://git@github.com/maxspahn/robot_mpcs.git", rev = "main", optional = true}
 motion-planning-scenes= {git = "https://git@github.com/maxspahn/motion_planning_scenes.git", rev = "main"}
-# fabrics = {path = "../../../../code/fabrics", optional = true}
+fabrics = {path = "../../../../code/fabrics", optional = true}
 Sphinx = { version = "4.2.0", optional = true }
 sphinx-rtd-theme = { version = "1.0.0", optional = true }
 sphinxcontrib-napoleon = { version = "0.7", optional = true }

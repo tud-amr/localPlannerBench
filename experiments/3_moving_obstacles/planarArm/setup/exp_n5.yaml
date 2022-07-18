@@ -15,9 +15,10 @@ goal:
     parent_link: 0
     child_link: 5
     desired_position:
+    epsilon: 0.2
       - 2.0
       - -2.0
-    type: static
+    type: staticSubGoal
     dynamic: False
 # subgoal2:
 #   prime: False

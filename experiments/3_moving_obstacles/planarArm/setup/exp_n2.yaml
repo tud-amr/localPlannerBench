@@ -43,7 +43,7 @@ r_body: 0.2
 obstacles:
   obst0:
     dim: 2
-    type: analyticSphereObstacle
+    type: analyticSphere
     geometry:
       trajectory:
         - "1.5"
@@ -51,7 +51,7 @@ obstacles:
       radius: 0.3
   obst1:
     dim: 2
-    type: analyticSphereObstacle
+    type: analyticSphere
     geometry:
       trajectory:
         - "-1.5"
