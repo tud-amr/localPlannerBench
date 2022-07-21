@@ -81,7 +81,7 @@ selfCollision:
 obstacles:
   obst0:
     dim: 3
-    type: analyticSphereObstacle
+    type: analyticSphere
     geometry:
       trajectory:
         - "-1.0 + 0.1 * t"
@@ -90,7 +90,7 @@ obstacles:
       radius: 0.1
   obst1:
     dim: 3
-    type: analyticSphereObstacle
+    type: analyticSphere
     geometry:
       trajectory:
         - "-1.0 + 0.2 * t"
