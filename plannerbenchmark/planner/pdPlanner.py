@@ -8,9 +8,11 @@ class PDPlanner(AbstractPlanner):
         required_keys = ["type", "n", 'k', 'p']
         super().__init__(exp, setupFile, required_keys)
         self._curError = np.zeros(self.n())
+        if not 'interval' in self._setup:
+            self._setup['interval'] = 1
 
     def interval(self):
-        return 1
+        return self._setup['interval']
 
     def n(self):
         return self._setup['n']

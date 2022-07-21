@@ -37,7 +37,11 @@ class CaseEvaluation(object):
         plannerFile = self._folder + "/planner.yaml"
         with open(plannerFile, "r") as file:
             self._plannerSetup = yaml.safe_load(file)
-        return self._plannerSetup["interval"]
+        try:
+            return self._plannerSetup["interval"]
+        except KeyError:
+            print("No interval specified, assuming 1.")
+            return 1
 
     def decodeFolderName(self) -> None:
         """Decodes the folder name into planner and timeStamp using regex."""
