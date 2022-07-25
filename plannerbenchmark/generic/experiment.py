@@ -3,6 +3,9 @@ import csv
 import gym
 import numpy as np
 import casadi as ca
+from omegaconf import OmegaConf, MISSING
+from dataclasses import dataclass
+from typing import List, Dict, Optional
 
 import planarenvs.point_robot
 import planarenvs.n_link_reacher
@@ -18,8 +21,6 @@ from MotionPlanningEnv.obstacleCreator import ObstacleCreator
 from MotionPlanningGoal.staticSubGoal import StaticSubGoal
 from MotionPlanningGoal.goalComposition import GoalComposition
 
-from omegaconf import DictConfig, OmegaConf, MISSING
-
 
 class ExperimentIncompleteError(Exception):
     pass
@@ -31,6 +32,71 @@ class InvalidInitStateError(Exception):
 
 class ExperimentInfeasible(Exception):
     pass
+
+# Note: maybe this should be in the motion_planning_scenes repo?
+@dataclass
+class GeometryConfig:
+    """Class comment to be filled in"""
+
+    position: List[float] = MISSING
+    radius: float = MISSING
+
+@dataclass
+class ObstacleConfig:
+    """Class comment to be filled in"""
+
+    type: str = MISSING
+    dim: int = MISSING
+    geometry: GeometryConfig = MISSING
+    low: GeometryConfig = MISSING
+    high: GeometryConfig = MISSING
+
+@dataclass
+class SelfCollisionConfig:
+    """Class comment to be filled in"""
+
+    pairs: Optional[List[List[int]]] = MISSING
+
+@dataclass
+class SubGoalCompositionConfig:
+    """Class comment to be filled in"""
+
+    prime: bool = MISSING
+    m: float = MISSING
+    w: float = MISSING
+    indices: List[int] = MISSING
+    parent_link: int = MISSING
+    child_link: int = MISSING
+    desired_position: List[float] = MISSING
+    low: List[float] = MISSING
+    high: List[float] = MISSING
+    type: str = MISSING
+    epsilon: float = MISSING
+
+@dataclass
+class StateConfig:
+    """Class comment to be filled in"""
+
+    q0: List[float] = MISSING
+    q0dot: List[float] = MISSING
+
+@dataclass
+class ExperimentConfig:
+    """Data class that specifies the structure and default values of an experiment config"""
+
+    T: int = 2000 
+    n: int = MISSING
+    dynamic: bool = MISSING
+    dt: float = 0.05 
+    env: str = MISSING
+    robot_type: str = MISSING
+    goal: Dict[str, SubGoalCompositionConfig] = MISSING
+    initState: StateConfig = MISSING
+    limits: Dict[str, List[float]] = MISSING
+    r_body: float = MISSING
+    randomObstacles: Dict[str, int] = MISSING
+    obstacles: Dict[str, ObstacleConfig] = MISSING
+    selfCollision: SelfCollisionConfig = MISSING
 
 
 class Experiment(object):
