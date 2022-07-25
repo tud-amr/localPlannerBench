@@ -173,8 +173,8 @@ class Runner(object):
                         break
                     if i % 1000 == 0:
                         print("Timestep : %d" %i)
-                    q = ob['x']
-                    qdot = ob['xdot']
+                    q = ob['x'][0:2]
+                    qdot = ob['xdot'][0:2]
                     if self._experiment.dynamic():
                         envEval = self._experiment.evaluate(t)
                         if not planner.config.dynamic:
@@ -186,6 +186,11 @@ class Runner(object):
                     if self._experiment.robotType() in ['groundRobot', 'boxer', 'albert']:
                         qudot = np.concatenate((ob['vel'], ob['xdot'][3:]))
                         observation += [qudot]
+                    try:
+                        sensor_data = ob['lidarSensor']
+                        observation += [sensor_data]
+                    except KeyError as key_error:
+                        print("Sensor data not found")
                     t_before = time.perf_counter()
                     action = planner.computeAction(*observation)
                     solving_time = time.perf_counter() - t_before

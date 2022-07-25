@@ -1,3 +1,4 @@
+
 # General dependencies
 from dataclasses import dataclass, field
 from typing import Dict
@@ -15,7 +16,7 @@ from MotionPlanningGoal.dynamicSubGoal import DynamicSubGoal
 from plannerbenchmark.generic.planner import Planner, PlannerConfig
 
 @dataclass
-class FabricConfig(PlannerConfig):
+class SensorFabricConfig(PlannerConfig):
     m_base: float = 0.2
     m_ratio: float = 1.0
     obst: Dict[str, float] = field(default_factory = lambda: ({'exp': 1.0, 'lam': 1.0}))
@@ -28,13 +29,15 @@ class FabricConfig(PlannerConfig):
     l_offset: float = 0.2
     m_arm: float = 1.0
     m_rot: float = 1.0
+    number_lidar_rays: int = 24
+    radius_ray_obstacles: float = 0.3
 
 
-class FabricPlanner(Planner):
+class SensorFabricPlanner(Planner):
 
     def __init__(self, exp, **kwargs):
         super().__init__(exp, **kwargs)
-        self._config = FabricConfig(**kwargs)
+        self._config = SensorFabricConfig(**kwargs)
         self.reset()
         base_energy: str = (
             "0.5 * sym('base_inertia') * ca.dot(xdot, xdot)"
@@ -43,7 +46,7 @@ class FabricPlanner(Planner):
             "-sym('obst_geo_lam') / (x ** sym('obst_geo_exp')) * xdot ** 2"
         )
         collision_finsler: str = (
-            "1.0/(x**1) * (-0.5 * (ca.sign(xdot) - 1)) * xdot**2"
+            "0.1/(x**1) * (1 - ca.heaviside(xdot)) * xdot**2"
         )
         limit_geometry: str = (
             "-0.1 / (x ** 1) * xdot ** 2"
@@ -58,7 +61,7 @@ class FabricPlanner(Planner):
             "1.0/(x**1) * (-0.5 * (ca.sign(xdot) - 1)) * xdot**2"
         )
         attractor_potential: str = (
-            "5.0 * (ca.norm_2(x) + 1 / 10 * ca.log(1 + ca.exp(-2 * 10 * ca.norm_2(x))))"
+            "1.0 * (ca.norm_2(x) + 1 / 10 * ca.log(1 + ca.exp(-2 * 10 * ca.norm_2(x))))"
         )
         attractor_metric: str = (
             "((2.0 - 0.3) * ca.exp(-1 * (0.75 * ca.norm_2(x))**2) + 0.3) * ca.SX(np.identity(x.size()[0]))"
@@ -73,7 +76,8 @@ class FabricPlanner(Planner):
             self_collision_finsler=self_collision_finsler,
         )
         self._collision_links = [i for i in range(1, self.config.n+1)]
-        self._number_obstacles = 0
+        self._collision_links = [1]
+        self._number_static_obstacles = self._config.number_lidar_rays
         self._dynamic_goal = False
 
     def initialize_runtime_arguments(self):
@@ -81,8 +85,6 @@ class FabricPlanner(Planner):
         self._runtime_arguments['weight_goal_0'] = np.array(self.config.attractor['k_psi'])
         self._runtime_arguments['base_inertia'] = np.array([self.config.m_base])
         for j in range(self._number_static_obstacles):
-            self._runtime_arguments[f'radius_obst_{j}'] = np.array([self._static_obsts[j].radius()])
-            self._runtime_arguments[f'x_obst_{j}'] = np.array(self._static_obsts[j].position())
             for i in self._collision_links:
                 self._runtime_arguments[f'obst_geo_exp_obst_{j}_{i}_leaf'] = np.array([self.config.obst['exp']])
                 self._runtime_arguments[f'obst_geo_lam_obst_{j}_{i}_leaf'] = np.array([self.config.obst['lam']])
@@ -106,8 +108,8 @@ class FabricPlanner(Planner):
                 self._dynamic_obsts.append(obst)
             else:
                 self._static_obsts.append(obst)
-        self._number_static_obstacles = len(self._static_obsts)
-        self._number_dynamic_obstacles = len(self._dynamic_obsts)
+        #self._number_static_obstacles = len(self._static_obsts)
+        self._number_dynamic_obstacles = 0
 
     def setSelfCollisionAvoidance(self, r_body):
         self_collision_pairs = self._exp.selfCollisionPairs()
@@ -133,7 +135,7 @@ class FabricPlanner(Planner):
             self._goal,
             limits=self._limits,
             number_obstacles=self._number_static_obstacles,
-            number_dynamic_obstacles=self._number_dynamic_obstacles,
+            number_dynamic_obstacles=0,
         )
         self._planner.concretize()
         self.initialize_runtime_arguments()
@@ -153,9 +155,13 @@ class FabricPlanner(Planner):
                 self._runtime_arguments[f'x_ref_dynamic_obst_{i}_{j}_leaf'] = args[1 + 3*i+1]
                 self._runtime_arguments[f'xdot_ref_dynamic_obst_{i}_{j}_leaf'] = args[1 + 3*i + 2]
                 self._runtime_arguments[f'xddot_ref_dynamic_obst_{i}_{j}_leaf'] = args[1 + 3*i + 3]
-
-
-        pass
+        if len(args) > 2:
+            ob_lidar = args[2].reshape(self._config.number_lidar_rays, 2) + args[0]
+        else:
+            ob_lidar = [[100, 100], ] * self._config.number_lidar_rays
+        for j in range(self._number_static_obstacles):
+            self._runtime_arguments[f'radius_obst_{j}'] = np.array([self._config.radius_ray_obstacles])
+            self._runtime_arguments[f'x_obst_{j}'] = ob_lidar[j]
 
     def computeAction(self, *args):
         self.adapt_runtime_arguments(args)
