@@ -1,6 +1,5 @@
 #! /usr/bin/env python3
 
-import argparse
 import subprocess
 import datetime
 import time
@@ -13,8 +12,12 @@ import signal
 from plannerbenchmark.generic.experiment import Experiment, ExperimentInfeasible
 from plannerbenchmark.generic.logger import Logger
 
-from plannerbenchmark.generic.planner  import PlannerRegistry
+from plannerbenchmark.generic.planner  import PlannerRegistry 
+from plannerbenchmark.generic.config_signatures  import * 
 from plannerbenchmark.planner import *
+
+from omegaconf import DictConfig, OmegaConf, MISSING
+import hydra
 
 
 def blockPrint():
@@ -28,7 +31,6 @@ def enablePrint():
 
 class Runner(object):
     def __init__(self):
-        self.initializeArgumentParser()
         signal.signal(signal.SIGINT, self.handleStop)
         self._aborted = False
 
@@ -37,65 +39,32 @@ class Runner(object):
         self.stopEnvironment()
         self._aborted = True
 
-    def initializeArgumentParser(self):
-        self._parser = argparse.ArgumentParser("Run motion planning experiment")
-        self._parser.add_argument(
-            "--caseSetup", "-case", type=str, help="Experiment setup file", required=True
-        )
-        self._parser.add_argument(
-            "--planners", "-p", type=str, nargs="+", help="List of planner setup files", required=True
-        )
-        self._parser.add_argument(
-            "--res-folder",
-            "-res",
-            type=str,
-            default='results',
-            help="Results folder",
-        )
-        self._parser.add_argument(
-            "--numberRuns", "-n", type=int, default=1, help="Number of runs of the experiment"
-        )
-        self._parser.add_argument("--ros", dest="ros", action="store_true")
-        self._parser.add_argument("--no-save", dest="save", action="store_false")
-        self._parser.add_argument("--random-goal", dest="random_goal", action="store_true")
-        self._parser.add_argument("--random-obst", dest="random_obst", action="store_true")
-        self._parser.add_argument("--random-init", dest="random_init", action="store_true")
-        self._parser.add_argument("--no-verbose", dest="verbose", action="store_false")
-        self._parser.add_argument("--render", dest="render", action="store_true")
-        self._parser.add_argument("--compare", dest="compare", action="store_true")
-        self._parser.set_defaults(save=True)
-        self._parser.set_defaults(ros=False)
-        self._parser.set_defaults(random_goal=False)
-        self._parser.set_defaults(random_obst=False)
-        self._parser.set_defaults(random_init=False)
-        self._parser.set_defaults(verbose=True)
-        self._parser.set_defaults(render=False)
-        self._parser.set_defaults(compare=False)
-
-    def parseArguments(self):
-        args = self._parser.parse_args()
-        self._render = args.render
-        self._save = args.save
-        self._random_obst = args.random_obst
-        self._random_init = args.random_init
-        self._random_goal = args.random_goal
-        self._numberRuns = args.numberRuns
-        self._verbose = args.verbose
-        self._render = args.render
-        self._res_folder = os.getcwd() + '/' + args.res_folder
+    def parseArguments(self, cfg: DictConfig):
+        self._render = cfg.render
+        self._save = cfg.save
+        self._random_obst = cfg.random_obst
+        self._random_init = cfg.random_init
+        self._random_goal = cfg.random_goal
+        self._numberRuns = cfg.numberRuns
+        self._verbose = cfg.verbose
+        self._render = cfg.render
+        self._res_folder = os.getcwd() + '/' + cfg.res_folder
         self._planners = []
-        self._experiment = Experiment(args.caseSetup)
-        self._ros = args.ros
-        self._compare = args.compare
+        self._experiment = Experiment(cfg.experiment)
+        self._ros = cfg.ros
+        self._compare = cfg.compare
         if self._compare:
-            self._compareTimeStamp = args.caseSetup[-24:-9]
+            self._compareTimeStamp = 0
         if self._ros:
             self.startRosConverterNode()
         else:
             self._env = self._experiment.env(render=self._render)
-        for planner_file in args.planners:
-            planner = PlannerRegistry.create_planner(self._experiment, planner_file)
-            self._planners.append(planner)
+
+        # Only supports one planner config at a time with hydra sturctured configs,
+        # because list or dicts in the default are not supported.
+        # There is an easy api for running multiple configurations in a sweep though. 
+        planner = PlannerRegistry.create_planner(self._experiment, cfg.planner)
+        self._planners.append(planner)
 
     def startRosConverterNode(self):
         from plannerbenchmark.ros.ros_converter_node import ActionConverterNode
@@ -200,9 +169,10 @@ class Runner(object):
             print("Completed %d runs" % completedRuns)
             self.stopEnvironment()
 
-def newmain():
+@hydra.main(version_base=None, config_path="../../../localPlannerBench/experiments/example", config_name="config")
+def newmain(cfg):
     myRunner = Runner()
-    myRunner.parseArguments()
+    myRunner.parseArguments(cfg)
     myRunner.run()
 
 

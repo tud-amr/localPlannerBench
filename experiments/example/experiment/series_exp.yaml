@@ -1,0 +1,190 @@
+defaults:
+  - base_experiment
+T: 5000
+dt: 0.01
+dynamic: false
+env: panda-reacher-acc-v0
+goal:
+  subgoal1:
+    child_link: 7
+    desired_position:
+    - 0.33563598076771184
+    - 0.14337110123957353
+    - 0.44683409208835706
+    epsilon: 0.05
+    high:
+    - 0.7
+    - 0.3
+    - 1.3
+    indices:
+    - 0
+    - 1
+    - 2
+    low:
+    - 0.2
+    - -0.3
+    - 0.2
+    m: 3
+    parent_link: 0
+    prime: true
+    type: staticSubGoal
+    w: 1
+initState:
+  q0:
+  - 0.6984209765575948
+  - 1.6694677108108333
+  - -1.1352748373884505
+  - -2.608451882139134
+  - 0.32552180642438344
+  - 3.540685706354681
+  - -2.5652571524362524
+  q0dot:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+limits:
+  high:
+  - 2.8973
+  - 1.7628
+  - 2.8973
+  - 0.0698
+  - 2.8973
+  - 3.7525
+  - 2.8973
+  low:
+  - -2.8973
+  - -1.7628
+  - -2.8973
+  - -3.0718
+  - -2.8973
+  - -0.0175
+  - -2.8973
+n: 7
+obstacles:
+  obst0:
+    dim: 3
+    geometry:
+      position:
+      - 0.7445398545642845
+      - -0.8343699722523066
+      - 0.23343929943208996
+      radius: 0.16257686423996176
+    high:
+      position:
+      - 1.0
+      - 1.0
+      - 1.0
+      radius: 0.4
+    low:
+      position:
+      - 0.3
+      - -1.0
+      - 0.0
+      radius: 0.0
+    type: sphereObstacle
+  obst1:
+    dim: 3
+    geometry:
+      position:
+      - 0.6331662645954101
+      - -0.2877626134962239
+      - 0.9310172097257545
+      radius: 0.329962219879185
+    high:
+      position:
+      - 1.0
+      - 1.0
+      - 1.0
+      radius: 0.4
+    low:
+      position:
+      - 0.3
+      - -1.0
+      - 0.0
+      radius: 0.0
+    type: sphereObstacle
+  obst2:
+    dim: 3
+    geometry:
+      position:
+      - 0.6488586162697596
+      - 0.6996592094783394
+      - 0.9594479638445592
+      radius: 0.1623498862840725
+    high:
+      position:
+      - 1.0
+      - 1.0
+      - 1.0
+      radius: 0.4
+    low:
+      position:
+      - 0.3
+      - -1.0
+      - 0.0
+      radius: 0.0
+    type: sphereObstacle
+  obst3:
+    dim: 3
+    geometry:
+      position:
+      - 0.6822426148335979
+      - 0.792342746972662
+      - 0.6372404516010937
+      radius: 0.31939677824621576
+    high:
+      position:
+      - 1.0
+      - 1.0
+      - 1.0
+      radius: 0.4
+    low:
+      position:
+      - 0.3
+      - -1.0
+      - 0.0
+      radius: 0.0
+    type: sphereObstacle
+  obst4:
+    dim: 3
+    geometry:
+      position:
+      - 0.6160930791408973
+      - 0.8527832412426046
+      - 0.8282830906225774
+      radius: 0.3508460078463156
+    high:
+      position:
+      - 1.0
+      - 1.0
+      - 1.0
+      radius: 0.4
+    low:
+      position:
+      - 0.3
+      - -1.0
+      - 0.0
+      radius: 0.0
+    type: sphereObstacle
+r_body: 0.15
+randomObstacles:
+  number: 5
+robot_type: panda
+selfCollision:
+  pairs:
+  - - 0
+    - 6
+  - - 0
+    - 7
+  - - 1
+    - 6
+  - - 1
+    - 7
+  - - 2
+    - 6
+  - - 2
+    - 7

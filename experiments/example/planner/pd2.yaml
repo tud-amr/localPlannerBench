@@ -1,0 +1,7 @@
+defaults:
+  - base_pd
+name: pd
+robot_type: pointRobot
+n: 2
+k: 3.8
+p: 0.2

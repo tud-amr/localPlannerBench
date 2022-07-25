@@ -22,12 +22,12 @@ class PlannerRegistry(type):
 
     @classmethod
     def parseSetup(cls, setupFile):
-        with open(setupFile, "r") as setupStream:
-            cls._setup = yaml.safe_load(setupStream)
+        cls._setup = setupFile
 
     @classmethod
     def create_planner(cls, exp, setup, **kwargs):
         cls.parseSetup(setup)
         name = cls._setup['name']
+        print(cls.REGISTRY)
         planner = cls.REGISTRY[name]
         return planner(exp, **cls._setup)

@@ -1,3 +1,5 @@
+defaults:
+  - base_experiment
 T: 2000
 dynamic: False
 dt: 0.05
@@ -63,5 +65,4 @@ obstacles:
       radius: 1.0
 selfCollision:
   pairs:
-    
 

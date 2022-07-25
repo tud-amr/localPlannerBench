@@ -18,6 +18,7 @@ from MotionPlanningEnv.obstacleCreator import ObstacleCreator
 from MotionPlanningGoal.staticSubGoal import StaticSubGoal
 from MotionPlanningGoal.goalComposition import GoalComposition
 
+from omegaconf import DictConfig, OmegaConf, MISSING
 
 
 class ExperimentIncompleteError(Exception):
@@ -33,8 +34,7 @@ class ExperimentInfeasible(Exception):
 
 
 class Experiment(object):
-    def __init__(self, setupFile):
-        self._setupFile = setupFile
+    def __init__(self, cfg):
         self._required_keys = [
             "T",
             "dt",
@@ -49,37 +49,32 @@ class Experiment(object):
             "selfCollision",
             "dynamic",
         ]
-        self.parseSetup()
+        self._cfg = cfg
         self._fk = FkCreator(self.robotType(), self.n()).fk()
-
-    def parseSetup(self):
-        with open(self._setupFile, "r") as setupStream:
-            self._setup = yaml.safe_load(setupStream)
-        self.checkCompleteness()
-        self._motionPlanningGoal = GoalComposition(name="mpg", contentDict=self._setup['goal'])
+        self._motionPlanningGoal = GoalComposition(name="mpg", contentDict=self._cfg.goal)
         self.parseObstacles()
 
     def parseObstacles(self):
         self._obstacles = []
         self._obstacleCreator = ObstacleCreator()
-        if self._setup["obstacles"]:
-            for obst in self._setup["obstacles"]:
-                obstData = self._setup["obstacles"][obst]
+        if self._cfg.obstacles:
+            for obst in self._cfg["obstacles"]:
+                obstData = self._cfg["obstacles"][obst]
                 obstType = obstData['type']
                 obstName = obst
                 self._obstacles.append(self._obstacleCreator.createObstacle(obstType, obstName, obstData))
 
     def dynamic(self):
-        return self._setup['dynamic']
+        return self._cfg['dynamic']
 
     def selfCollisionPairs(self):
-        if self._setup['selfCollision']['pairs']:
-            return self._setup["selfCollision"]["pairs"]
+        if self._cfg['selfCollision']['pairs']:
+            return self._cfg["selfCollision"]["pairs"]
         else:
             return []
 
     def rBody(self):
-        return self._setup["r_body"]
+        return self._cfg["r_body"]
 
     def fk(self, q, n, positionOnly=False):
         return self._fk.fk(q, n, positionOnly=positionOnly)
@@ -97,32 +92,32 @@ class Experiment(object):
         return evals
 
     def robotType(self):
-        return self._setup["robot_type"]
+        return self._cfg["robot_type"]
 
     def n(self):
-        return self._setup["n"]
+        return self._cfg["n"]
 
     def T(self):
-        return self._setup["T"]
+        return self._cfg["T"]
 
     def dt(self):
-        return self._setup["dt"]
+        return self._cfg["dt"]
 
     def envName(self):
-        return self._setup["env"]
+        return self._cfg["env"]
 
     def obstacles(self):
         return self._obstacles
 
     def limits(self):
-        low = np.array(self._setup["limits"]["low"])
-        high = np.array(self._setup["limits"]["high"])
+        low = np.array(self._cfg["limits"]["low"])
+        high = np.array(self._cfg["limits"]["high"])
         return low, high
 
     def initState(self):
         try:
-            q0 = np.array([float(x) for x in self._setup["initState"]["q0"]])
-            q0dot = np.array([float(x) for x in self._setup["initState"]["q0dot"]])
+            q0 = np.array([float(x) for x in self._cfg["initState"]["q0"]])
+            q0dot = np.array([float(x) for x in self._cfg["initState"]["q0dot"]])
         except:
             raise InvalidInitStateError("Initial state could not be parsed")
         """
@@ -163,13 +158,13 @@ class Experiment(object):
 
     def shuffleInitConfiguration(self):
         q0_new = np.random.uniform(low=self.limits()[0], high=self.limits()[1])
-        self._setup["initState"]["q0"] = q0_new.tolist()
+        self._cfg["initState"]["q0"] = q0_new.tolist()
 
     def shuffleObstacles(self):
         self._obstacles = []
-        obstData = self._setup["obstacles"]['obst0']
+        obstData = self._cfg["obstacles"]['obst0']
         obstType = obstData['type']
-        for i in range(self._setup["randomObstacles"]["number"]):
+        for i in range(self._cfg["randomObstacles"]["number"]):
             obstName = 'obst' + str(i)
             randomObst = self._obstacleCreator.createObstacle(obstType, obstName, obstData)
             randomObst.shuffle()
@@ -183,16 +178,6 @@ class Experiment(object):
         if random_init:
             self.shuffleInitConfiguration()
         return
-
-    def checkCompleteness(self):
-        incomplete = False
-        missingKeys = ""
-        for key in self._required_keys:
-            if key not in self._setup.keys():
-                incomplete = True
-                missingKeys += key + ", "
-        if incomplete:
-            raise ExperimentIncompleteError("Missing keys: %s" % missingKeys[:-2])
 
     def checkFeasibility(self, checkGoalReachible):
         for o in self.obstacles():
@@ -220,16 +205,16 @@ class Experiment(object):
                 raise ExperimentInfeasible("Goal unreachible")
 
     def save(self, folderPath):
-        self._setup["goal"] = self._motionPlanningGoal.toDict()
+        self._cfg["goal"] = self._motionPlanningGoal.toDict()
         obstsDict = {}
         obstFile = folderPath + "/obst"
         initStateFilename = folderPath + "/initState.csv"
         for i, obst in enumerate(self._obstacles):
             obstsDict[obst.name()] = obst.toDict()
             obst.toCSV(obstFile + "_" + str(i) + ".csv")
-        self._setup["obstacles"] = obstsDict
+        self._cfg["obstacles"] = obstsDict
         with open(folderPath + "/exp.yaml", "w") as file:
-            yaml.dump(self._setup, file)
+            yaml.dump(OmegaConf.to_yaml(self._cfg), file)
         with open(initStateFilename, "w") as file:
             csv_writer = csv.writer(file, delimiter=",")
             csv_writer.writerow(self.initState()[0])

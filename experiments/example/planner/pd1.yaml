@@ -1,3 +1,5 @@
+defaults:
+  - base_pd
 name: pd
 robot_type: pointRobot
 n: 2
