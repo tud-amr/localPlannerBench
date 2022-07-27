@@ -173,8 +173,12 @@ class Runner(object):
                         break
                     if i % 1000 == 0:
                         print("Timestep : %d" %i)
-                    q = ob['x']
-                    qdot = ob['xdot']
+                    if 'x' in ob:
+                        q = ob['x']
+                        qdot = ob['xdot']
+                    elif 'joint_state' in ob:
+                        q = ob['joint_state']['position']
+                        qdot = ob['joint_state']['velocity']
                     if self._experiment.dynamic():
                         envEval = self._experiment.evaluate(t)
                         if not planner.config.dynamic:
