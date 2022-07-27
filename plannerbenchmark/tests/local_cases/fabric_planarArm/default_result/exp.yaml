@@ -22,7 +22,7 @@ goal:
     parent_link: 0
     prime: true
     type: staticSubGoal
-    w: 5
+    w: 1
   subgoal2:
     child_link: 5
     desired_position:
@@ -34,7 +34,7 @@ goal:
     parent_link: 4
     prime: false
     type: staticSubGoal
-    w: 10
+    w: 2
 initState:
   q0:
   - 1.57

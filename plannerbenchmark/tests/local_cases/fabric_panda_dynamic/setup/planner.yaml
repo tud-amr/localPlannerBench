@@ -4,13 +4,13 @@ robot_type: simPanda
 n: 7
 m_base: 1.0
 obst:
-  exp: 2.0
-  lam: 5.0
+  exp: 3.0
+  lam: 1.0
 selfCol:
   exp: 3.0
   lam: 1.5
 attractor:
-  k_psi: 5.0
+  k_psi: 1.0
 limits:
   exp: 1.0
   lam: 1.0

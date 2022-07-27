@@ -22,7 +22,7 @@ goal:
     parent_link: 0
     prime: true
     type: staticSubGoal
-    w: 5
+    w: 1
 initState:
   q0:
   - 0.0

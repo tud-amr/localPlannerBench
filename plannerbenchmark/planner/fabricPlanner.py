@@ -78,7 +78,6 @@ class FabricPlanner(Planner):
 
     def initialize_runtime_arguments(self):
         self._runtime_arguments = {}
-        self._runtime_arguments['weight_goal_0'] = np.array(self.config.attractor['k_psi'])
         self._runtime_arguments['base_inertia'] = np.array([self.config.m_base])
         for j in range(self._number_static_obstacles):
             self._runtime_arguments[f'radius_obst_{j}'] = np.array([self._static_obsts[j].radius()])
@@ -147,7 +146,9 @@ class FabricPlanner(Planner):
             self._runtime_arguments['xdot_ref_goal_0_leaf'] = args[3]
             self._runtime_arguments['xddot_ref_goal_0_leaf'] = args[4]
         else:
-            self._runtime_arguments['x_goal_0'] = np.array(self._goal.primeGoal().position())
+            for i, sub_goal in enumerate(self._goal.subGoals()):
+                self._runtime_arguments[f'x_goal_{i}'] = np.array(sub_goal.position())
+                self._runtime_arguments[f'weight_goal_{i}'] = np.array(sub_goal.weight() * self.config.attractor['k_psi'])
         for i, obst in enumerate(self._dynamic_obsts):
             for j in self._collision_links:
                 self._runtime_arguments[f'x_ref_dynamic_obst_{i}_{j}_leaf'] = args[1 + 3*i+1]
