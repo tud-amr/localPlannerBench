@@ -5,7 +5,7 @@ import numpy as np
 import casadi as ca
 from omegaconf import OmegaConf, MISSING
 from dataclasses import dataclass
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 
 import planarenvs.point_robot
 import planarenvs.n_link_reacher
@@ -18,8 +18,8 @@ import urdfenvs.boxer_robot
 
 from forwardkinematics.fksCommon.fk_creator import FkCreator
 from MotionPlanningEnv.obstacleCreator import ObstacleCreator
-from MotionPlanningGoal.staticSubGoal import StaticSubGoal
-from MotionPlanningGoal.goalComposition import GoalComposition
+from MotionPlanningGoal.goalComposition import GoalComposition, SubGoalConfig 
+from MotionPlanningEnv.sphereObstacle import SphereObstacleConfig 
 
 
 class ExperimentIncompleteError(Exception):
@@ -33,45 +33,11 @@ class InvalidInitStateError(Exception):
 class ExperimentInfeasible(Exception):
     pass
 
-# Note: maybe this should be in the motion_planning_scenes repo?
-@dataclass
-class GeometryConfig:
-    """Class comment to be filled in"""
-
-    position: List[float] = MISSING
-    radius: float = MISSING
-
-@dataclass
-class ObstacleConfig:
-    """Class comment to be filled in"""
-
-    type: str = MISSING
-    dim: int = MISSING
-    geometry: GeometryConfig = MISSING
-    low: GeometryConfig = MISSING
-    high: GeometryConfig = MISSING
-
 @dataclass
 class SelfCollisionConfig:
     """Class comment to be filled in"""
 
     pairs: Optional[List[List[int]]] = MISSING
-
-@dataclass
-class SubGoalCompositionConfig:
-    """Class comment to be filled in"""
-
-    prime: bool = MISSING
-    m: float = MISSING
-    w: float = MISSING
-    indices: List[int] = MISSING
-    parent_link: int = MISSING
-    child_link: int = MISSING
-    desired_position: List[float] = MISSING
-    low: List[float] = MISSING
-    high: List[float] = MISSING
-    type: str = MISSING
-    epsilon: float = MISSING
 
 @dataclass
 class StateConfig:
@@ -90,14 +56,15 @@ class ExperimentConfig:
     dt: float = 0.05 
     env: str = MISSING
     robot_type: str = MISSING
-    goal: Dict[str, SubGoalCompositionConfig] = MISSING
+    # NOTE: Using type Any here, because it's not possible to have a union of custom dataclasses. 
+    # Also there is already type checking in the motion-planning-scenes package when instatiating the goals.
+    goal: Dict[str, Any] = MISSING
     initState: StateConfig = MISSING
     limits: Dict[str, List[float]] = MISSING
     r_body: float = MISSING
     randomObstacles: Dict[str, int] = MISSING
-    obstacles: Dict[str, ObstacleConfig] = MISSING
+    obstacles: Optional[Dict[str, SphereObstacleConfig]] = MISSING
     selfCollision: SelfCollisionConfig = MISSING
-
 
 class Experiment(object):
     def __init__(self, cfg):
