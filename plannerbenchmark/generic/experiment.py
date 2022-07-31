@@ -68,6 +68,9 @@ class ExperimentConfig:
 
 class Experiment(object):
     def __init__(self, cfg):
+        if isinstance(cfg, str):
+            cfg = OmegaConf.load()
+
         self._required_keys = [
             "T",
             "dt",
@@ -247,7 +250,7 @@ class Experiment(object):
             obst.toCSV(obstFile + "_" + str(i) + ".csv")
         self._cfg["obstacles"] = obstsDict
         with open(folderPath + "/exp.yaml", "w") as file:
-            yaml.dump(OmegaConf.to_yaml(self._cfg), file)
+            OmegaConf.save(config=self._cfg, f=file)
         with open(initStateFilename, "w") as file:
             csv_writer = csv.writer(file, delimiter=",")
             csv_writer.writerow(self.initState()[0])

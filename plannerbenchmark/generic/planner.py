@@ -2,6 +2,7 @@ from abc import abstractmethod
 from dataclasses import dataclass, asdict
 import yaml
 from plannerbenchmark.generic.planner_registry import PlannerRegistry
+from omegaconf import OmegaConf
 
 class PlannerSettingIncomplete(Exception):
     pass
@@ -65,7 +66,7 @@ class Planner(metaclass=PlannerRegistry):
 
     def save(self, folderPath):
         with open(folderPath + "/planner.yaml", 'w') as file:
-            yaml.dump(asdict(self.config), file)
+            OmegaConf.save(config=self.config, f=file)
 
     @abstractmethod
     def computeAction(self, q, qdot):

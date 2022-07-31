@@ -1,0 +1,71 @@
+defaults:
+  - base_experiment
+T: 500
+dynamic: False
+dt: 0.10
+env: boxer-robot-vel-v0
+robot_type: boxer
+n: 3
+goal:
+  subgoal0:
+    prime: True
+    m: 2
+    w: 5
+    indices:
+      - 0
+      - 1
+    parent_link: "origin"
+    child_link: "ee_link"
+    desired_position:
+      - 8.0
+      - 0.0
+    low:
+      - -14.0
+      - -14.0
+    high: 
+      - 14.0
+      - 14.0
+    type: staticSubGoal
+    epsilon: 0.1
+obstacles:
+  obst0:
+    type: sphereObstacle
+    dim: 2
+    geometry:
+      position: 
+        - 0.0
+        - -0.5
+      radius: 0.8
+    low:
+      position:
+        - -5.0
+        - -5.0
+      radius: 0.0
+    high:
+      position:
+        - 5.0
+        - 5.0
+      radius: 1.0
+randomObstacles:
+  number: 1
+initState:
+  q0:
+    - -8.0
+    - 0.0
+    - 0.0
+  q0dot:
+    - 0.0
+    - 0.0
+    - 0.0
+limits:
+  low:
+    - -100.0
+    - -100.0
+    - -3.14
+  high:
+    - 10.0
+    - 10.0
+    - 3.14
+r_body: 0.80
+selfCollision:
+  pairs:

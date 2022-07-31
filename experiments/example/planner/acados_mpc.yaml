@@ -1,0 +1,4 @@
+defaults:
+  - base_acados_mpc
+name: AcadosMpcPlanner
+robot_type: boxer
