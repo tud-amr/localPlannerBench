@@ -4,6 +4,7 @@ dynamic: false
 env: nLink-reacher-acc-v0
 goal:
   subgoal1:
+    angle: null
     child_link: 5
     desired_position:
     - 2.0
@@ -22,19 +23,22 @@ goal:
     parent_link: 0
     prime: true
     type: staticSubGoal
-    w: 5
+    w: 1.0
   subgoal2:
+    angle: null
     child_link: 5
     desired_position:
     - 0.0
     epsilon: 0.01
+    high: null
     indices:
     - 1
+    low: null
     m: 1
     parent_link: 4
     prime: false
     type: staticSubGoal
-    w: 10
+    w: 2.0
 initState:
   q0:
   - 1.57
@@ -80,6 +84,7 @@ obstacles:
       - -5.0
       - -5.0
       radius: 0.0
+    movable: false
     type: sphereObstacle
 r_body: 0.51
 randomObstacles:

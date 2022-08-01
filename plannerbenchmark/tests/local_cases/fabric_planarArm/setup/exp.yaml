@@ -8,7 +8,7 @@ goal:
   subgoal1:
     prime: True
     m: 2
-    w: 5
+    w: 1
     indices:
       - 0
       - 1
@@ -28,7 +28,7 @@ goal:
   subgoal2:
     prime: False
     m: 1
-    w: 10
+    w: 2
     indices:
       - 1
     parent_link: 4

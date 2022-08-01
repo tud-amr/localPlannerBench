@@ -14,7 +14,16 @@ from plannerbenchmark.generic.experiment import Experiment, ExperimentInfeasible
 from plannerbenchmark.generic.logger import Logger
 
 from plannerbenchmark.generic.planner  import PlannerRegistry
-from plannerbenchmark.planner import *
+
+# Import different planners
+try:
+    from plannerbenchmark.planner.fabricPlanner import FabricPlanner
+except Exception as e:
+    print(e)
+try:
+    from plannerbenchmark.planner.mpcPlanner import MPCPlanner
+except Exception as e:
+    print(e)
 
 
 def blockPrint():
@@ -173,8 +182,12 @@ class Runner(object):
                         break
                     if i % 1000 == 0:
                         print("Timestep : %d" %i)
-                    q = ob['x']
-                    qdot = ob['xdot']
+                    if 'x' in ob:
+                        q = ob['x']
+                        qdot = ob['xdot']
+                    elif 'joint_state' in ob:
+                        q = ob['joint_state']['position']
+                        qdot = ob['joint_state']['velocity']
                     if self._experiment.dynamic():
                         envEval = self._experiment.evaluate(t)
                         if not planner.config.dynamic:
@@ -184,7 +197,7 @@ class Runner(object):
                     else:
                         observation = [q, qdot]
                     if self._experiment.robotType() in ['groundRobot', 'boxer', 'albert']:
-                        qudot = np.concatenate((ob['vel'], ob['xdot'][3:]))
+                        qudot = np.concatenate((ob['joint_state']['forward_velocity'], ob['joint_state']['velocity'][2:]))
                         observation += [qudot]
                     t_before = time.perf_counter()
                     action = planner.computeAction(*observation)

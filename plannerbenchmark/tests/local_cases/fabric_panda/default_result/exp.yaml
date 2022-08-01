@@ -4,6 +4,7 @@ dynamic: false
 env: panda-reacher-acc-v0
 goal:
   subgoal1:
+    angle: null
     child_link: 7
     desired_position:
     - 0.5
@@ -26,7 +27,7 @@ goal:
     parent_link: 0
     prime: true
     type: staticSubGoal
-    w: 1
+    w: 1.0
 initState:
   q0:
   - 1.0
@@ -83,6 +84,7 @@ obstacles:
       - -1.0
       - 0.0
       radius: 0.0
+    movable: false
     type: sphereObstacle
 r_body: 0.15
 randomObstacles:

@@ -7,12 +7,16 @@ damper:
   r_d: 0.8
 dynamic: false
 interval: 1
+l_offset: 0.2
 limits:
   exp: 3.0
   lam: 10.0
+m_arm: 1.0
 m_base: 0.2
 m_ratio: 1.0
+m_rot: 1.0
 n: 2
+name: fabric
 obst:
   exp: 1.0
   lam: 1.0
@@ -22,4 +26,3 @@ selfCol:
   lam: 2.0
 speed:
   ex_factor: 1.0
-name: fabric
