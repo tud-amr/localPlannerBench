@@ -8,7 +8,7 @@ slack: true
 name: mpc
 weights:
   ws: 1e10
-  wu: 5.0
-  wvel: 5.0
+  wu: 2.0
+  wvel: 2.0
   wx: 4.0
 slack: False

@@ -10,8 +10,8 @@ planarenvs = "^1.0.3"
 urdfenvs = "^0.2.2"
 motion-planning-scenes= "^0.1.22"
 forwardkinematics = "^1.0.1"
-#fabrics = {path = "../../../../code/fabrics", optional = true}
-#robotmpcs = {git = "https://git@github.com/maxspahn/robot_mpcs.git", rev = "main", optional = true}
+fabrics = {path = "../../../../code/fabrics", optional = true}
+robotmpcs = {version = "^0.1.4", optional = true}
 
 
 [tool.poetry.extras]
