@@ -1,0 +1,22 @@
+clearance:
+  allMinDist:
+    obst0_fk0:
+      dist: 0.38898774311329165
+      loc:
+      - 2.0
+      - 0.2
+      r: 1.0
+    obst0_fk1:
+      dist: 0.38898774311329165
+      loc:
+      - 2.0
+      - 0.2
+      r: 1.0
+  short: 0.38898774311329165
+solverTime:
+  short: 1.210285649495745
+success:
+  short: 1
+time2Goal:
+  flag: 0
+  short: 3.149999999999997

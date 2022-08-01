@@ -4,6 +4,7 @@ dynamic: true
 env: panda-reacher-acc-v0
 goal:
   subgoal1:
+    angle: null
     child_link: 7
     desired_position:
     - 0.1
@@ -26,7 +27,7 @@ goal:
     parent_link: 0
     prime: true
     type: staticSubGoal
-    w: 1
+    w: 1.0
 initState:
   q0:
   - 1.0
@@ -71,6 +72,8 @@ obstacles:
       - -1.0 + 0.1 * t
       - '-0.4'
       - '0.7'
+    high: null
+    low: null
     type: analyticSphere
   obst1:
     dim: 3
@@ -80,6 +83,8 @@ obstacles:
       - -1.0 + 0.2 * t
       - 1.0 - 0.1 * t
       - '0.3'
+    high: null
+    low: null
     type: analyticSphere
 r_body: 0.2
 randomObstacles:
