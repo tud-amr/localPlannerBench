@@ -57,7 +57,7 @@ class MPCPlanner(Planner):
             + dt_str
             + "_H"
             + str(self.config.H)
-        )
+        ).replace("int", "1nt")
         if not self.config.slack:
             self._solverFile += "_noSlack"
         with open(self._solverFile + "/paramMap.yaml", "r") as stream:
