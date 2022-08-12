@@ -43,7 +43,7 @@ class FabricPlanner(Planner):
             "-sym('obst_geo_lam') / (x ** sym('obst_geo_exp')) * xdot ** 2"
         )
         collision_finsler: str = (
-            "0.1/(x**1) * (-0.5 * (ca.sign(xdot) - 1)) * xdot**2"
+            "1.0/(x**1) * (-0.5 * (ca.sign(xdot) - 1)) * xdot**2"
         )
         limit_geometry: str = (
             "-0.1 / (x ** 1) * xdot ** 2"
@@ -73,7 +73,6 @@ class FabricPlanner(Planner):
             self_collision_finsler=self_collision_finsler,
         )
         self._collision_links = [i for i in range(1, self.config.n+1)]
-        print(' -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - ')
         self._number_obstacles = 0
         self._dynamic_goal = False
 
