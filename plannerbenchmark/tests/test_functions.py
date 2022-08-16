@@ -77,12 +77,9 @@ def run_integration_test_case(caseFolder):
     print(f"Running case from {caseFolder}")
     print("------------------------------------------------------------------------")
     tests_path = os.path.dirname(os.path.abspath(__file__))
-    execPath = tests_path + "/../exec/"
     # run case
     cmdRunner = [
-        "poetry",
-        "run",
-        execPath + "runner",
+        "runner",
         "-c",
         tests_path + "/" + caseFolder + "/setup/exp.yaml",
         "-p",
@@ -92,9 +89,7 @@ def run_integration_test_case(caseFolder):
     ]
     Popen(cmdRunner, stdout=DEVNULL).wait()
     cmdPostProcessor = [
-        "poetry",
-        "run",
-        execPath + "postProcessor",
+        "post_process",
         "--exp",
         "tempResults",
         "-k",
