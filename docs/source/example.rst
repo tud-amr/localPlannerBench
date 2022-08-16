@@ -31,7 +31,7 @@ example. For that execute
 
 .. code:: bash
 
-   ../../plannerbenchmark/exec/runner -c setup/exp.yaml -p setup/planner.yaml --render
+  runner -c setup/exp.yaml -p setup/planner.yaml --render
 
 When you run the above line, the experiment starts with the configuration files you have
 provided through the command line interface, namely ``-c setup/exp.yaml`` specifies the
@@ -52,7 +52,7 @@ you want to postprocess. When you are ready, you can simple invoke the postProce
 
 .. code:: bash
 
-   ../../plannerbenchmark/exec/postProcessor --exp results/<name_experiment> -k time2Goal pathLength --plot
+   post_process --exp results/<name_experiment> -k time2Goal pathLength --plot
 
 In the above line, the argument ``--exp results/<name_experiment>`` tells the
 postProcessor which experiment to process. Key-performance-indicators are listed behind
