@@ -68,7 +68,7 @@ class TimeToReachGoalMetric(Metric):
     """
 
     def computeMetric(self, data):
-        m = self._params["m"]
+        m = self._params["dimension_obstacle"]
         fks = np.stack([data[name] for name in self._measNames[:m]]).T
         goal = np.stack([data[name] for name in self._measNames[m:-1]]).T
         time_steps= data[self._measNames[-1]]
@@ -90,7 +90,7 @@ class IntegratedErrorMetric(Metric):
     """
 
     def computeMetric(self, data):
-        m = self._params["m"]
+        m = self._params["dimension_obstacle"]
         des_distance = self._params["des_distance"]
         fks = np.stack([data[name] for name in self._measNames[:m]]).T
         goal = np.stack([data[name] for name in self._measNames[m:-1]]).T
@@ -181,7 +181,7 @@ class InverseDynamicClearanceMetric(ClearanceMetric):
         return evaluation
 
     def computeMetric(self, data):
-        m = self._params["m"]
+        m = self._params["dimension_obstacle"]
         n = self._params["n"]
         r_body = self._params["r_body"]
         r_obsts = self._params["r_obsts"]
@@ -222,7 +222,7 @@ class SelfClearanceMetric(Metric):
     """
 
     def computeMetric(self, data):
-        m = self._params["m"]
+        m = self._params["dimension_obstacle"]
         n = self._params["n"]
         r_body = self._params["r_body"]
         pairs = self._params["pairs"]

@@ -41,7 +41,7 @@ def createMetricsFromNames(
     """
     metrics = []
     goal_indices = experiment.primeGoal().indices()
-    m = experiment.obstacles()[0].dim()
+    dimension_obstacle = experiment.obstacles()[0].dim()
     n = experiment.n()
     fksNames = []
     eeNames = []
@@ -93,7 +93,7 @@ def createMetricsFromNames(
                     {
                         'r_body': experiment.rBody(),
                         'r_obsts': r_obsts, 
-                        'm': m,
+                        'dimension_obstacle': dimension_obstacle,
                         'n': experiment.n()
                     }
                 )
@@ -106,7 +106,7 @@ def createMetricsFromNames(
                     {
                         'r_body': experiment.rBody(),
                         'r_obsts': r_obsts, 
-                        'm': m,
+                        'dimension_obstacle': dimension_obstacle,
                         'n': experiment.n()
                     }
                 )
@@ -116,7 +116,7 @@ def createMetricsFromNames(
                 TimeToReachGoalMetric(
                     name,
                     eeNames + goalNames + ["t"],
-                    {"m": m, "des_distance": experiment.primeGoal().epsilon()},
+                    {"dimension_obstacle": dimension_obstacle, "des_distance": experiment.primeGoal().epsilon()},
                 )
             )
         if name == "pathLength":
@@ -126,7 +126,7 @@ def createMetricsFromNames(
                 IntegratedErrorMetric(
                     name,
                     eeNames + goalNames + ["t"],
-                    {"m": m, "des_distance": 10* experiment.primeGoal().epsilon()},
+                    {"dimension_obstacle": dimension_obstacle, "des_distance": 10* experiment.primeGoal().epsilon()},
                 )
             )
     return metrics
