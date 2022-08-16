@@ -28,7 +28,7 @@ class EmptyObstacle():
         return 3
 
 @dataclass
-class MpcConfig(PlannerConfig):
+class ForcesProMpcConfig(PlannerConfig):
     H: int = 10
     dt: float = 0.5
     slack: bool = False
@@ -38,10 +38,10 @@ class MpcConfig(PlannerConfig):
 
 
 
-class MPCPlanner(Planner):
+class ForcesProMpcPlanner(Planner):
     def __init__(self, exp, **kwargs):
         super().__init__(exp, **kwargs)
-        self._config = MpcConfig(**kwargs)
+        self._config = ForcesProMpcConfig(**kwargs)
         """
         self._paramMap, self._npar, self._nx, self._nu, self._ns = getParameterMap(
             self.config.n, self.m(), self.nbObstacles(), self.m(), self.config.slack

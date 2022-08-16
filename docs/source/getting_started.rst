@@ -13,6 +13,7 @@ Pre-requisites
 - gnuplot (``sudo apt install gnuplot``)
 - [Optional] `poetry <https://python-poetry.org/docs/>`_
 - [Optional] `embotech forces pro <https://www.embotech.com/products/forcespro/overview/>`_ for mpc
+- [Optional] `acados_template <https://github.com/acados/acados/tree/master/interfaces/acados_template>`_ for mpc
 
 
 Installation
