@@ -42,6 +42,13 @@ class CasePlotting(object):
                 cwd=createPlotFolder,
                 stdout=subprocess.PIPE,
             ).wait()
+        elif self._experiment.robotType() == "pointRobotUrdf":
+            createPlotFolder = curPath + "plottingPointMassUrdf/"
+            subprocess.Popen(
+                ["./createPlot", self._folder],
+                cwd=createPlotFolder,
+                stdout=subprocess.PIPE,
+            ).wait()
         elif self._experiment.robotType() == "panda":
             createPlotFolder = curPath + "plottingPanda/"
             subprocess.Popen(

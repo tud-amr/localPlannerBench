@@ -79,6 +79,6 @@ class SlimPostProcessor(object):
             subprocess.Popen(["xdg-open", folder], stdout=subprocess.PIPE)
 
 
-if __name__ == "__main__":
+def main():
     pp = SlimPostProcessor()
     pp.run()

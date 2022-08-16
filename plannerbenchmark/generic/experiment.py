@@ -12,6 +12,7 @@ import urdfenvs.panda_reacher
 import urdfenvs.mobile_reacher
 import urdfenvs.albert_reacher
 import urdfenvs.boxer_robot
+import urdfenvs.point_robot_urdf
 
 from forwardkinematics.fksCommon.fk_creator import FkCreator
 from MotionPlanningEnv.obstacleCreator import ObstacleCreator
