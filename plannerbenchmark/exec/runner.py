@@ -154,6 +154,10 @@ class Runner(object):
     def run(self):
         print("start run")
         completedRuns = 0
+        print("Composing the planner")
+        start=time.perf_counter()
+        self.setPlanner()
+        print(f"Planner composed in {np.round(time.perf_counter()-start, decimals=2)} sec")
         while completedRuns < self._numberRuns:
             self._experiment.shuffle(self._random_obst, self._random_init, self._random_goal)
             try:
@@ -162,10 +166,6 @@ class Runner(object):
             except ExperimentInfeasible as e:
                 print("Case not feasible %s" % str(e))
                 continue
-            print("Composing the planner")
-            start=time.perf_counter()
-            self.setPlanner()
-            print(f"Planner composed in {np.round(time.perf_counter()-start, decimals=2)} sec")
             q0, q0dot = self._experiment.initState()
             timeStamp = "{:%Y%m%d_%H%M%S}".format(datetime.datetime.now())
             if self._compare:
