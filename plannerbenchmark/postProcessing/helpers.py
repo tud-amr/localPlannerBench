@@ -116,7 +116,7 @@ def createMetricsFromNames(
                 TimeToReachGoalMetric(
                     name,
                     eeNames + goalNames + ["t"],
-                    {"dimension_obstacle": dimension_obstacle, "des_distance": experiment.primeGoal().epsilon()},
+                    {"goal_indices": goal_indices, "des_distance": experiment.primeGoal().epsilon()},
                 )
             )
         if name == "pathLength":

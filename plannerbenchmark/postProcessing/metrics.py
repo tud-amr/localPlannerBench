@@ -68,9 +68,9 @@ class TimeToReachGoalMetric(Metric):
     """
 
     def computeMetric(self, data):
-        m = self._params["dimension_obstacle"]
-        fks = np.stack([data[name] for name in self._measNames[:m]]).T
-        goal = np.stack([data[name] for name in self._measNames[m:-1]]).T
+        dimension_goal = len(self._params["goal_indices"])
+        fks = np.stack([data[name] for name in self._measNames[:dimension_goal]]).T
+        goal = np.stack([data[name] for name in self._measNames[dimension_goal:-1]]).T
         time_steps= data[self._measNames[-1]]
         des_distance = self._params["des_distance"]
         distances = computeDistances(fks, goal)
