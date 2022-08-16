@@ -13,10 +13,13 @@ forwardkinematics = "^1.0.4"
 #fabrics = {path = "../../../../code/fabrics", optional = true}
 robotmpcs = {version = "^0.1.4", optional = true}
 
-
 [tool.poetry.extras]
 fabric = ['fabrics']
 mpc = ['robotmpcs']
+
+[tool.poetry.scripts]
+runner = 'plannerbenchmark.exec.runner:newmain'
+post_process = 'plannerbenchmark.exec.post_processor:main'
 
 [tool.poetry.dev-dependencies]
 black = "^22.3.0"

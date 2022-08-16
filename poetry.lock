@@ -485,8 +485,8 @@ optional = false
 python-versions = ">=3.6"
 
 [package.extras]
-docs = ["Sphinx (>=4)", "furo (>=2021.7.5b38)", "proselint (>=0.10.2)", "sphinx-autodoc-typehints (>=1.12)"]
-test = ["appdirs (==1.4.4)", "pytest (>=6)", "pytest-cov (>=2.7)", "pytest-mock (>=3.6)"]
+test = ["pytest-mock (>=3.6)", "pytest-cov (>=2.7)", "pytest (>=6)", "appdirs (==1.4.4)"]
+docs = ["sphinx-autodoc-typehints (>=1.12)", "proselint (>=0.10.2)", "furo (>=2021.7.5b38)", "Sphinx (>=4)"]
 
 [[package]]
 name = "pluggy"
@@ -566,11 +566,14 @@ python-versions = "*"
 
 [[package]]
 name = "pygments"
-version = "2.12.0"
+version = "2.13.0"
 description = "Pygments is a syntax highlighting package written in Python."
 category = "dev"
 optional = false
 python-versions = ">=3.6"
+
+[package.extras]
+plugins = ["importlib-metadata"]
 
 [[package]]
 name = "pylint"
@@ -686,7 +689,7 @@ six = ">=1.5"
 
 [[package]]
 name = "pytz"
-version = "2022.1"
+version = "2022.2.1"
 description = "World timezone definitions, modern and historical"
 category = "dev"
 optional = false
@@ -911,7 +914,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "trimesh"
-version = "3.13.0"
+version = "3.13.4"
 description = "Import, export, process, analyze and view triangular meshes."
 category = "main"
 optional = false
@@ -921,9 +924,9 @@ python-versions = "*"
 numpy = "*"
 
 [package.extras]
-all = ["chardet", "shapely", "lxml", "pyglet", "xatlas", "glooey", "sympy", "scikit-image", "mapbox-earcut", "svg.path", "python-fcl", "meshio", "msgpack", "pycollada", "setuptools", "jsonschema", "psutil", "networkx", "pillow", "triangle", "rtree", "requests", "colorlog", "scipy", "xxhash"]
-easy = ["setuptools", "pycollada", "shapely", "chardet", "lxml", "jsonschema", "pyglet", "sympy", "svg.path", "networkx", "pillow", "rtree", "requests", "msgpack", "colorlog", "scipy", "xxhash"]
-test = ["pyinstrument", "pytest-cov", "pytest", "ezdxf", "coveralls"]
+test = ["ezdxf", "pyinstrument", "pytest-cov", "coveralls", "pytest"]
+easy = ["lxml", "xxhash", "pillow", "shapely", "rtree", "scipy", "chardet", "colorlog", "svg.path", "requests", "networkx", "jsonschema", "setuptools", "pycollada", "msgpack", "pyglet", "sympy"]
+all = ["lxml", "xxhash", "pycollada", "scikit-image", "chardet", "svg.path", "requests", "networkx", "glooey", "pyglet", "mapbox-earcut", "xatlas", "pillow", "shapely", "rtree", "scipy", "colorlog", "psutil", "python-fcl", "triangle", "jsonschema", "setuptools", "meshio", "msgpack", "sympy"]
 
 [[package]]
 name = "typed-ast"
@@ -1537,8 +1540,8 @@ pyglet = [
     {file = "pyglet-1.5.26.zip", hash = "sha256:ee8c5e0b5b87df84188e20e552982eba8da00944b4c5560f1cfdd5c9714d19b0"},
 ]
 pygments = [
-    {file = "Pygments-2.12.0-py3-none-any.whl", hash = "sha256:dc9c10fb40944260f6ed4c688ece0cd2048414940f1cea51b8b226318411c519"},
-    {file = "Pygments-2.12.0.tar.gz", hash = "sha256:5eb116118f9612ff1ee89ac96437bb6b49e8f04d8a13b514ba26f620208e26eb"},
+    {file = "Pygments-2.13.0-py3-none-any.whl", hash = "sha256:f643f331ab57ba3c9d89212ee4a2dabc6e94f117cf4eefde99a0574720d14c42"},
+    {file = "Pygments-2.13.0.tar.gz", hash = "sha256:56a8508ae95f98e2b9bdf93a6be5ae3f7d8af858b43e02c5a2ff083726be40c1"},
 ]
 pylint = [
     {file = "pylint-2.13.9-py3-none-any.whl", hash = "sha256:705c620d388035bdd9ff8b44c5bcdd235bfb49d276d488dd2c8ff1736aa42526"},
@@ -1571,8 +1574,8 @@ python-dateutil = [
     {file = "python_dateutil-2.8.2-py2.py3-none-any.whl", hash = "sha256:961d03dc3453ebbc59dbdea9e4e11c5651520a876d0f4db161e8674aae935da9"},
 ]
 pytz = [
-    {file = "pytz-2022.1-py2.py3-none-any.whl", hash = "sha256:e68985985296d9a66a881eb3193b0906246245294a881e7c8afe623866ac6a5c"},
-    {file = "pytz-2022.1.tar.gz", hash = "sha256:1e760e2fe6a8163bc0b3d9a19c4f84342afa0a2affebfaa84b01b978a02ecaa7"},
+    {file = "pytz-2022.2.1-py2.py3-none-any.whl", hash = "sha256:220f481bdafa09c3955dfbdddb7b57780e9a94f5127e35456a48589b9e0c0197"},
+    {file = "pytz-2022.2.1.tar.gz", hash = "sha256:cea221417204f2d1a2aa03ddae3e867921971d0d76f14d87abb4414415bbdcf5"},
 ]
 pyyaml = [
     {file = "PyYAML-6.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:d4db7c7aef085872ef65a8fd7d6d09a14ae91f691dec3e87ee5ee0539d516f53"},
@@ -1697,8 +1700,8 @@ tomli = [
     {file = "tomli-1.2.3.tar.gz", hash = "sha256:05b6166bff487dc068d322585c7ea4ef78deed501cc124060e0f238e89a9231f"},
 ]
 trimesh = [
-    {file = "trimesh-3.13.0-py3-none-any.whl", hash = "sha256:df556f0fda5bd887eb546bb1a2c135f6048ee3a0aaacbd8819df32ecc977915b"},
-    {file = "trimesh-3.13.0.tar.gz", hash = "sha256:8667e3b323b21495f0fc1d3c83f66474def8eaf2b966098d42aa3cd600d4400d"},
+    {file = "trimesh-3.13.4-py3-none-any.whl", hash = "sha256:3d6acda50a4571390a97b0089e39d9dccbb40e0991421e1ef921c4d0717979bd"},
+    {file = "trimesh-3.13.4.tar.gz", hash = "sha256:3531e1e645aedcdae2f98a22f72be41e55910f7b2562b6a4b4a7dc6a1ec2118f"},
 ]
 typed-ast = [
     {file = "typed_ast-1.5.4-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:669dd0c4167f6f2cd9f57041e03c3c2ebf9063d0757dc89f79ba1daa2bfca9d4"},
