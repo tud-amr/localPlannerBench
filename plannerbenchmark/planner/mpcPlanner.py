@@ -8,7 +8,6 @@ from dataclasses import dataclass, field
 from typing import Dict
 
 from plannerbenchmark.generic.planner import Planner, PlannerConfig
-from plannerbenchmark.planner.mpc.parameterMap import getParameterMap
 
 path_name = (
     os.path.dirname(os.path.realpath(__file__))
@@ -60,26 +59,26 @@ class MPCPlanner(Planner):
         ).replace("int", "1nt")
         if not self.config.slack:
             self._solverFile += "_noSlack"
-        with open(self._solverFile + "/paramMap.yaml", "r") as stream:
-            try:
-                self._paramMap = yaml.safe_load(stream)
-            except yaml.YAMLError as exc:
-                print(exc)
-        with open(self._solverFile + "/properties.yaml", "r") as stream:
-            try:
-                self._properties = yaml.safe_load(stream)
-            except yaml.YAMLError as exc:
-                print(exc)
-        self._nx = self._properties['nx']
-        self._nu = self._properties['nu']
-        self._ns = self._properties['ns']
-        self._npar = self._properties['npar']
+        self.load_solver()
+
+    def load_solver(self):
+        print("Loading solver %s" % self._solverFile)
         try:
-            print("Loading solver %s" % self._solverFile)
+            with open(self._solverFile + "/paramMap.yaml", "r") as stream:
+                self._paramMap = yaml.safe_load(stream)
+            with open(self._solverFile + "/properties.yaml", "r") as stream:
+                self._properties = yaml.safe_load(stream)
             self._solver = forcespro.nlp.Solver.from_directory(self._solverFile)
+        except FileNotFoundError as file_not_found_error:
+            print("Solver has not been generated. Consider creating it.")
+            raise file_not_found_error
         except Exception as e:
             print("FAILED TO LOAD SOLVER")
             raise e
+        self._npar = self._properties['npar']
+        self._nx = self._properties['nx']
+        self._nu = self._properties['nu']
+        self._ns = self._properties['ns']
 
     def reset(self):
         print("RESETTING PLANNER")
