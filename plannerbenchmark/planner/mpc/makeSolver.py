@@ -1,3 +1,5 @@
+import logging
+
 from robotmpcs.models.pointRobotMpcModel import PointRobotMpcModel
 from robotmpcs.models.planarArmMpcModel import PlanarArmMpcModel
 from robotmpcs.models.boxerMpcModel import BoxerMpcModel
@@ -23,7 +25,7 @@ def createSolver():
         n = 2
         mpcModel = BoxerMpcModel(N)
     else:
-        print(f"Solver for robot type {robotType} not available yet")
+        logging.warn(f"Solver for robot type {robotType} not available yet")
         
     if slack:
         mpcModel.setSlack()

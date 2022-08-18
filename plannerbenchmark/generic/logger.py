@@ -55,7 +55,7 @@ class Logger(object):
         folderPath = curPath + "/" + self._planner.plannerType() + "_" + self._timeStamp
         while os.path.isdir(folderPath):
             folderPath = folderPath[:-2] + str(int(folderPath[-2:]) + 1)
-        print("Saving results to : %s" % folderPath)
+        logging.info("Saving results to : {folderPath}")
         os.makedirs(folderPath)
         self.saveResult(folderPath)
         self._planner.save(folderPath)
