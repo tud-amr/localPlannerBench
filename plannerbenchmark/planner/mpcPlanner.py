@@ -131,7 +131,7 @@ class MPCPlanner(Planner):
 
     def updateDynamicObstacles(self, obstArray):
         nbDynamicObsts = int(obstArray.size / 3 / self.m())
-        for j in range(self.config.nbObt):
+        for j in range(self.config.nbObst):
             if j < nbDynamicObsts:
                 obstPos = obstArray[:self.m()]
                 obstVel = obstArray[self.m():2*self.m()]
