@@ -3,6 +3,7 @@ from subprocess import Popen, DEVNULL
 import yaml
 import numpy as np
 import re
+import logging
 import pytest
 
 
