@@ -71,7 +71,7 @@ class MPCPlanner(Planner):
                 self._properties = yaml.safe_load(stream)
             self._solver = forcespro.nlp.Solver.from_directory(self._solverFile)
         except FileNotFoundError as file_not_found_error:
-            logging.error("Solver has not been generated. Consider creating it.")
+            logging.error("Solver has not been generated. Consider creating it using `makeSolver.py`")
             raise file_not_found_error
         except Exception as e:
             logging.error("Failed to load solver")
