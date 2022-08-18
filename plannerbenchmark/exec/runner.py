@@ -1,12 +1,9 @@
 #! /usr/bin/env python3
 
 import argparse
-import subprocess
 import datetime
 import time
 import os
-import sys
-import warnings
 import numpy as np
 import signal
 import logging
@@ -27,15 +24,6 @@ except Exception as e:
     logging.warning(f"The forces-pro mpc planner cannot be used, {e}")
 
 log_levels = {"WARNING": 30, "INFO": 20, "DEBUG": 10, "QUIET": 100}
-
-
-def blockPrint():
-    sys.stdout = open(os.devnull, 'w')
-    warnings.filterwarnings('ignore')
-
-
-def enablePrint():
-    sys.stdout = sys.__stdout__
 
 
 class Runner(object):
@@ -165,10 +153,6 @@ class Runner(object):
     def run(self):
         logging.info("Starting runner...")
         completedRuns = 0
-        logging.info("Composing the planner")
-        start=time.perf_counter()
-        self.setPlanner()
-        logging.info(f"Planner composed in {np.round(time.perf_counter()-start, decimals=2)} sec")
         while completedRuns < self._numberRuns:
             self._experiment.shuffle(self._random_obst, self._random_init, self._random_goal)
             try:
@@ -177,6 +161,10 @@ class Runner(object):
             except ExperimentInfeasible as e:
                 logging.warn(f"Case not feasible, {e}")
                 continue
+            logging.info("Composing the planner")
+            start=time.perf_counter()
+            self.setPlanner()
+            logging.info(f"Planner composed in {np.round(time.perf_counter()-start, decimals=2)} sec")
             q0, q0dot = self._experiment.initState()
             timeStamp = "{:%Y%m%d_%H%M%S}".format(datetime.datetime.now())
             if self._compare:
