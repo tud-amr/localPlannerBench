@@ -22,22 +22,19 @@ class AcadosMpcConfig(PlannerConfig):
     ws_x: List[float] = field(default_factory=lambda: [-15.0, 15.0])    # m
     ws_y: List[float] = field(default_factory=lambda: [-16.0, 16.0])      # m
     
-    robot_min_acc: float = -1.0
-    robot_max_acc: float = 1.0
-    robot_min_vel: float = -1.0
-    robot_max_vel: float = 1.0
+    robot_min_acc: float = -3.0
+    robot_max_acc: float = 3.0
+    robot_min_vel: float = -3.0
+    robot_max_vel: float = 3.0
     robot_max_yawrate: float = 0.26
     robot_min_yawrate: float = -0.26
 
-    # MPC settings
-    N: int = 30 # horizon length
-    nx: int = 4 # state dimension 
-    nu: int = 2 # control dimension 
+    N: int = 20 # horizon length
 
     # MPC cost terms weights, can be real time param
-    w_pos: float = 2.0
-    w_input: float = 0.02
-    w_coll: float = 0.06
+    w_pos: float = 1.0
+    w_input: float = 0.01
+    w_coll: float = 0.10
 
 
 class AcadosMpcPlanner(Planner):
@@ -45,7 +42,8 @@ class AcadosMpcPlanner(Planner):
         super().__init__(exp, **kwargs)
         self._config = AcadosMpcConfig(**kwargs)
 
-        self._init_problem()
+        # NOTE: Initializing solver on first call to self.computeAction, because self._exp is not updated yet with random obstacles
+        self._initialized = False
 
         self._mpc_feasible = False
 
@@ -62,9 +60,7 @@ class AcadosMpcPlanner(Planner):
         pass
 
     def setObstacles(self, obsts, r_body):
-        # NOTE: reinit problem, since the obstacle has changed. 
-        # NOTE: only 1 obstacle is supported
-        self._init_problem()
+        pass
 
     def setSelfCollisionAvoidance(self, r_body):
         pass
@@ -73,16 +69,17 @@ class AcadosMpcPlanner(Planner):
         pass
 
     def setGoal(self, goal):
-        # NOTE: reinit problem, since the goal has changed. 
-        self._init_problem()
+        pass
 
     def concretize(self):
         pass
 
     def computeAction(self, *args):
-        print(args)
+        if not self._initialized:
+            self._init_problem()
+            self._initialized = True
         robot_state_current = np.array(args).flatten() # [x, y , vx, vy]
-        print(f"STATE {robot_state_current}")
+        # print(f"STATE {robot_state_current}")
 
         # Force solver initial state to be the current robot state
         self.acados_ocp_solver.constraints_set(0, 'lbx', np.array(robot_state_current))
@@ -92,11 +89,14 @@ class AcadosMpcPlanner(Planner):
             self._mpc_x_plan = np.tile(np.array(robot_state_current).reshape((-1, 1)), (1, self._config.N))
 
         if not hasattr(self, "_mpc_u_plan"):
-            self._mpc_u_plan = np.zeros((self._config.nu, self._config.N))
+            self._mpc_u_plan = np.zeros((self._exp.n(), self._config.N))
 
-        x_traj_init = np.concatenate((self._mpc_x_plan[:, 1:], self._mpc_x_plan[:, -1:]), axis=1)
-        u_traj_init = np.concatenate((self._mpc_u_plan[:, 1:], self._mpc_u_plan[:, -1:]), axis=1)
-        print(x_traj_init.shape)
+        if self._mpc_feasible:
+            x_traj_init = np.concatenate((self._mpc_x_plan[:, 1:], self._mpc_x_plan[:, -1:]), axis=1)
+            u_traj_init = np.concatenate((self._mpc_u_plan[:, 1:], self._mpc_u_plan[:, -1:]), axis=1)
+        else:
+            x_traj_init = np.tile(np.array(robot_state_current).reshape((-1, 1)), (1, self._config.N))
+            u_traj_init = self._mpc_u_plan = np.zeros((self._exp.n(), self._config.N))
 
         for iStage in range(0, self._config.N):
             self.acados_ocp_solver.set(iStage, 'x', x_traj_init[:, iStage])
@@ -107,7 +107,7 @@ class AcadosMpcPlanner(Planner):
 
         # NOTE: In case of solver infeasibility, keeps previous action.
         if status != 0:     # infeasible 
-            print('acados returned status {} in closed loop iteration.'.format(status))
+            # print('acados returned status {} in closed loop iteration.'.format(status))
             self._mpc_feasible = False 
             # use previous action
             return list(self._mpc_u_plan[:, 0]) 
@@ -120,7 +120,7 @@ class AcadosMpcPlanner(Planner):
         self._mpc_feasible = True 
         robot_control_current = list(self._mpc_u_plan[:, 0])
 
-        print(f"ACTION {robot_control_current}")
+        # print(f"ACTION {robot_control_current}")
         return robot_control_current
 
 
