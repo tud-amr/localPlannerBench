@@ -50,6 +50,14 @@ The virtual environment is entered by
 
     poetry shell
 
+If planners with limited access (fabrics) or required user installation
+are wanted, their path has to be specified with
+
+.. code:: bash
+
+   poetry add <relative/path/to/fabrics>
+   poetry add <relative/path/to/acados_template>
+
 Tutorial
 ------------
 
