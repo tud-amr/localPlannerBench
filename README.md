@@ -89,7 +89,7 @@ The following is a very simple example case.
 
 Run an experiments:
 
-Experiments should be added in separate folder in `experiments`. One
+Experiments should be added in separate folder in `examples`. One
 very simple example can be found in this folder. Note that you need to
 active your poetry shell if you have installed the package using poetry
 by
