@@ -4,6 +4,7 @@ from typing import List
 import matplotlib.pyplot as plt 
 import matplotlib.patches as mpatches 
 from matplotlib import markers
+import logging
 
 from dataclasses import dataclass, field
 import numpy as np
@@ -26,8 +27,6 @@ class AcadosMpcConfig(PlannerConfig):
     robot_max_acc: float = 3.0
     robot_min_vel: float = -3.0
     robot_max_vel: float = 3.0
-    robot_max_yawrate: float = 0.26
-    robot_min_yawrate: float = -0.26
 
     N: int = 20 # horizon length
 
@@ -79,7 +78,7 @@ class AcadosMpcPlanner(Planner):
             self._init_problem()
             self._initialized = True
         robot_state_current = np.array(args).flatten() # [x, y , vx, vy]
-        # print(f"STATE {robot_state_current}")
+        logging.debug(f"STATE {robot_state_current}")
 
         # Force solver initial state to be the current robot state
         self.acados_ocp_solver.constraints_set(0, 'lbx', np.array(robot_state_current))
@@ -120,7 +119,7 @@ class AcadosMpcPlanner(Planner):
         self._mpc_feasible = True 
         robot_control_current = list(self._mpc_u_plan[:, 0])
 
-        # print(f"ACTION {robot_control_current}")
+        logging.debug(f"ACTION {robot_control_current}")
         return robot_control_current
 
 
