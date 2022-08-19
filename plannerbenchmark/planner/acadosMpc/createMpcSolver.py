@@ -70,6 +70,7 @@ def create_mpc_solver(pr, exp):
     ocp.solver_options.qp_solver = 'PARTIAL_CONDENSING_HPIPM'
     ocp.solver_options.qp_solver_iter_max = 200  
     ocp.solver_options.qp_solver_warm_start = 1 
+    # ocp.solver_options.levenberg_marquardt = 0.
     # code generation options
     ocp.code_export_directory = f"{os.path.dirname(os.path.abspath(__file__))}/point_mass_mpc_c_generated_code"
     ocp.solver_options.print_level = 0

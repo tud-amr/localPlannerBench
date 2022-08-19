@@ -23,17 +23,17 @@ class AcadosMpcConfig(PlannerConfig):
     ws_x: List[float] = field(default_factory=lambda: [-15.0, 15.0])    # m
     ws_y: List[float] = field(default_factory=lambda: [-16.0, 16.0])      # m
     
-    robot_min_acc: float = -3.0
-    robot_max_acc: float = 3.0
-    robot_min_vel: float = -3.0
-    robot_max_vel: float = 3.0
+    robot_min_acc: float = -2.0
+    robot_max_acc: float = 2.0
+    robot_min_vel: float = -2.0
+    robot_max_vel: float = 2.0
 
     N: int = 20 # horizon length
 
     # MPC cost terms weights, can be real time param
     w_pos: float = 1.0
-    w_input: float = 0.01
     w_coll: float = 0.10
+    w_input: float = 0.01
 
 
 class AcadosMpcPlanner(Planner):
