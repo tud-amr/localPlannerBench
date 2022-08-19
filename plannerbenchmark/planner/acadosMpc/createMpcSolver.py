@@ -38,16 +38,17 @@ def create_mpc_solver(pr, exp):
     ocp.constraints.idxbu = np.array(range(exp.n()))
 
     # Set path constraints bound
-    ocp.constraints.lh = np.zeros(len(exp.obstacles()))
-    ocp.constraints.uh = np.ones(len(exp.obstacles()))*100
+    nc = ocp.model.con_h_expr.shape[0]
+    ocp.constraints.lh = np.zeros(nc)
+    ocp.constraints.uh = np.ones(nc)*100
+
     # Slack for constraints
     # ocp.constraints.idxsh = np.array([0])
-    ns = ocp.model.con_h_expr.shape[0]
-    nsh = ns
-    ocp.cost.zl = 100 * np.ones((ns,))
-    ocp.cost.zu = 100 * np.ones((ns,))
-    ocp.cost.Zl = 1 * np.ones((ns,))
-    ocp.cost.Zu = 1 * np.ones((ns,))
+    nsh = nc
+    ocp.cost.zl = 100 * np.ones((nc,))
+    ocp.cost.zu = 100 * np.ones((nc,))
+    ocp.cost.Zl = 1 * np.ones((nc,))
+    ocp.cost.Zu = 1 * np.ones((nc,))
     ocp.constraints.lsh = np.zeros(nsh)
     ocp.constraints.ush = np.zeros(nsh)
     ocp.constraints.idxsh = np.array(range(nsh))
