@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import os
+import logging
 import subprocess
 
 from plannerbenchmark.postProcessing.caseEvaluation import CaseEvaluation
@@ -11,6 +12,7 @@ from plannerbenchmark.postProcessing.seriesPlotting import SeriesPlotting
 from plannerbenchmark.postProcessing.helpers import createMetricsFromNames
 from plannerbenchmark.postProcessing.seriesComparisonPlotting import SeriesComparisonPlotting
 
+log_levels = {"WARNING": 30, "INFO": 20, "DEBUG": 10, "QUIET": 100}
 
 class SlimPostProcessor(object):
 
@@ -34,6 +36,14 @@ class SlimPostProcessor(object):
             help="List of all kpis/metrics to be evaluated",
             required=True
         )
+        self._parser.add_argument(
+                "--log-level",
+                "-v",
+                "-ll",
+                type=str,
+                default="INFO",
+                help="Set logging level (Choose between DEBUG, INFO, WARNING, QUIET)"
+        )
         self._parser.add_argument("--latest", dest="latest", action="store_true")
         self._parser.set_defaults(latest=False)
         self._parser.add_argument("--series", dest="series", action="store_true")
@@ -45,6 +55,7 @@ class SlimPostProcessor(object):
 
     def run(self):
         args = self._parser.parse_args()
+        logging.basicConfig(level=log_levels[args.log_level])
         kpis = sorted(args.kpis)
         nbMetrics = len(kpis)
         folder = os.getcwd() + "/" + args.expFolder

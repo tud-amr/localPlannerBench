@@ -3,6 +3,7 @@ import yaml
 import os
 import sys
 import forcespro
+import logging
 
 from dataclasses import dataclass, field
 from typing import Dict
@@ -62,7 +63,7 @@ class ForcesProMpcPlanner(Planner):
         self.load_solver()
 
     def load_solver(self):
-        print("Loading solver %s" % self._solverFile)
+        logging.info(f"Loading solver {self._solverFile}")
         try:
             with open(self._solverFile + "/paramMap.yaml", "r") as stream:
                 self._paramMap = yaml.safe_load(stream)
@@ -70,10 +71,10 @@ class ForcesProMpcPlanner(Planner):
                 self._properties = yaml.safe_load(stream)
             self._solver = forcespro.nlp.Solver.from_directory(self._solverFile)
         except FileNotFoundError as file_not_found_error:
-            print("Solver has not been generated. Consider creating it.")
+            logging.error("Solver has not been generated. Consider creating it using `makeSolver.py`")
             raise file_not_found_error
         except Exception as e:
-            print("FAILED TO LOAD SOLVER")
+            logging.error("Failed to load solver")
             raise e
         self._npar = self._properties['npar']
         self._nx = self._properties['nx']
@@ -81,7 +82,7 @@ class ForcesProMpcPlanner(Planner):
         self._ns = self._properties['ns']
 
     def reset(self):
-        print("RESETTING PLANNER")
+        logging.info("Resetting mpc planner.")
         self._x0 = np.zeros(shape=(self.config.H, self._nx + self._nu + self._ns))
         self._xinit = np.zeros(self._nx)
         if self.config.slack:
@@ -130,7 +131,7 @@ class ForcesProMpcPlanner(Planner):
 
     def updateDynamicObstacles(self, obstArray):
         nbDynamicObsts = int(obstArray.size / 3 / self.m())
-        for j in range(self.config.nbObt):
+        for j in range(self.config.nbObst):
             if j < nbDynamicObsts:
                 obstPos = obstArray[:self.m()]
                 obstVel = obstArray[self.m():2*self.m()]
@@ -163,7 +164,7 @@ class ForcesProMpcPlanner(Planner):
 
     def setGoal(self, goal):
         if len(goal.subGoals()) > 1:
-            print("WARNING: Only single goal supported in mpc")
+            logging.warn("Only single goal supported in mpc")
         primeGoal = goal.primeGoal()
         for i in range(self.config.H):
             for j in range(self.m()):
@@ -189,7 +190,6 @@ class ForcesProMpcPlanner(Planner):
             self._x0[i][0 : self._nx] = xinit
 
     def solve(self, ob):
-        # print("Observation : " , ob[0:self._nx])
         self._xinit = ob[0 : self._nx]
         if ob.size > self._nx:
             self.updateDynamicObstacles(ob[self._nx:])
@@ -229,7 +229,7 @@ class ForcesProMpcPlanner(Planner):
             #print('xinit : ', self._xinit)
         output, exitflag, info = self._solver.solve(problem)
         if exitflag < 0:
-            print(exitflag)
+            logging.warn(f"MPC solver raised an error flag {exitflag}")
         if  self.config.H < 10:
             key1 = 'x1'
         elif self.config.H > 9 and self.config.H < 100:
@@ -240,9 +240,9 @@ class ForcesProMpcPlanner(Planner):
         if self.config.slack:
             self._slack = output[key1][self._nx]
             if self._slack > 1e-3:
-                print("slack : ", self._slack)
-        # print('action : ', action)
-        # print("prediction : ", output["x02"][0:self._nx])
+                logging.warn(f"Slack variable higher than safe threshold: {self._slack}")
+        logging.debug(f"action : {action}")
+        logging.debug(f"prediction : {output['x02'][0:self._nx]}")
         self.shiftHorizon(output, ob)
         return action, info
 

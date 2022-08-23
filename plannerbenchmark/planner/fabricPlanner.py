@@ -2,6 +2,7 @@
 from dataclasses import dataclass, field
 from typing import Dict
 import numpy as np
+import logging
 
 # Dependencies for this specific planner
 from fabrics.planner.parameterized_planner import ParameterizedFabricPlanner
@@ -36,6 +37,8 @@ class FabricPlanner(Planner):
         super().__init__(exp, **kwargs)
         self._config = FabricConfig(**kwargs)
         self.reset()
+
+    def reset(self):
         base_energy: str = (
             "0.5 * sym('base_inertia') * ca.dot(xdot, xdot)"
         )
@@ -75,6 +78,7 @@ class FabricPlanner(Planner):
         self._collision_links = [i for i in range(1, self.config.n+1)]
         self._number_obstacles = 0
         self._dynamic_goal = False
+
 
     def initialize_runtime_arguments(self):
         self._runtime_arguments = {}
@@ -161,4 +165,7 @@ class FabricPlanner(Planner):
     def computeAction(self, *args):
         self.adapt_runtime_arguments(args)
         action = self._planner.compute_action(**self._runtime_arguments)
+        if np.linalg.norm(action) < 1e-5:
+            action *= 0
+        logging.debug(f"Action computed by fabric: {action}")
         return action

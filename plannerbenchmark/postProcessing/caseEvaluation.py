@@ -1,4 +1,5 @@
 import csv
+import logging
 import numpy as np
 import yaml
 import re
@@ -111,7 +112,7 @@ class CaseEvaluation(object):
             )
             self._kpis["success"] = successMetric.computeMetric(self._res)
         except KeyError:
-            print("Success assumed.")
+            logging.info("Reaching or clearance metric not found: Success assumed.")
             self._kpis["success"] = {'short': 1}
 
     def process(self) -> None:

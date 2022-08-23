@@ -3,6 +3,7 @@ from subprocess import Popen, DEVNULL
 import yaml
 import numpy as np
 import re
+import logging
 import pytest
 
 
@@ -73,9 +74,9 @@ def verify_resFile(caseFolder):
 
 
 def run_integration_test_case(caseFolder):
-    print("\n------------------------------------------------------------------------")
-    print(f"Running case from {caseFolder}")
-    print("------------------------------------------------------------------------")
+    logging.info("\n------------------------------------------------------------------------")
+    logging.info(f"Running case from {caseFolder}")
+    logging.info("------------------------------------------------------------------------")
     tests_path = os.path.dirname(os.path.abspath(__file__))
     # run case
     cmdRunner = [
