@@ -73,7 +73,7 @@ limits:
     - 3.14
     - 2.0
     - 2.0
-r_body: 0.51
+r_body: 0.10
 obstacles:
   obst0:
     type: sphereObstacle

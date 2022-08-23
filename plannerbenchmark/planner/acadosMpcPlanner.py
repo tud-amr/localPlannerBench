@@ -6,6 +6,7 @@ import matplotlib.patches as mpatches
 from matplotlib import markers
 import logging
 
+from forwardkinematics.fksCommon.fk_creator import FkCreator
 from dataclasses import dataclass, field
 import numpy as np
 import casadi as cd 
@@ -18,15 +19,11 @@ from plannerbenchmark.planner.acadosMpc.createMpcSolver import create_mpc_solver
 @dataclass
 class AcadosMpcConfig(PlannerConfig):
     # Problem setup 
-    # workspace 
-    # TODO: Read the workspace limits from the experiment config instead
-    ws_x: List[float] = field(default_factory=lambda: [-15.0, 15.0])    # m
-    ws_y: List[float] = field(default_factory=lambda: [-16.0, 16.0])      # m
-    
-    robot_min_acc: float = -2.0
-    robot_max_acc: float = 2.0
-    robot_min_vel: float = -2.0
-    robot_max_vel: float = 2.0
+    # TODO: these should be part of experiment config
+    robot_min_acc: float = -1.0
+    robot_max_acc: float = 1.0
+    robot_min_vel: float = -1.0
+    robot_max_vel: float = 1.0
 
     N: int = 20 # horizon length
 
@@ -34,6 +31,8 @@ class AcadosMpcConfig(PlannerConfig):
     w_pos: float = 1.0
     w_coll: float = 0.10
     w_input: float = 0.01
+    w_joints: List[float] = field(default_factory=lambda: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+    w_vref: float = 0.3
 
 
 class AcadosMpcPlanner(Planner):
@@ -77,6 +76,7 @@ class AcadosMpcPlanner(Planner):
         if not self._initialized:
             self._init_problem()
             self._initialized = True
+
         robot_state_current = np.array(args).flatten() # [x, y , vx, vy]
         logging.debug(f"STATE {robot_state_current}")
 
@@ -109,7 +109,7 @@ class AcadosMpcPlanner(Planner):
             # print('acados returned status {} in closed loop iteration.'.format(status))
             self._mpc_feasible = False 
             # use previous action
-            return list(self._mpc_u_plan[:, 0]) 
+            return np.array(self._mpc_u_plan[:, 0]) 
 
         # Obtain solution
         for iStage in range(0, self._config.N):
@@ -120,7 +120,7 @@ class AcadosMpcPlanner(Planner):
         robot_control_current = list(self._mpc_u_plan[:, 0])
 
         logging.debug(f"ACTION {robot_control_current}")
-        return robot_control_current
+        return np.array(robot_control_current)
 
 
 

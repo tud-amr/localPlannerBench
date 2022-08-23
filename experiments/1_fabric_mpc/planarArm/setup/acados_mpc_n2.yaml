@@ -1,4 +1,5 @@
 name: AcadosMpc
-w_pos: 0.08
-w_input: 0.02
-w_coll: 0.00
+w_pos: 0.30
+w_input: 0.01
+w_coll: 0.05
+N: 20

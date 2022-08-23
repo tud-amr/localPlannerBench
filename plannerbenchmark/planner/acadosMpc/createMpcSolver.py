@@ -1,6 +1,7 @@
 import numpy as np
 from plannerbenchmark.planner.acadosMpc.pointMassModel import acados_point_mass_model
 from plannerbenchmark.planner.acadosMpc.nLinkModel import acados_n_link_model
+from plannerbenchmark.planner.acadosMpc.pandaArmModel import acados_panda_arm_model
 from acados_template import AcadosOcp, AcadosOcpSolver
 
 import os
@@ -12,6 +13,8 @@ def create_mpc_solver(pr, exp):
         model_ac = acados_point_mass_model(pr, exp)
     elif exp.envName() == "nLink-reacher-acc-v0":
         model_ac = acados_n_link_model(pr, exp)
+    elif exp.envName() == "panda-reacher-acc-v0":
+        model_ac = acados_panda_arm_model(pr, exp)
 
      # Create an acados ocp object 
     ocp = AcadosOcp()
@@ -28,8 +31,10 @@ def create_mpc_solver(pr, exp):
     ocp.constraints.x0 = np.zeros(exp.n()*2)
     
     # Set state bound 
-    ocp.constraints.lbx = np.array([[pr.ws_x[0]]*exp.n(), [pr.robot_min_vel]*exp.n()]).flatten()
-    ocp.constraints.ubx = np.array([[pr.ws_x[1]]*exp.n(), [pr.robot_max_vel]*exp.n()]).flatten()
+    nx = model_ac.x.size()[0]
+    ocp.constraints.lbx = np.array([exp.limits()[0], [pr.robot_min_vel]*exp.n()]).flatten()
+    ocp.constraints.ubx = np.array([exp.limits()[1], [pr.robot_max_vel]*exp.n()]).flatten()
+        
     ocp.constraints.idxbx = np.array(range(exp.n()*2))
 
     # Set control input bound 
@@ -43,18 +48,27 @@ def create_mpc_solver(pr, exp):
     ocp.constraints.uh = np.ones(nc)*100
 
     # Slack for constraints
-    # ocp.constraints.idxsh = np.array([0])
-    nsh = nc
-    ocp.cost.zl = 100 * np.ones((nc,))
-    ocp.cost.zu = 100 * np.ones((nc,))
-    ocp.cost.Zl = 1 * np.ones((nc,))
-    ocp.cost.Zu = 1 * np.ones((nc,))
-    ocp.constraints.lsh = np.zeros(nsh)
-    ocp.constraints.ush = np.zeros(nsh)
-    ocp.constraints.idxsh = np.array(range(nsh))
+    ns = nc + nx
+    ocp.constraints.idxsh = np.array(range(nc))
+
+    # Slack for state bounds
+    ocp.constraints.idxsbx = np.array(range(nx))
+
+    ocp.cost.zl = 1e2 * np.ones((ns,))
+    ocp.cost.zu = 1e2 * np.ones((ns,))
+    ocp.cost.Zl = 1e0 * np.ones((ns,))
+    ocp.cost.Zu = 1e0 * np.ones((ns,))
+
+    # ocp.constraints.idxsbx_e = np.array(range(nx))
+    # # ocp.constraints.idxsh_e = np.array([0])
+    # ocp.cost.zl_e = 1e2 * np.ones(nx) 
+    # ocp.cost.zu_e = 1e2 * np.ones(nx) 
+    # ocp.cost.Zu_e = 1.0 * np.ones(nx) 
+    # ocp.cost.Zl_e = 1.0 * np.ones(nx) 
 
     # horizon
     ocp.solver_options.tf = pr.N * exp.dt()
+    ocp.solver_options.tol = 1e-3
 
     # Solver options
     # integrator option
@@ -64,13 +78,11 @@ def create_mpc_solver(pr, exp):
     # nlp solver options
     ocp.solver_options.nlp_solver_type = 'SQP'
     ocp.solver_options.nlp_solver_max_iter = 400 
-    ocp.solver_options.nlp_solver_tol_eq = 1E-3
     ocp.solver_options.hessian_approx = 'GAUSS_NEWTON'
     # qp solver options
     ocp.solver_options.qp_solver = 'PARTIAL_CONDENSING_HPIPM'
-    ocp.solver_options.qp_solver_iter_max = 200  
-    ocp.solver_options.qp_solver_warm_start = 1 
-    # ocp.solver_options.levenberg_marquardt = 0.
+    ocp.solver_options.qp_solver_iter_max = 100  
+
     # code generation options
     ocp.code_export_directory = f"{os.path.dirname(os.path.abspath(__file__))}/point_mass_mpc_c_generated_code"
     ocp.solver_options.print_level = 0

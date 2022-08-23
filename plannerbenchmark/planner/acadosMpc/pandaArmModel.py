@@ -1,18 +1,18 @@
 import numpy as np
 import casadi as cd 
-from forwardkinematics.fksCommon.fk_creator import FkCreator
+from forwardkinematics.urdfFks.pandaFk import PandaFk
 from plannerbenchmark.planner.acadosMpc.cost_functions import *
 
 from acados_template import AcadosModel 
 
 
-def acados_n_link_model(pr, exp):
+def acados_panda_arm_model(pr, exp):
     # Create an acados ocp model
     model = AcadosModel()
-    model.name = 'n_link_ocp'
+    model.name = 'panda_arm_ocp'
 
     n = exp.n()
-    fk = FkCreator('planarArm', n).fk()
+    fk = PandaFk()
 
     x = cd.SX.sym('x', n * 2)
     x_dot = cd.SX.sym('x_dot', n * 2)
@@ -44,6 +44,9 @@ def acados_n_link_model(pr, exp):
     cost_goal = l2_normalized(pos_ee, start_ee, goal_ee)
     cost_input = input_normalized(u=acc, limit=pr.robot_max_acc)
     cost_coll = sum([custom_collision_potential(pos_ee, robot_size, obs.position(), obs.radius()) for obs in exp.obstacles()])/len(exp.obstacles())
+    center_joints = (exp.limits()[0] + exp.limits()[1]) / 2.
+    cost_joints = input_normalized(pos - center_joints, 2)
+    cost_vref = input_normalized(vel, pr.robot_max_vel)
 
     # Constraints
     constraints = [] 
@@ -54,10 +57,10 @@ def acados_n_link_model(pr, exp):
     constraints = cd.vertcat(*constraints)
 
     # stage cost
-    cost_stage = pr.w_input*cost_input + pr.w_pos*cost_goal + pr.w_coll*cost_coll
+    cost_stage = pr.w_input*cost_input + pr.w_pos*cost_goal + pr.w_coll*cost_coll + cost_joints + cost_vref * pr.w_vref
 
     # terminal cost 
-    cost_e = pr.w_pos*cost_goal + pr.w_coll*cost_coll
+    cost_e = pr.w_pos*cost_goal + pr.w_coll*cost_coll 
 
     # Formulating acados ocp model
     model.x = x 
