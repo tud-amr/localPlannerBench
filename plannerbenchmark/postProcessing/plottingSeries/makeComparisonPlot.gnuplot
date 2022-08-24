@@ -32,6 +32,8 @@ if (planner2Type eq 'fabric') planner2 = 'Static Fabric'
 if (planner1Type eq 'mpc') planner1 = 'MPC'
 if (planner2Type eq 'mpc') planner2 = 'MPC'
 if (planner1Type eq 'dynamicFabric') planner1 = 'Dynamic Fabric'
+if (planner1Type eq 'AcadosMpc') planner1 = 'Acados MPC'
+if (planner2Type eq 'AcadosMpc') planner2 = 'Acados MPC'
 if (planner2Type eq 'dynamicFabric') planner2 = 'Dynamic Fabric'
 yLabel = sprintf("%s / %s on logarithmic scale", planner1, planner2)
 set y2label yLabel font ",35" rotate by 90
