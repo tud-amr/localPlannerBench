@@ -40,10 +40,9 @@ class AcadosMpcPlanner(Planner):
         super().__init__(exp, **kwargs)
         self._config = AcadosMpcConfig(**kwargs)
 
-        # NOTE: Initializing solver on first call to self.computeAction, because self._exp is not updated yet with random obstacles
-        self._initialized = False
-
         self._mpc_feasible = False
+
+        self._init_problem()
 
     def _init_problem(self):
         # Regenerate solver
@@ -58,6 +57,7 @@ class AcadosMpcPlanner(Planner):
         pass
 
     def setObstacles(self, obsts, r_body):
+        self._mpc_feasible = False
         pass
 
     def setSelfCollisionAvoidance(self, r_body):
@@ -67,16 +67,13 @@ class AcadosMpcPlanner(Planner):
         pass
 
     def setGoal(self, goal):
+        self._mpc_feasible = False
         pass
 
     def concretize(self):
         pass
 
     def computeAction(self, *args):
-        if not self._initialized:
-            self._init_problem()
-            self._initialized = True
-
         robot_state_current = np.array(args).flatten() # [x, y , vx, vy]
         logging.debug(f"STATE {robot_state_current}")
 
@@ -97,9 +94,17 @@ class AcadosMpcPlanner(Planner):
             x_traj_init = np.tile(np.array(robot_state_current).reshape((-1, 1)), (1, self._config.N))
             u_traj_init = self._mpc_u_plan = np.zeros((self._exp.n(), self._config.N))
 
+        start = self._exp.initState()[0]
+        goal = self._exp.goal().primeGoal().position()
+        obs = np.array([[*o.position(), o.radius()] for o in self._exp.obstacles()]).flatten()
+        param_this_stage = np.concatenate((start, goal, obs))
+
         for iStage in range(0, self._config.N):
             self.acados_ocp_solver.set(iStage, 'x', x_traj_init[:, iStage])
             self.acados_ocp_solver.set(iStage, 'u', u_traj_init[:, iStage])
+            self.acados_ocp_solver.set(iStage, 'p', param_this_stage)
+
+        self.acados_ocp_solver.set(iStage+1, 'p', param_this_stage)
 
         # Call the solver
         status = self.acados_ocp_solver.solve()

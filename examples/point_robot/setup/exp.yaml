@@ -1,4 +1,4 @@
-T: 2000
+T: 500
 dynamic: False
 dt: 0.05
 env: point-robot-acc-v0
@@ -48,8 +48,26 @@ obstacles:
     dim: 2
     geometry:
       position: 
-        - -2.0
+        - 2.0
         - 0.2
+      radius: 1.0
+    low:
+      position:
+        - -5.0
+        - -5.0
+      radius: 0.0
+    high:
+      position:
+        - 5.0
+        - 5.0
+      radius: 1.0
+  obst1:
+    type: sphereObstacle
+    dim: 2
+    geometry:
+      position: 
+        - 2.4
+        - 0.4
       radius: 1.0
     low:
       position:

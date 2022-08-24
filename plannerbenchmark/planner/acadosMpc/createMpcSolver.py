@@ -66,6 +66,11 @@ def create_mpc_solver(pr, exp):
     # ocp.cost.Zu_e = 1.0 * np.ones(nx) 
     # ocp.cost.Zl_e = 1.0 * np.ones(nx) 
 
+    start = exp.goal().primeGoal().position()
+    goal = exp.goal().primeGoal().position()
+    obs = np.array([[*o.position(), o.radius()] for o in exp.obstacles()]).flatten()
+    ocp.parameter_values = np.concatenate((start, goal, obs))
+
     # horizon
     ocp.solver_options.tf = pr.N * exp.dt()
     ocp.solver_options.tol = 1e-3

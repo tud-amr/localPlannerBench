@@ -93,6 +93,10 @@ class Runner(object):
         self._res_folder = os.getcwd() + '/' + args.res_folder
         self._planners = []
         self._experiment = Experiment(args.caseSetup)
+
+        # NOTE: Shuffle at least once to make sure experiment.obstacles() has right shape. Important for mpc problem formulation in __init__ functions.
+        self._experiment.shuffle(self._random_obst, self._random_init, self._random_goal)
+
         self._ros = args.ros
         self._compare = args.compare
         if self._compare:
@@ -166,7 +170,7 @@ class Runner(object):
             self.setPlanner()
             logging.info(f"Planner composed in {np.round(time.perf_counter()-start, decimals=2)} sec")
             q0, q0dot = self._experiment.initState()
-            timeStamp = "{:%Y%m%d_%H%M%S}".format(datetime.datetime.now())
+            timeStamp = "{:%Y%m%d_%H%M%S_%f}".format(datetime.datetime.now())
             if self._compare:
                 timeStamp = self._compareTimeStamp
             for planner in self._planners:
