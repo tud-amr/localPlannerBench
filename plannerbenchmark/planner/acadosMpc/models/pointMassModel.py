@@ -1,7 +1,8 @@
 import numpy as np
 import casadi as cd 
 
-from acados_template import AcadosModel 
+from acados_template import AcadosModel
+from plannerbenchmark.generic.experiment import Experiment 
 from plannerbenchmark.planner.acadosMpc.cost_functions import *
 
 
@@ -23,13 +24,12 @@ def acados_point_mass_model(pr, exp):
     vel = x[2:]
     acc = u
     
-    robot_size = exp.rBody()
-
     # Params 
     start = cd.SX.sym('start', 2) # [x, y]
     goal = cd.SX.sym('goal', 2) # [x, y]
     n_obs = len(exp.obstacles())
     obs = cd.SX.sym('obstacles', 3*n_obs) # [x, y, radius]*n
+    robot_size = cd.SX.sym('r_body', 1)
 
     # Costs
     cost_goal = l2_normalized(pos, start, goal)
@@ -50,10 +50,17 @@ def acados_point_mass_model(pr, exp):
     model.xdot = x_dot 
     model.f_expl_expr = dyn_f_expl 
     model.f_impl_expr = dyn_f_impl 
-    model.p = cd.vertcat(start, goal, obs)
+    model.p = cd.vertcat(start, goal, obs, robot_size)
 
     model.cost_expr_ext_cost = cost_stage 
     model.cost_expr_ext_cost_e = cost_e 
     model.con_h_expr = constraints
 
-    return model 
+    return model
+
+def point_mass_params(exp: Experiment) -> np.ndarray:
+    start = exp.initState()[0]
+    goal = exp.goal().primeGoal().position()
+    obs = np.array([[*o.position(), o.radius()] for o in exp.obstacles()]).flatten()
+    r_body = [exp.rBody()]
+    return np.concatenate((start, goal, obs, r_body))

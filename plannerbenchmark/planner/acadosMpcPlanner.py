@@ -26,6 +26,7 @@ class AcadosMpcConfig(PlannerConfig):
     robot_max_vel: float = 1.0
 
     N: int = 20 # horizon length
+    n_obs = 5
 
     # MPC cost terms weights, can be real time param
     w_pos: float = 1.0
@@ -46,7 +47,7 @@ class AcadosMpcPlanner(Planner):
 
     def _init_problem(self):
         # Regenerate solver
-        self.acados_ocp_solver = create_mpc_solver(self._config, self._exp)
+        self._acados_ocp_solver, self._extract_params = create_mpc_solver(self._config, self._exp)
 
         # TODO: add option to load pregenerated solver
         
@@ -78,8 +79,8 @@ class AcadosMpcPlanner(Planner):
         logging.debug(f"STATE {robot_state_current}")
 
         # Force solver initial state to be the current robot state
-        self.acados_ocp_solver.constraints_set(0, 'lbx', np.array(robot_state_current))
-        self.acados_ocp_solver.constraints_set(0, 'ubx', np.array(robot_state_current))
+        self._acados_ocp_solver.constraints_set(0, 'lbx', np.array(robot_state_current))
+        self._acados_ocp_solver.constraints_set(0, 'ubx', np.array(robot_state_current))
 
         if not hasattr(self, "_mpc_x_plan"):
             self._mpc_x_plan = np.tile(np.array(robot_state_current).reshape((-1, 1)), (1, self._config.N))
@@ -94,20 +95,17 @@ class AcadosMpcPlanner(Planner):
             x_traj_init = np.tile(np.array(robot_state_current).reshape((-1, 1)), (1, self._config.N))
             u_traj_init = self._mpc_u_plan = np.zeros((self._exp.n(), self._config.N))
 
-        start = self._exp.initState()[0]
-        goal = self._exp.goal().primeGoal().position()
-        obs = np.array([[*o.position(), o.radius()] for o in self._exp.obstacles()]).flatten()
-        param_this_stage = np.concatenate((start, goal, obs))
+        param_this_stage = self._extract_params(self._exp)
 
         for iStage in range(0, self._config.N):
-            self.acados_ocp_solver.set(iStage, 'x', x_traj_init[:, iStage])
-            self.acados_ocp_solver.set(iStage, 'u', u_traj_init[:, iStage])
-            self.acados_ocp_solver.set(iStage, 'p', param_this_stage)
+            self._acados_ocp_solver.set(iStage, 'x', x_traj_init[:, iStage])
+            self._acados_ocp_solver.set(iStage, 'u', u_traj_init[:, iStage])
+            self._acados_ocp_solver.set(iStage, 'p', param_this_stage)
 
-        self.acados_ocp_solver.set(iStage+1, 'p', param_this_stage)
+        self._acados_ocp_solver.set(iStage+1, 'p', param_this_stage)
 
         # Call the solver
-        status = self.acados_ocp_solver.solve()
+        status = self._acados_ocp_solver.solve()
 
         # NOTE: In case of solver infeasibility, keeps previous action.
         if status != 0:     # infeasible 
@@ -118,8 +116,8 @@ class AcadosMpcPlanner(Planner):
 
         # Obtain solution
         for iStage in range(0, self._config.N):
-            self._mpc_x_plan[:, iStage] = self.acados_ocp_solver.get(iStage, 'x')
-            self._mpc_u_plan[:, iStage] = self.acados_ocp_solver.get(iStage, 'u')
+            self._mpc_x_plan[:, iStage] = self._acados_ocp_solver.get(iStage, 'x')
+            self._mpc_u_plan[:, iStage] = self._acados_ocp_solver.get(iStage, 'u')
 
         self._mpc_feasible = True 
         robot_control_current = list(self._mpc_u_plan[:, 0])

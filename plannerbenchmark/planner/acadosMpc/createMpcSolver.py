@@ -1,7 +1,7 @@
 import numpy as np
-from plannerbenchmark.planner.acadosMpc.pointMassModel import acados_point_mass_model
-from plannerbenchmark.planner.acadosMpc.nLinkModel import acados_n_link_model
-from plannerbenchmark.planner.acadosMpc.pandaArmModel import acados_panda_arm_model
+from plannerbenchmark.planner.acadosMpc.models.nLinkModel import acados_n_link_model, n_link_params
+from plannerbenchmark.planner.acadosMpc.models.pandaArmModel import acados_panda_arm_model, panda_arm_params
+from plannerbenchmark.planner.acadosMpc.models.pointMassModel import acados_point_mass_model, point_mass_params
 from acados_template import AcadosOcp, AcadosOcpSolver
 
 import os
@@ -11,10 +11,13 @@ def create_mpc_solver(pr, exp):
     # TODO: support more experiment envs
     if exp.envName() == "point-robot-acc-v0":
         model_ac = acados_point_mass_model(pr, exp)
+        extract_params = point_mass_params
     elif exp.envName() == "nLink-reacher-acc-v0":
         model_ac = acados_n_link_model(pr, exp)
+        extract_params = n_link_params
     elif exp.envName() == "panda-reacher-acc-v0":
         model_ac = acados_panda_arm_model(pr, exp)
+        extract_params = panda_arm_params
 
      # Create an acados ocp object 
     ocp = AcadosOcp()
@@ -66,10 +69,7 @@ def create_mpc_solver(pr, exp):
     # ocp.cost.Zu_e = 1.0 * np.ones(nx) 
     # ocp.cost.Zl_e = 1.0 * np.ones(nx) 
 
-    start = exp.goal().primeGoal().position()
-    goal = exp.goal().primeGoal().position()
-    obs = np.array([[*o.position(), o.radius()] for o in exp.obstacles()]).flatten()
-    ocp.parameter_values = np.concatenate((start, goal, obs))
+    ocp.parameter_values = np.zeros(model_ac.p.size()[0])
 
     # horizon
     ocp.solver_options.tf = pr.N * exp.dt()
@@ -93,5 +93,5 @@ def create_mpc_solver(pr, exp):
     ocp.solver_options.print_level = 0
 
     # Generate the solver
-    return AcadosOcpSolver(acados_ocp=ocp, json_file=f"{os.path.dirname(os.path.abspath(__file__))}/point_mass_acados_ocp.json")
+    return AcadosOcpSolver(acados_ocp=ocp, json_file=f"{os.path.dirname(os.path.abspath(__file__))}/point_mass_acados_ocp.json"), extract_params
 
