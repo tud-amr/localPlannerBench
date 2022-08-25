@@ -87,7 +87,7 @@ Tutorial
 --------
 
 Simple
-========
+^^^^^^^^^
 
 The following is a very simple example case containing a point mass robot and a PD planner.
 
@@ -132,8 +132,10 @@ The you can run the post processor with arguments as
 post_process --exp path/to/experiment -k time2Goal pathLength --plot
 ```
 
+![Example trajectory](docs/source/img/trajectory_point_robot.png){width="70%"}
+
 Advanced
-========
+^^^^^^^^^
 
 To showcase the power of localPlannerBench we would also like to show you a more complex example, containing the 7-DoF frankaemika panda robot arm and a custom opensource [acados](https://github.com/acados/acados) based MPC planner.
 
@@ -162,7 +164,9 @@ The you can run the post processor with arguments as
 post_process --exp results --latest -k time2Goal pathLength --plot
 ```
 
+<img src="docs/source/img/panda_arm_acados_mpc.gif" width="250"/>
+
+
 More detailed information about the examples can be found in
 example\_long
 
-![Example trajectory](docs/source/img/trajectory_point_robot.png){width="70%"}
