@@ -86,8 +86,7 @@ poetry shell
 Tutorial
 --------
 
-Simple
-^^^^^^^^^
+### Simple
 
 The following is a very simple example case containing a point mass robot and a PD planner.
 
@@ -132,10 +131,9 @@ The you can run the post processor with arguments as
 post_process --exp path/to/experiment -k time2Goal pathLength --plot
 ```
 
-![Example trajectory](docs/source/img/trajectory_point_robot.png){width="70%"}
+![Example trajectory](docs/source/img/trajectory_point_robot.png)
 
-Advanced
-^^^^^^^^^
+### Advanced
 
 To showcase the power of localPlannerBench we would also like to show you a more complex example, containing the 7-DoF frankaemika panda robot arm and a custom opensource [acados](https://github.com/acados/acados) based MPC planner.
 
@@ -158,15 +156,14 @@ Then the experiment is run with the command line interface
 runner -c setup/exp.yaml -p setup/acados_mpc.yaml --render
 ```
 
+<img src="docs/source/img/panda_arm_acados_mpc.gif" width="70%"/>
+
 The you can run the post processor with arguments as
 
 ``` {.sourceCode .bash}
 post_process --exp results --latest -k time2Goal pathLength --plot
 ```
 
-<img src="docs/source/img/panda_arm_acados_mpc.gif" width="250"/>
+![Example trajectory](docs/source/img/trajectory_panda_acados_mpc.png)
 
-
-More detailed information about the examples can be found in
-example\_long
 
