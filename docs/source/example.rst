@@ -3,7 +3,7 @@
 Example
 ==================
 
-We provide several experiment setups in the ``experiments`` folder.
+We provide several experiment setups in the ``examples`` folder.
 However, here we want to walk you through the most basic example without a planner that
 has a dependency on other packages.
 

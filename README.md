@@ -46,6 +46,7 @@ Pre-requisites
 -   \[Optional\] [poetry](https://python-poetry.org/docs/)
 -   \[Optional\] [embotech forces
     pro](https://www.embotech.com/products/forcespro/overview/) for mpc
+-   \[Optional\] [acados_template](https://github.com/acados/acados/tree/master/interfaces/acados_template) for mpc
 
 Installation
 ------------
@@ -85,7 +86,10 @@ poetry shell
 Tutorial
 --------
 
-The following is a very simple example case.
+Simple
+========
+
+The following is a very simple example case containing a point mass robot and a PD planner.
 
 Run an experiments:
 
@@ -97,6 +101,8 @@ by
 ``` {.sourceCode .bash}
 poetry shell
 ```
+
+> Or alternatively active your virtual python environment
 
 Then you navigate there by
 
@@ -112,8 +118,8 @@ runner -c setup/exp.yaml -p setup/pdplanner.yaml --render
 
 Postprocessing:
 
-The experiments can be postprocessed using the provide executable. When
-using poetry, make sure you are in the virtual environment
+The experiments can be postprocessed using the provide executable. Again make sure you are in the virtual environment, when
+using poetry run: 
 (`poetry shell`)
 
 ``` {.sourceCode .bash}
@@ -126,7 +132,37 @@ The you can run the post processor with arguments as
 post_process --exp path/to/experiment -k time2Goal pathLength --plot
 ```
 
-More detailed information about this example can be found in
+Advanced
+========
+
+To showcase the power of localPlannerBench we would also like to show you a more complex example, containing the 7-DoF frankaemika panda robot arm and a custom opensource [acados](https://github.com/acados/acados) based MPC planner.
+
+Again make sure you are in your virtual python environment.
+``` {.sourceCode .bash}
+poetry shell
+```
+
+Install [acados_template](https://github.com/acados/acados/tree/master/interfaces/acados_template) inside of the virtual environment if you haven't already.
+
+Then you navigate to 
+
+``` {.sourceCode .bash}
+cd examples/panda_arm
+```
+
+Then the experiment is run with the command line interface
+
+``` {.sourceCode .bash}
+runner -c setup/exp.yaml -p setup/acados_mpc.yaml --render
+```
+
+The you can run the post processor with arguments as
+
+``` {.sourceCode .bash}
+post_process --exp results --latest -k time2Goal pathLength --plot
+```
+
+More detailed information about the examples can be found in
 example\_long
 
 ![Example trajectory](docs/source/img/trajectory_point_robot.png){width="70%"}
