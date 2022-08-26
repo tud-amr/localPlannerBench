@@ -18,7 +18,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Structure" href="structure.html" />
+    <link rel="next" title="Experiment Config" href="experiment_config.html" />
     <link rel="prev" title="Getting started" href="getting_started.html" /> 
 </head>
 
@@ -48,6 +48,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#conclusion">Conclusion</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="experiment_config.html">Experiment Config</a></li>
 <li class="toctree-l1"><a class="reference internal" href="structure.html">Structure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
 </ul>
@@ -78,7 +79,7 @@
              
   <section id="example">
 <span id="example-long"></span><h1>Example<a class="headerlink" href="#example" title="Permalink to this headline"></a></h1>
-<p>We provide several experiment setups in the <code class="docutils literal notranslate"><span class="pre">experiments</span></code> folder.
+<p>We provide several experiment setups in the <code class="docutils literal notranslate"><span class="pre">examples</span></code> folder.
 However, here we want to walk you through the most basic example without a planner that
 has a dependency on other packages.</p>
 <section id="navigate-to-example">
@@ -99,12 +100,12 @@ goals and parameters to the planner are specified.</p>
 <h2>Run the example<a class="headerlink" href="#run-the-example" title="Permalink to this headline"></a></h2>
 <p>Once you have familiarized yourself with the directories and files, you can run the
 example. For that execute</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>../../plannerbenchmark/exec/runner -c setup/exp.yaml -p pdplanner setup/planner.yaml --render
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>runner -c setup/exp.yaml -p setup/&lt;planner_name&gt;.yaml --render
 </pre></div>
 </div>
 <p>When you run the above line, the experiment starts with the configuration files you have
 provided through the command line interface, namely <code class="docutils literal notranslate"><span class="pre">-c</span> <span class="pre">setup/exp.yaml</span></code> specifies the
-experiment and <code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">pdplanner</span> <span class="pre">setup/planner.yaml</span></code> specifies the planner. The flag
+experiment and <code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">setup/&lt;planner_name&gt;.yaml</span></code> specifies the planner. The flag
 <code class="docutils literal notranslate"><span class="pre">--render</span></code> indicates that the experiment should be rendered to your screen. Once the
 experiment has finished or you have stopped it prematurely, a new folder is created in the
 <code class="docutils literal notranslate"><span class="pre">results</span></code> directory. In there, you will find all necessary information on what exactly
@@ -117,15 +118,14 @@ performance of the particular planner. This is what the <code class="docutils li
 The postprocessor uses the results folder that was created after running the experiment to
 evaluate user-specified metrics. Familiarize yourself a bit with the content of the folder
 you want to postprocess. When you are ready, you can simple invoke the postProcessor by</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>../../plannerbenchmark/exec/postProcessor --exp results/&lt;name_experiment&gt; -k time2Goal pathLength --plot
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>post_process --exp results/&lt;name_experiment&gt; -k time2Goal pathLength --plot
 </pre></div>
 </div>
 <p>In the above line, the argument <code class="docutils literal notranslate"><span class="pre">--exp</span> <span class="pre">results/&lt;name_experiment&gt;</span></code> tells the
 postProcessor which experiment to process. Key-performance-indicators are listed behind
-<code class="docutils literal notranslate"><span class="pre">-k</span></code> option. The flag <code class="docutils literal notranslate"><span class="pre">--plot</span></code> that a plot of the trajectory should be created. On a
-standard linux installation, this command should automatically open the folder of the
-experiment. If it does not, you have to manually navigate to the experiment folder to
-access the plots and evaluations (Consider using the <code class="docutils literal notranslate"><span class="pre">--no-open</span></code> flag in this case).
+<code class="docutils literal notranslate"><span class="pre">-k</span></code> option. The flag <code class="docutils literal notranslate"><span class="pre">--plot</span></code> that a plot of the trajectory should be created.
+Navigate to the experiment folder in your explorer to
+access the plots and evaluations.
 The evaluations are stored in <code class="docutils literal notranslate"><span class="pre">postProcess.yaml</span></code>.</p>
 </section>
 <section id="conclusion">
@@ -140,7 +140,7 @@ Feel free to add your own method or additional functionility.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="getting_started.html" class="btn btn-neutral float-left" title="Getting started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="structure.html" class="btn btn-neutral float-right" title="Structure" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="experiment_config.html" class="btn btn-neutral float-right" title="Experiment Config" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

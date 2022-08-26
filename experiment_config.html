@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Experiment Config &mdash; Local Planner Bench  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Structure" href="structure.html" />
+    <link rel="prev" title="Example" href="example.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> Local Planner Bench
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Local Motion Planning Benchmark Suite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example.html">Example</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Experiment Config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="structure.html">Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Local Planner Bench</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Experiment Config</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/experiment_config.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="experiment-config">
+<span id="id1"></span><h1>Experiment Config<a class="headerlink" href="#experiment-config" title="Permalink to this headline"></a></h1>
+<p>In the example you have learned how easy it is to run different experiment setups in combination with different planners.
+LocalPlannerBench is especially powerful because of the versatility of the supported experiment options and environments.
+To create your own custom experiment setup, simply write an <code class="docutils literal notranslate"><span class="pre">exp.yaml</span></code> file with your desired configurations.
+We will list the available options here:</p>
+<dl class="field-list simple">
+<dt class="field-odd">T :int</dt>
+<dd class="field-odd"><p>Maximum simulated time to let the experiment run for.</p>
+</dd>
+<dt class="field-even">dt :float</dt>
+<dd class="field-even"><p>Timestep of the simulator.</p>
+</dd>
+<dt class="field-odd">dynamic :bool</dt>
+<dd class="field-odd"><p>Does the experiment contain dynamic obstacles or goals.</p>
+</dd>
+<dt class="field-even">env :str</dt>
+<dd class="field-even"><p>Name of the simulation environment. LocalPlannerBench currently supports 2 different simulators with a large number of environments and robots of varying fidelity from point mass robots to full fledged mobile manipulators.
+More information about the two simulators can be found here:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/maxspahn/gym_envs_planar">gym_envs_planar</a></p></li>
+<li><p><a class="reference external" href="https://github.com/maxspahn/gym_envs_urdf">gym_envs_urdf</a></p></li>
+</ul>
+</dd>
+<dt class="field-odd">goal :Dict</dt>
+<dd class="field-odd"><p>Dictionary containing a collection of subgoals for the current experiment. The keys of the subgoals should follow this structure: <code class="docutils literal notranslate"><span class="pre">subgoal0,</span> <span class="pre">subgoal1,</span> <span class="pre">...,</span> <span class="pre">subgoali</span></code>.
+A subgoal specification is again very versatile, you can specify the indices of the joints, desired position, weight of the goal and even minimum and maximum goal values for random generation of goals.
+See <a class="reference external" href="https://github.com/maxspahn/motion_planning_scenes">motion_planning_scenes</a> for more information.</p>
+</dd>
+<dt class="field-even">initState :Dict</dt>
+<dd class="field-even"><p>Should contain a dictionary with the initial state of the joints. The key <code class="docutils literal notranslate"><span class="pre">q0</span></code> containing the initial positions and <code class="docutils literal notranslate"><span class="pre">q0dot</span></code> the initial velocities.</p>
+</dd>
+<dt class="field-odd">limits :Dict</dt>
+<dd class="field-odd"><p>Should contain a dictionary with the lower and upper limits of the states of the joints. The key <code class="docutils literal notranslate"><span class="pre">low</span></code> containing the lower bound positions and <code class="docutils literal notranslate"><span class="pre">high</span></code> the upper bound positions.</p>
+</dd>
+<dt class="field-even">n :int</dt>
+<dd class="field-even"><p>Number of joints</p>
+</dd>
+<dt class="field-odd">obstacles :Dict</dt>
+<dd class="field-odd"><p>Dictionary containing a collection of obstacles for the current experiment. The keys of the obstacles should follow this structure: <code class="docutils literal notranslate"><span class="pre">obst0,</span> <span class="pre">obst1,</span> <span class="pre">...,</span> <span class="pre">obsti</span></code>.
+A subgoal specification is again very versatile, you can specify the dimension, desired position, and even minimum and maximum values for random generation of obstacles.
+See <a class="reference external" href="https://github.com/maxspahn/motion_planning_scenes">motion_planning_scenes</a> for more information.</p>
+</dd>
+<dt class="field-even">r_body :float</dt>
+<dd class="field-even"><p>Radius of the links of the robot, to be used by planners for collision avoidance.
+Note: only a single radius for all links is currently supported.</p>
+</dd>
+<dt class="field-odd">randomObstacles :Dict</dt>
+<dd class="field-odd"><p>Dictionary containing information about the random generation of obstacles for this experiment.
+The Dictionary should contain the key <code class="docutils literal notranslate"><span class="pre">number</span></code> to specify the number of randomobstacles.</p>
+</dd>
+<dt class="field-even">robot_type :str</dt>
+<dd class="field-even"><p>The name of the type of robot used in the environment.</p>
+</dd>
+<dt class="field-odd">selfCollision :Dict</dt>
+<dd class="field-odd"><p>Dictionary containing information about configuration for self collision avoidance.
+The Dictionary should contain the key <code class="docutils literal notranslate"><span class="pre">pairs</span></code> to specify pairs of links that should avoid eachother.</p>
+</dd>
+</dl>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="example.html" class="btn btn-neutral float-left" title="Example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="structure.html" class="btn btn-neutral float-right" title="Structure" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Max Spahn.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -48,6 +48,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="example.html">Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiment_config.html">Experiment Config</a></li>
 <li class="toctree-l1"><a class="reference internal" href="structure.html">Structure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
 </ul>
@@ -88,6 +89,7 @@
 <li><p>gnuplot (<code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt</span> <span class="pre">install</span> <span class="pre">gnuplot</span></code>)</p></li>
 <li><p>[Optional] <a class="reference external" href="https://python-poetry.org/docs/">poetry</a></p></li>
 <li><p>[Optional] <a class="reference external" href="https://www.embotech.com/products/forcespro/overview/">embotech forces pro</a> for mpc</p></li>
+<li><p>[Optional] <a class="reference external" href="https://github.com/acados/acados/tree/master/interfaces/acados_template">acados_template</a> for mpc</p></li>
 </ul>
 </section>
 <section id="installation">
@@ -116,6 +118,12 @@ poetry install
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>poetry shell
 </pre></div>
 </div>
+<p>If planners with limited access (fabrics) or required user installation
+are wanted, their path has to be specified with</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>poetry add &lt;relative/path/to/fabrics&gt;
+poetry add &lt;relative/path/to/acados_template&gt;
+</pre></div>
+</div>
 </section>
 <section id="tutorial">
 <h2>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline"></a></h2>
@@ -129,24 +137,25 @@ poetry by</p>
 </pre></div>
 </div>
 <p>Then you navigate there by</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> experiments/example
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> examples/point_robot
 </pre></div>
 </div>
 <p>Then the experiment is run with the command line interface</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>../../plannerbenchmark/exec/runner -c setup/exp.yaml -p pdplanner setup/planner.yaml --render
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>runner -c setup/exp.yaml -p setup/pdplanner.yaml --render
 </pre></div>
 </div>
 <p>Postprocessing:</p>
 <p>The experiments can be postprocessed using the provide executable. When
 using poetry, make sure you are in the virtual environment (<code class="docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">shell</span></code>)</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> experiments/example
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> examples/point_robot
 </pre></div>
 </div>
 <p>The you can run the post processor with arguments as</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>../../plannerbenchmark/exec/postProcessor --exp path/to/experiment -k time2Goal pathLength --plot --no-open
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>post_process --exp path/to/experiment -k time2Goal pathLength --plot
 </pre></div>
 </div>
 <p>More detailed information about this example can be found in <a class="reference internal" href="example.html#example-long"><span class="std std-ref">Example</span></a></p>
+<a class="reference internal image-reference" href="_images/trajectory_point_robot.png"><img alt="Example trajectory" class="align-center" src="_images/trajectory_point_robot.png" style="width: 70%;" /></a>
 </section>
 </section>
 
