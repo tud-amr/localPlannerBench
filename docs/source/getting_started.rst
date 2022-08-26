@@ -13,6 +13,7 @@ Pre-requisites
 - gnuplot (``sudo apt install gnuplot``)
 - [Optional] `poetry <https://python-poetry.org/docs/>`_
 - [Optional] `embotech forces pro <https://www.embotech.com/products/forcespro/overview/>`_ for mpc
+- [Optional] `acados_template <https://github.com/acados/acados/tree/master/interfaces/acados_template>`_ for mpc
 
 
 Installation
@@ -50,6 +51,14 @@ The virtual environment is entered by
 
     poetry shell
 
+If planners with limited access (fabrics) or required user installation
+are wanted, their path has to be specified with
+
+.. code:: bash
+
+   poetry add <relative/path/to/fabrics>
+   poetry add <relative/path/to/acados_template>
+
 Tutorial
 ------------
 
@@ -70,13 +79,13 @@ Then you navigate there by
 
 .. code:: bash
 
-    cd experiments/example
+    cd examples/point_robot
 
 Then the experiment is run with the command line interface
 
 .. code:: bash
 
-    ../../plannerbenchmark/exec/runner -c setup/exp.yaml -p pdplanner setup/planner.yaml --render
+    runner -c setup/exp.yaml -p setup/pdplanner.yaml --render
 
 Postprocessing:
 
@@ -85,12 +94,17 @@ using poetry, make sure you are in the virtual environment (``poetry shell``)
 
 .. code:: bash
 
-    cd experiments/example
+    cd examples/point_robot
 
 The you can run the post processor with arguments as
 
 .. code:: bash
 
-    ../../plannerbenchmark/exec/postProcessor --exp path/to/experiment -k time2Goal pathLength --plot --no-open
+    post_process --exp path/to/experiment -k time2Goal pathLength --plot
 
 More detailed information about this example can be found in :ref:`example_long`
+
+.. image:: img/trajectory_point_robot.png
+    :width: 70%
+    :align: center
+    :alt: Example trajectory

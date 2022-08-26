@@ -1,0 +1,102 @@
+T: 2000
+dynamic: False
+dt: 0.05
+env: nLink-reacher-acc-v0
+robot_type: planarArm
+n: 5
+goal:
+  subgoal1:
+    prime: True
+    m: 2
+    w: 1
+    indices:
+      - 0
+      - 1
+    parent_link: 0
+    child_link: 5
+    desired_position:
+      - 2.0
+      - 1.7
+    low:
+      - -5.0
+      - -5.0
+    high: 
+      - 5.0
+      - 5.0
+    type: staticSubGoal
+    epsilon: 0.15
+  subgoal2:
+    prime: False
+    m: 1
+    w: 2
+    indices:
+      - 1
+    parent_link: 4
+    child_link: 5
+    desired_position:
+      - 0.0
+    type: staticSubGoal
+    epsilon: 0.01
+initState:
+  q0:
+    - 1.57
+    - 0.0
+    - -1.57
+    - 0.0
+    - 0.0
+  q0dot:
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+limits:
+  low: 
+    - -3.14
+    - -2.0
+    - -2.0
+    - -2.0
+    - -2.0
+  high: 
+    - 3.14
+    - 2.0
+    - 2.0
+    - 2.0
+    - 2.0
+r_body: 0.51
+obstacles:
+  obst1:
+    dim: 2
+    type: sphereObstacle
+    geometry:
+      position:
+        - -1.1
+        - 1.0
+      radius: 0.5
+    low:
+      position:
+        - -5.0
+        - -5.0
+      radius: 0.0
+    high:
+      position:
+        - 5.0
+        - 5.0
+      radius: 1.0
+randomObstacles:
+  number: 5
+selfCollision:
+  pairs:
+    - [0, 2]
+    - [0, 3]
+    - [0, 4]
+    - [0, 5]
+    - [1, 3]
+    - [1, 4]
+    - [1, 5]
+    - [2, 4]
+    - [2, 5]
+    - [3, 5]
+
+    
+

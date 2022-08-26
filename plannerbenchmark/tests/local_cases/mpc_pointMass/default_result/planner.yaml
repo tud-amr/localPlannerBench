@@ -1,0 +1,15 @@
+H: 30
+dt: 0.1
+interval: 2
+n: 2
+obst:
+  nbObst: 5
+slack: false
+name: mpc
+weights:
+  ws: 1e10
+  wu: 1.0
+  wvel: 1.0
+  wx: 1.0
+robot_type: pointRobot
+dynamic: false

@@ -1,0 +1,106 @@
+T: 2000
+dt: 0.01
+dynamic: false
+env: panda-reacher-acc-v0
+goal:
+  subgoal1:
+    angle: null
+    child_link: 7
+    desired_position:
+    - 0.5
+    - -0.4
+    - 0.3
+    epsilon: 0.05
+    high:
+    - 0.7
+    - 0.0
+    - 1.1
+    indices:
+    - 0
+    - 1
+    - 2
+    low:
+    - -0.4
+    - -0.4
+    - 0.1
+    m: 3
+    parent_link: 0
+    prime: true
+    type: staticSubGoal
+    w: 1.0
+initState:
+  q0:
+  - 1.0
+  - 0.0
+  - 0.0
+  - -1.5
+  - 0.0
+  - 1.8675
+  - 0.0
+  q0dot:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+limits:
+  high:
+  - 2.8973
+  - 1.7628
+  - 2.8973
+  - 0.0698
+  - 2.8973
+  - 3.7525
+  - 2.8973
+  low:
+  - -2.8973
+  - -1.7628
+  - -2.8973
+  - -3.0718
+  - -2.8973
+  - -0.0175
+  - -2.8973
+n: 7
+obstacles:
+  obst0:
+    dim: 3
+    geometry:
+      position:
+      - 0.7
+      - 0.3
+      - 0.6
+      radius: 0.15
+    high:
+      position:
+      - 1.0
+      - 0.3
+      - 1.0
+      radius: 0.2
+    low:
+      position:
+      - -1.0
+      - -1.0
+      - 0.0
+      radius: 0.0
+    movable: false
+    type: sphereObstacle
+r_body: 0.15
+randomObstacles:
+  number: 5
+robot_type: panda
+selfCollision:
+  pairs:
+  - - 0
+    - 6
+  - - 0
+    - 7
+  - - 1
+    - 6
+  - - 1
+    - 7
+  - - 2
+    - 6
+  - - 2
+    - 7

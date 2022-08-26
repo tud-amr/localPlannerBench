@@ -1,0 +1,28 @@
+attractor:
+  k_psi: 2.0
+damper:
+  b:
+  - 0.01
+  - 6.5
+  r_d: 0.2
+dynamic: false
+interval: 1
+l_offset: 0.2
+limits:
+  exp: 1.0
+  lam: 1.0
+m_arm: 1.0
+m_base: 1.0
+m_ratio: 1.0
+m_rot: 1.0
+n: 5
+name: fabric
+obst:
+  exp: 1.0
+  lam: 2.0
+robot_type: planarArm
+selfCol:
+  exp: 1.0
+  lam: 2.0
+speed:
+  ex_factor: 2.0

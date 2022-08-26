@@ -1,216 +1,171 @@
 # General dependencies
-import casadi as ca
+from dataclasses import dataclass, field
+from typing import Dict
 import numpy as np
+import logging
 
 # Dependencies for this specific planner
-from fabrics.planner.fabricPlanner import DefaultFabricPlanner
-from fabrics.planner.nonHolonomicPlanner import DefaultNonHolonomicPlanner
-from fabrics.planner.default_energies import CollisionLagrangian, ExecutionLagrangian
-from fabrics.planner.default_maps import (
-    CollisionMap,
-    LowerLimitMap,
-    UpperLimitMap,
-    SelfCollisionMap,
-)
-from fabrics.planner.default_leaves import defaultAttractor, defaultDynamicAttractor
-from fabrics.planner.default_geometries import (
-    CollisionGeometry,
-    GoalGeometry,
-    LimitGeometry,
-)
-from fabrics.diffGeometry.analyticSymbolicTrajectory import AnalyticSymbolicTrajectory
-from fabrics.diffGeometry.diffMap import DifferentialMap, RelativeDifferentialMap
-from fabrics.diffGeometry.energized_geometry import WeightedGeometry
+from fabrics.planner.parameterized_planner import ParameterizedFabricPlanner
 
 # Motion planning scenes
 from MotionPlanningEnv.dynamicSphereObstacle import DynamicSphereObstacle
 from MotionPlanningEnv.sphereObstacle import SphereObstacle
+from MotionPlanningGoal.dynamicSubGoal import DynamicSubGoal
 
 # Dependencies on plannerbenchmark
-from plannerbenchmark.generic.abstractPlanner import AbstractPlanner
+from plannerbenchmark.generic.planner import Planner, PlannerConfig
 
-class FabricPlanner(AbstractPlanner):
-    def __init__(self, exp, setupFile):
-        required_keys = [
-            "type",
-            "n",
-            "obst",
-            "attractor",
-            "speed",
-            "damper",
-            "limits",
-            "selfCol",
-            "interval",
-            "dynamic",
-        ]
-        super().__init__(exp, setupFile, required_keys)
+@dataclass
+class FabricConfig(PlannerConfig):
+    m_base: float = 0.2
+    m_ratio: float = 1.0
+    obst: Dict[str, float] = field(default_factory = lambda: ({'exp': 1.0, 'lam': 1.0}))
+    selfCol: Dict[str, float] = field(default_factory = lambda: ({'exp': 1.0, 'lam': 1.0}))
+    attractor: Dict[str, float] = field(default_factory = lambda: ({'k_psi': 3.0}))
+    speed: Dict[str, float] = field(default_factory = lambda : ({'ex_factor': 1.0}))
+    dynamic: bool = False
+    limits: Dict[str, float] = field(default_factory = lambda: ({'exp': 1.0, 'lam': 1.0}))
+    damper: Dict[str, object] = field(default_factory = lambda :({'r_d': 0.8, 'b': [0.1, 6.5]}))
+    l_offset: float = 0.2
+    m_arm: float = 1.0
+    m_rot: float = 1.0
+
+
+class FabricPlanner(Planner):
+
+    def __init__(self, exp, **kwargs):
+        super().__init__(exp, **kwargs)
+        self._config = FabricConfig(**kwargs)
         self.reset()
 
     def reset(self):
-        if self._exp.robotType() in ['groundRobot', 'boxer', 'albert']:
-            self._planner = DefaultNonHolonomicPlanner(self.n(), m_base=self.mBase(), m_ratio=self.m_ratio(), debug=False)
-        else:
-            self._planner = DefaultFabricPlanner(self.n(), m_base=self.mBase(), debug=False)
-        self._q, self._qdot = self._planner.var()
+        base_energy: str = (
+            "0.5 * sym('base_inertia') * ca.dot(xdot, xdot)"
+        )
+        collision_geometry: str = (
+            "-sym('obst_geo_lam') / (x ** sym('obst_geo_exp')) * xdot ** 2"
+        )
+        collision_finsler: str = (
+            "1.0/(x**1) * (-0.5 * (ca.sign(xdot) - 1)) * xdot**2"
+        )
+        limit_geometry: str = (
+            "-0.1 / (x ** 1) * xdot ** 2"
+        )
+        limit_finsler: str = (
+            "1.0/(x**1) * (-0.5 * (ca.sign(xdot) - 1)) * xdot**2"
+        )
+        self_collision_geometry: str = (
+            "-sym('self_geo_lam') / (x ** sym('self_geo_exp')) * xdot ** 2"
+        )
+        self_collision_finsler: str = (
+            "1.0/(x**1) * (-0.5 * (ca.sign(xdot) - 1)) * xdot**2"
+        )
+        attractor_potential: str = (
+            "5.0 * (ca.norm_2(x) + 1 / 10 * ca.log(1 + ca.exp(-2 * 10 * ca.norm_2(x))))"
+        )
+        attractor_metric: str = (
+            "((2.0 - 0.3) * ca.exp(-1 * (0.75 * ca.norm_2(x))**2) + 0.3) * ca.SX(np.identity(x.size()[0]))"
+        )
+        self._planner = ParameterizedFabricPlanner(
+            self.config.n,
+            self._exp.robotType(),
+            base_energy=base_energy,
+            collision_geometry=collision_geometry,
+            collision_finsler=collision_finsler,
+            self_collision_geometry=self_collision_geometry,
+            self_collision_finsler=self_collision_finsler,
+        )
+        self._collision_links = [i for i in range(1, self.config.n+1)]
+        self._number_obstacles = 0
+        self._dynamic_goal = False
 
-    def m_ratio(self):
-        if 'm_ratio' in self._setup.keys():
-            return self._setup['m_ratio']
-        return 0.1
 
-    def interval(self):
-        return self._setup["interval"]
-
-    def n(self):
-        return self._setup["n"]
-
-    def mBase(self):
-        return self._setup["m_base"]
-
-    def dynamic(self):
-        return self._setup["dynamic"]
-
-    def configObst(self):
-        return self._setup["obst"]
-
-    def configSelfColAvoidance(self):
-        return self._setup["selfCol"]
-
-    def configAttractor(self):
-        return self._setup["attractor"]
-
-    def configSpeed(self):
-        return self._setup["speed"]
-
-    def configLimits(self):
-        return self._setup["limits"]
-
-    def configDamper(self):
-        return self._setup["damper"]
+    def initialize_runtime_arguments(self):
+        self._runtime_arguments = {}
+        self._runtime_arguments['base_inertia'] = np.array([self.config.m_base])
+        for j in range(self._number_static_obstacles):
+            self._runtime_arguments[f'radius_obst_{j}'] = np.array([self._static_obsts[j].radius()])
+            self._runtime_arguments[f'x_obst_{j}'] = np.array(self._static_obsts[j].position())
+            for i in self._collision_links:
+                self._runtime_arguments[f'obst_geo_exp_obst_{j}_{i}_leaf'] = np.array([self.config.obst['exp']])
+                self._runtime_arguments[f'obst_geo_lam_obst_{j}_{i}_leaf'] = np.array([self.config.obst['lam']])
+                self._runtime_arguments[f'radius_body_{i}'] = np.array([self._r_body])
+        for j in range(self._number_dynamic_obstacles):
+            self._runtime_arguments[f'radius_dynamic_obst_{j}'] = np.array([self._dynamic_obsts[j].radius()])
+            for i in self._collision_links:
+                self._runtime_arguments[f'obst_geo_exp_dynamic_obst_{j}_{i}_leaf'] = np.array([self.config.obst['exp']])
+                self._runtime_arguments[f'obst_geo_lam_dynamic_obst_{j}_{i}_leaf'] = np.array([self.config.obst['lam']])
+                self._runtime_arguments[f'radius_body_{i}'] = np.array([self._r_body])
+        for link, paired_links in self._self_collision_dict.items():
+            for paired_link in paired_links:
+                self._runtime_arguments[f'self_geo_lam_self_collision_{link}_{paired_link}'] = np.array([self.config.selfCol['lam']])
+                self._runtime_arguments[f'self_geo_exp_self_collision_{link}_{paired_link}'] = np.array([self.config.selfCol['exp']])
 
     def setObstacles(self, obsts, r_body):
-        x = ca.SX.sym("x", 1)
-        xdot = ca.SX.sym("xdot", 1)
-        lag_col = CollisionLagrangian(x, xdot)
-        geo_col = CollisionGeometry(
-            x, xdot, exp=self.configObst()["exp"], lam=self.configObst()["lam"]
-        )
-        for i, obst in enumerate(obsts):
-            m_obst = obst.dim()
+        self._dynamic_obsts = []
+        self._static_obsts = []
+        for obst in obsts:
             if isinstance(obst, DynamicSphereObstacle):
-                refTraj_i = AnalyticSymbolicTrajectory(ca.SX(np.identity(m_obst)), m_obst, traj=obst.traj())
-                x_col = ca.SX.sym("x_col", m_obst)
-                xdot_col = ca.SX.sym("xdot_col", m_obst)
-                x_rel = ca.SX.sym("x_rel", m_obst)
-                xdot_rel = ca.SX.sym("xdot_rel", m_obst)
-            for j in range(1, self.n() + 1):
-                if self._exp.robotType() == "pointRobot" and j == 1:
-                    continue
-                if self._exp.robotType() == "groundRobot" and j == 1:
-                    continue
-                fk = self._exp.fk(self._q, j, positionOnly=True)
-                if self._exp.robotType() == 'boxer':
-                    fk = fk[0:2]
-                if isinstance(obst, DynamicSphereObstacle):
-                    phi_n = ca.norm_2(x_rel) / (obst.radius() + r_body) - 1
-                    dm_n = DifferentialMap(phi_n, q=x_rel, qdot=xdot_rel)
-                    dm_rel = RelativeDifferentialMap(q=x_col, qdot=xdot_col, refTraj =refTraj_i)
-                    dm_col = DifferentialMap(fk, q=self._q, qdot=self._qdot)
-                    eg = WeightedGeometry(g=geo_col, le=lag_col)
-                    eg_n = eg.pull(dm_n)
-                    eg_rel = eg_n.pull(dm_rel)
-                    self._planner.addWeightedGeometry(dm_col, eg_rel)
-                    #self._planner.addGeometry(dm_col, lag_col.pull(dm_n).pull(dm_rel), geo_col.pull(dm_n).pull(dm_rel))
-                elif isinstance(obst, SphereObstacle):
-                    dm_col = CollisionMap(
-                        self._q, self._qdot, fk, obst.position(), obst.radius(), r_body=r_body
-                    )
-                    self._planner.addGeometry(dm_col, lag_col, geo_col)
+                self._dynamic_obsts.append(obst)
+            else:
+                self._static_obsts.append(obst)
+        self._number_static_obstacles = len(self._static_obsts)
+        self._number_dynamic_obstacles = len(self._dynamic_obsts)
 
     def setSelfCollisionAvoidance(self, r_body):
-        if self._exp.robotType() == "pointRobot":
-            return
-        x = ca.SX.sym("x", 1)
-        xdot = ca.SX.sym("xdot", 1)
-        lag_selfCol = CollisionLagrangian(x, xdot)
-        geo_selfCol = CollisionGeometry(
-            x,
-            xdot,
-            exp=self.configSelfColAvoidance()["exp"],
-            lam=self.configSelfColAvoidance()["lam"],
-        )
-        for pair in self._exp.selfCollisionPairs():
-            fk_1 = self._exp.fk(self._q, pair[0], positionOnly=True)
-            fk_2 = self._exp.fk(self._q, pair[1], positionOnly=True)
-            dm_selfCol = SelfCollisionMap(self._q, self._qdot, fk_1, fk_2, r_body)
-            self._planner.addGeometry(dm_selfCol, lag_selfCol, geo_selfCol)
+        self_collision_pairs = self._exp.selfCollisionPairs()
+        self._self_collision_dict = {}
+        for pair in self_collision_pairs:
+            if pair[0] in self._self_collision_dict.keys():
+                self._self_collision_dict[pair[0]].append(pair[1])
+            else:
+                self._self_collision_dict[pair[0]] = [pair[1]]
+        self._r_body = r_body
 
     def setJointLimits(self, limits):
-        x = ca.SX.sym("x", 1)
-        xdot = ca.SX.sym("xdot", 1)
-        lag_col = CollisionLagrangian(x, xdot)
-        geo_col = LimitGeometry(
-            x, xdot, lam=self.configLimits()["lam"], exp=self.configLimits()["exp"],
-        )
-        for i in range(self.n()):
-            dm_col = UpperLimitMap(self._q, self._qdot, limits[1][i], i)
-            self._planner.addGeometry(dm_col, lag_col, geo_col)
-            dm_col = LowerLimitMap(self._q, self._qdot, limits[0][i], i)
-            self._planner.addGeometry(dm_col, lag_col, geo_col)
+        self._limits = limits
 
     def setGoal(self, goal):
-        for subGoal in goal.subGoals():
-            if subGoal.type() == "staticJointSpaceSubGoal":
-                fk = self._q[subGoal.indices()]
-            else:
-                fk_child = self._exp.fk(self._q, subGoal.childLink(), positionOnly=True)[subGoal.indices()]
-                fk_parent = self._exp.fk(self._q, subGoal.parentLink(), positionOnly=True)[subGoal.indices()]
-                fk = fk_child - fk_parent
-            if subGoal.type() == "analyticSubGoal":
-                goalSymbolicTraj = AnalyticSymbolicTrajectory(ca.SX(np.identity(subGoal.m())), subGoal.m(), traj=subGoal.traj())
-                dm_psi, lag_psi, geo_psi, x_psi, xdot_psi = defaultDynamicAttractor(
-                    self._q, self._qdot, fk, goalSymbolicTraj, k_psi=self.configAttractor()['k_psi'] * subGoal.weight()
-                )
-                self._planner.addForcingGeometry(dm_psi, lag_psi, geo_psi, goalVelocity=goalSymbolicTraj.xdot())
-            elif subGoal.type() == "splineSubGoal": 
-                goalSymbolicTraj = AnalyticSymbolicTrajectory(ca.SX(np.identity(subGoal.m())), subGoal.m(), traj=subGoal.traj())
-                dm_psi, lag_psi, geo_psi, x_psi, xdot_psi = defaultDynamicAttractor(
-                    self._q, self._qdot, fk, goalSymbolicTraj, k_psi=self.configAttractor()['k_psi'] * subGoal.weight()
-                )
-                self._planner.addForcingGeometry(dm_psi, lag_psi, geo_psi, goalVelocity=goalSymbolicTraj.xdot())
-            else:
-                dm_psi, lag_psi, geo_psi, x_psi, xdot_psi = defaultAttractor(
-                    self._q, self._qdot, subGoal.position(), fk
-                )
-                geo_psi = GoalGeometry(
-                    x_psi, xdot_psi, k_psi=self.configAttractor()["k_psi"] * subGoal.weight()
-                )
-                self._planner.addForcingGeometry(dm_psi, lag_psi, geo_psi)
-            if subGoal.isPrimeGoal():
-                self._dm_psi = dm_psi
-                self._x_psi = x_psi
-                self._xdot_psi = xdot_psi
+        self._dynamic_goal = isinstance(goal.primeGoal(), DynamicSubGoal) 
+        self._goal = goal
 
     def concretize(self):
-        # execution energy
-        exLag = ExecutionLagrangian(self._q, self._qdot)
-        self._planner.setExecutionEnergy(exLag)
-        # Speed control
-        # self._planner.setConstantSpeedControl(beta=2.0)
-        ex_factor = self.configSpeed()["ex_factor"]
-        self._planner.setDefaultSpeedControl(
-            self._x_psi,
-            self._dm_psi,
-            exLag,
-            ex_factor,
-            r_b=self.configDamper()["r_d"],
-            b=self.configDamper()["b"],
+        self._planner.set_components(
+            self._collision_links,
+            self._self_collision_dict,
+            self._goal,
+            limits=self._limits,
+            number_obstacles=self._number_static_obstacles,
+            number_dynamic_obstacles=self._number_dynamic_obstacles,
         )
         self._planner.concretize()
+        self.initialize_runtime_arguments()
+
+
+    def adapt_runtime_arguments(self, args):
+        self._runtime_arguments['q'] = args[0]
+        self._runtime_arguments['qdot'] = args[1]
+        if self._dynamic_goal:
+            self._runtime_arguments['x_ref_goal_0_leaf'] = args[2]
+            self._runtime_arguments['xdot_ref_goal_0_leaf'] = args[3]
+            self._runtime_arguments['xddot_ref_goal_0_leaf'] = args[4]
+        else:
+            for i, sub_goal in enumerate(self._goal.subGoals()):
+                self._runtime_arguments[f'x_goal_{i}'] = np.array(sub_goal.position())
+                self._runtime_arguments[f'weight_goal_{i}'] = np.array(sub_goal.weight() * self.config.attractor['k_psi'])
+        for i, obst in enumerate(self._dynamic_obsts):
+            for j in self._collision_links:
+                self._runtime_arguments[f'x_ref_dynamic_obst_{i}_{j}_leaf'] = args[1 + 3*i+1]
+                self._runtime_arguments[f'xdot_ref_dynamic_obst_{i}_{j}_leaf'] = args[1 + 3*i + 2]
+                self._runtime_arguments[f'xddot_ref_dynamic_obst_{i}_{j}_leaf'] = args[1 + 3*i + 3]
+
+
+        pass
 
     def computeAction(self, *args):
-        action = self._planner.computeAction(*args)
-        if self._planner._debug:
-            debugEval = self._planner.debugEval(*args)
-            print(debugEval)
+        self.adapt_runtime_arguments(args)
+        action = self._planner.compute_action(**self._runtime_arguments)
+        if np.linalg.norm(action) < 1e-5:
+            action *= 0
+        logging.debug(f"Action computed by fabric: {action}")
         return action

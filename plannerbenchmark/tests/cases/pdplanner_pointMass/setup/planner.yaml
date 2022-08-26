@@ -1,4 +1,4 @@
-type: pdplanner
+name: pd
 interval: 1
 robot_type: pointRobot
 n: 2

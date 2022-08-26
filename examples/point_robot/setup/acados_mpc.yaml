@@ -1,0 +1,12 @@
+name: AcadosMpc
+N: 20
+w_pos: 1.0
+w_coll: 0.01
+w_input: 0.01
+# w_joints: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+# w_vref: 0.0
+
+robot_min_acc: -2.0
+robot_max_acc: 2.0
+robot_min_vel: -2.0
+robot_max_vel: 2.0

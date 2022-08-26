@@ -1,6 +1,7 @@
 import os
 import sys
 import yaml
+import logging
 import csv
 
 
@@ -22,7 +23,7 @@ class Logger(object):
             if n_i < self._exp.n():
                 resDict['q' + str(n_i)] = q[n_i]
                 resDict['q' + str(n_i) + 'dot'] = qdot[n_i]
-            if self._exp.robotType() in ['panda', 'mobilePanda', 'tiago']:
+            if self._exp.robotType() in ['panda', 'mobilePanda', 'tiago', 'albert']:
                 fk = self._exp.fk(q, n_i, positionOnly=True)
                 resDict['fk' + str(n_i) + "_x"] = fk[0]
                 resDict['fk' + str(n_i) + "_y"] = fk[1]
@@ -55,7 +56,7 @@ class Logger(object):
         folderPath = curPath + "/" + self._planner.plannerType() + "_" + self._timeStamp
         while os.path.isdir(folderPath):
             folderPath = folderPath[:-2] + str(int(folderPath[-2:]) + 1)
-        print("Saving results to : %s" % folderPath)
+        logging.info(f"Saving results to : {folderPath}")
         os.makedirs(folderPath)
         self.saveResult(folderPath)
         self._planner.save(folderPath)

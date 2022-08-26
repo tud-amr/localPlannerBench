@@ -1,0 +1,14 @@
+name: mpc
+n: 5
+dt: 0.5
+H: 30
+interval: 10
+weights:
+  wx: 1.0
+  wvel: 5.0
+  ws: 1e10
+  wu: 5.0
+obst:
+  nbObst: 5
+slack: false
+robot_type: planarArm

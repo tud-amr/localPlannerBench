@@ -1,0 +1,15 @@
+H: 30
+dt: 0.1
+dynamic: false
+interval: 10
+n: 7
+name: mpc
+obst:
+  nbObst: 5
+robot_type: panda
+slack: true
+weights:
+  ws: 1e10
+  wu: 5.0
+  wvel: 5.0
+  wx: 10.0

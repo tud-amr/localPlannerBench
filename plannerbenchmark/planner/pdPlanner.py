@@ -1,28 +1,24 @@
+from dataclasses import dataclass
 import numpy as np
+import logging
 
-from plannerbenchmark.generic.abstractPlanner import AbstractPlanner
+from plannerbenchmark.generic.planner import Planner, PlannerConfig
+
+@dataclass
+class PdConfig(PlannerConfig):
+    k: float = 0.8
+    p: float = 0.2
 
 
-class PDPlanner(AbstractPlanner):
-    def __init__(self, exp, setupFile):
-        required_keys = ["type", "n", 'k', 'p']
-        super().__init__(exp, setupFile, required_keys)
-        self._curError = np.zeros(self.n())
-
-    def interval(self):
-        return 1
-
-    def n(self):
-        return self._setup['n']
+class PDPlanner(Planner):
+    def __init__(self, exp, **kwargs):
+        super().__init__(exp, **kwargs)
+        self._config = PdConfig(**kwargs)
+        self._curError = np.zeros(self.config.n)
+        logging.warn("The PD-Planner that you are using is not able to deal with obstacles")
 
     def dt(self):
         return self._exp.dt()
-
-    def k(self):
-        return self._setup['k']
-
-    def p(self):
-        return self._setup['p']
 
     def reset(self):
         pass
@@ -50,5 +46,5 @@ class PDPlanner(AbstractPlanner):
 
     def computeAction(self, *args):
         self.evalError(args[0])
-        return self.p() * self._curError + self.k() * self._curErrorDot
+        return self.config.p * self._curError + self.config.k * self._curErrorDot
 
