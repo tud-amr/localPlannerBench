@@ -1,5 +1,0 @@
-name: pd
-robot_type: pointRobot
-n: 2
-k: 0.8
-p: 0.2

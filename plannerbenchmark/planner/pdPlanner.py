@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import numpy as np
+import logging
 
 from plannerbenchmark.generic.planner import Planner, PlannerConfig
 
@@ -14,6 +15,7 @@ class PDPlanner(Planner):
         super().__init__(exp, **kwargs)
         self._config = PdConfig(**kwargs)
         self._curError = np.zeros(self.config.n)
+        logging.warn("The PD-Planner that you are using is not able to deal with obstacles")
 
     def dt(self):
         return self._exp.dt()

@@ -30,14 +30,12 @@ class SeriesPlotting(object):
         curPath = os.path.dirname(os.path.abspath(__file__)) + "/"
         curPath = pkg_path
         createPlotFolder = curPath + "plottingSeries"
-        for plannerName in plannerNames:
-            subprocess.Popen(
-                [
-                    "./createPlot",
-                    self._folder,
-                    plannerName,
-                    str(self._nbMetrics),
-                ],
-                cwd=createPlotFolder,
-                stdout=subprocess.PIPE,
-            ).wait()
+        subprocess.Popen(
+            [
+                "./createPlot",
+                self._folder,
+            ] + plannerNames + 
+            [str(self._nbMetrics)],
+            cwd=createPlotFolder,
+            stdout=subprocess.PIPE,
+        ).wait()

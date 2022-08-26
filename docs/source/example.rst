@@ -3,7 +3,7 @@
 Example
 ==================
 
-We provide several experiment setups in the ``experiments`` folder.
+We provide several experiment setups in the ``examples`` folder.
 However, here we want to walk you through the most basic example without a planner that
 has a dependency on other packages.
 
@@ -31,11 +31,11 @@ example. For that execute
 
 .. code:: bash
 
-  runner -c setup/exp.yaml -p setup/planner.yaml --render
+  runner -c setup/exp.yaml -p setup/<planner_name>.yaml --render
 
 When you run the above line, the experiment starts with the configuration files you have
 provided through the command line interface, namely ``-c setup/exp.yaml`` specifies the
-experiment and ``-p setup/planner.yaml`` specifies the planner. The flag
+experiment and ``-p setup/<planner_name>.yaml`` specifies the planner. The flag
 ``--render`` indicates that the experiment should be rendered to your screen. Once the
 experiment has finished or you have stopped it prematurely, a new folder is created in the
 ``results`` directory. In there, you will find all necessary information on what exactly

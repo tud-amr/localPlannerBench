@@ -1,14 +1,12 @@
 #! /usr/bin/env python3
 
 import argparse
-import subprocess
 import datetime
 import time
 import os
-import sys
-import warnings
 import numpy as np
 import signal
+import logging
 
 from plannerbenchmark.generic.experiment import Experiment, ExperimentInfeasible
 from plannerbenchmark.generic.logger import Logger
@@ -19,20 +17,13 @@ from plannerbenchmark.generic.planner  import PlannerRegistry
 try:
     from plannerbenchmark.planner.fabricPlanner import FabricPlanner
 except Exception as e:
-    print(e)
+    logging.warning(f"The fabrics mpc planner cannot be used, {e}")
 try:
     from plannerbenchmark.planner.mpcPlanner import MPCPlanner
 except Exception as e:
-    print(e)
+    logging.warning(f"The forces-pro mpc planner cannot be used, {e}")
 
-
-def blockPrint():
-    sys.stdout = open(os.devnull, 'w')
-    warnings.filterwarnings('ignore')
-
-
-def enablePrint():
-    sys.stdout = sys.__stdout__
+log_levels = {"WARNING": 30, "INFO": 20, "DEBUG": 10, "QUIET": 100}
 
 
 class Runner(object):
@@ -42,7 +33,7 @@ class Runner(object):
         self._aborted = False
 
     def handleStop(self, signum, frame):
-        print("\n Stopping runner...")
+        logging.info("\n Stopping runner...")
         self.stopEnvironment()
         self._aborted = True
 
@@ -61,6 +52,13 @@ class Runner(object):
             default='results',
             help="Results folder",
         )
+        self._parser.add_argument(
+                "--log-level",
+                "-v",
+                "-ll",
+                type=str,
+                default="INFO",
+                help="Set logging level (Choose between DEBUG, INFO, WARNING, QUIET)")
         self._parser.add_argument(
             "--numberRuns", "-n", type=int, default=1, help="Number of runs of the experiment"
         )
@@ -90,10 +88,15 @@ class Runner(object):
         self._random_goal = args.random_goal
         self._numberRuns = args.numberRuns
         self._verbose = args.verbose
+        logging.basicConfig(level=log_levels[args.log_level])
         self._render = args.render
         self._res_folder = os.getcwd() + '/' + args.res_folder
         self._planners = []
         self._experiment = Experiment(args.caseSetup)
+
+        # NOTE: Shuffle at least once to make sure experiment.obstacles() has right shape. Important for mpc problem formulation in __init__ functions.
+        self._experiment.shuffle(self._random_obst, self._random_init, self._random_goal)
+
         self._ros = args.ros
         self._compare = args.compare
         if self._compare:
@@ -152,22 +155,22 @@ class Runner(object):
         return
 
     def run(self):
-        print("start run")
+        logging.info("Starting runner...")
         completedRuns = 0
-        print("Composing the planner")
-        start=time.perf_counter()
-        self.setPlanner()
-        print(f"Planner composed in {np.round(time.perf_counter()-start, decimals=2)} sec")
         while completedRuns < self._numberRuns:
             self._experiment.shuffle(self._random_obst, self._random_init, self._random_goal)
             try:
                 self._experiment.checkFeasibility(checkGoalReachible=False)
                 completedRuns += 1
             except ExperimentInfeasible as e:
-                print("Case not feasible %s" % str(e))
+                logging.warn(f"Case not feasible, {e}")
                 continue
+            logging.info("Composing the planner")
+            start=time.perf_counter()
+            self.setPlanner()
+            logging.info(f"Planner composed in {np.round(time.perf_counter()-start, decimals=2)} sec")
             q0, q0dot = self._experiment.initState()
-            timeStamp = "{:%Y%m%d_%H%M%S}".format(datetime.datetime.now())
+            timeStamp = "{:%Y%m%d_%H%M%S_%f}".format(datetime.datetime.now())
             if self._compare:
                 timeStamp = self._compareTimeStamp
             for planner in self._planners:
@@ -181,7 +184,7 @@ class Runner(object):
                     if self._aborted:
                         break
                     if i % 1000 == 0:
-                        print("Timestep : %d" %i)
+                        logging.info(f"Timestep : {i}")
                     if 'x' in ob:
                         q = ob['x']
                         qdot = ob['xdot']
@@ -210,14 +213,14 @@ class Runner(object):
                     t = t_new - t0
                 if self._save:
                     logger.save()
-            print("Completed %d runs" % completedRuns)
+            logging.info(f"Completed {completedRuns} runs")
             self.stopEnvironment()
 
-def newmain():
+def main():
     myRunner = Runner()
     myRunner.parseArguments()
     myRunner.run()
 
 
 if __name__ == "__main__":
-    newmain()
+    main()
