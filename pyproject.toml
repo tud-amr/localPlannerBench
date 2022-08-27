@@ -1,8 +1,18 @@
 [tool.poetry]
 name = "plannerbenchmark"
 version = "1.0.0"
-description = "Benchmark suite for local planner in dynamic environment."
+description = "Benchmark suite for local planner in dynamic environments. Multiple planners can be compared on different kinematic chains in different environment. The suite is highly extendable for new planners, robots and environments."
 authors = ["Max Spahn <m.spahn@tudelft.nl>"]
+maintainers = [
+  "Max Spahn <m.spahn@tudelft.nl>",
+  "Chadi Salmi <c.salmi@tudelft.nl"
+]
+license = "GPL-3.0-or-later"
+readme = "README.md"
+homepage = "https://maxspahn.github.io/localPlannerBench/"
+documentation = "https://maxspahn.github.io/localPlannerBench/"
+repository = "https://github.com/maxspahn/localPlannerBench"
+keywords = ["robotics", "motion-planning", "benchmark"]
 
 [tool.poetry.dependencies]
 python = "^3.6.5,<3.10"
