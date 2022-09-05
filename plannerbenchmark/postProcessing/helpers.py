@@ -40,7 +40,8 @@ def createMetricsFromNames(
         Returns a list of all metrics for which the name was specified.
     """
     metrics = []
-    m = experiment.obstacles()[0].dim()
+    goal_indices = experiment.primeGoal().indices()
+    dimension_obstacle = experiment.obstacles()[0].dim()
     n = experiment.n()
     fksNames = []
     eeNames = []
@@ -50,9 +51,9 @@ def createMetricsFromNames(
         if obst.type() != 'sphereObstacle':
             r_obsts.append(obst.radius())
     for i in range(1, n + 1):
-        for j in range(m):
+        for j in goal_indices:
             fksNames.append("fk" + str(i) + "_" + indexMap[j])
-    for j in range(m):
+    for j in goal_indices:
         eeNames.append("fk" + str(n) + "_" + indexMap[j])
         goalNames.append("goal_" + str(j) + "_0")
     for name in names:
@@ -92,7 +93,7 @@ def createMetricsFromNames(
                     {
                         'r_body': experiment.rBody(),
                         'r_obsts': r_obsts, 
-                        'm': m,
+                        'dimension_obstacle': dimension_obstacle,
                         'n': experiment.n()
                     }
                 )
@@ -105,7 +106,7 @@ def createMetricsFromNames(
                     {
                         'r_body': experiment.rBody(),
                         'r_obsts': r_obsts, 
-                        'm': m,
+                        'dimension_obstacle': dimension_obstacle,
                         'n': experiment.n()
                     }
                 )
@@ -115,7 +116,7 @@ def createMetricsFromNames(
                 TimeToReachGoalMetric(
                     name,
                     eeNames + goalNames + ["t"],
-                    {"m": m, "des_distance": experiment.primeGoal().epsilon()},
+                    {"goal_indices": goal_indices, "des_distance": experiment.primeGoal().epsilon()},
                 )
             )
         if name == "pathLength":
@@ -125,7 +126,7 @@ def createMetricsFromNames(
                 IntegratedErrorMetric(
                     name,
                     eeNames + goalNames + ["t"],
-                    {"m": m, "des_distance": 10* experiment.primeGoal().epsilon()},
+                    {"dimension_obstacle": dimension_obstacle, "des_distance": 10* experiment.primeGoal().epsilon()},
                 )
             )
     return metrics

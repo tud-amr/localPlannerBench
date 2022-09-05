@@ -13,6 +13,7 @@ Welcome to Local Planner Bench's documentation!
    introduction
    getting_started
    example
+   experiment_config
    structure
    api
 

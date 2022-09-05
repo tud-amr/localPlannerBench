@@ -8,7 +8,7 @@ goal:
   subgoal1:
     prime: True
     m: 3
-    w: 2
+    w: 1
     indices:
       - 0
       - 1

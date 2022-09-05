@@ -3,6 +3,7 @@ from subprocess import Popen, DEVNULL
 import yaml
 import numpy as np
 import re
+import logging
 import pytest
 
 
@@ -73,16 +74,13 @@ def verify_resFile(caseFolder):
 
 
 def run_integration_test_case(caseFolder):
-    print("\n------------------------------------------------------------------------")
-    print(f"Running case from {caseFolder}")
-    print("------------------------------------------------------------------------")
+    logging.info("\n------------------------------------------------------------------------")
+    logging.info(f"Running case from {caseFolder}")
+    logging.info("------------------------------------------------------------------------")
     tests_path = os.path.dirname(os.path.abspath(__file__))
-    execPath = tests_path + "/../exec/"
     # run case
     cmdRunner = [
-        "poetry",
-        "run",
-        execPath + "runner",
+        "runner",
         "-c",
         tests_path + "/" + caseFolder + "/setup/exp.yaml",
         "-p",
@@ -92,9 +90,7 @@ def run_integration_test_case(caseFolder):
     ]
     Popen(cmdRunner, stdout=DEVNULL).wait()
     cmdPostProcessor = [
-        "poetry",
-        "run",
-        execPath + "postProcessor",
+        "post_process",
         "--exp",
         "tempResults",
         "-k",

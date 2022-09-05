@@ -34,8 +34,10 @@ set pointsize 0.5
 set grid y2tics
 set border 9
 if (planner1Type eq 'StaticFabric') planner1 = 'Static Fabric'
+if (planner1Type eq 'AcadosMpc') planner1 = 'Acados MPC'
 if (planner1Type eq 'DynamicFabric') planner1 = 'Dynamic Fabric'
 if (planner2Type eq 'StaticFabric') planner2 = 'Static Fabric'
+if (planner2Type eq 'AcadosMpc') planner2 = 'Acados MPC'
 if (planner2Type eq 'DynamicFabric') planner2 = 'Dynamic Fabric'
 if (planner1Type eq 'MPC') planner1 = 'MPC'
 if (planner2Type eq 'MPC') planner2 = 'MPC'

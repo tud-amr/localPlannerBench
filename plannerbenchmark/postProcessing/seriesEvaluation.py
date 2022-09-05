@@ -1,5 +1,6 @@
 import yaml
 import os
+import logging
 import csv
 
 from plannerbenchmark.postProcessing.caseEvaluation import CaseEvaluation
@@ -40,7 +41,7 @@ class SeriesEvaluation(object):
         for fullPath in fullPaths:
             if not os.path.isdir(fullPath):
                 continue
-            print(f"Evaluating experiment from folder : {fullPath}")
+            logging.info(f"Evaluating experiment from folder : {fullPath}")
             totalExps += 1
             case = CaseEvaluation(fullPath, recycle=self._recycle)
             case.setMetrics(self._metricNames)

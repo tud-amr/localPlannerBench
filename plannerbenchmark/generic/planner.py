@@ -1,17 +1,22 @@
 from abc import abstractmethod
-from dataclasses import dataclass, asdict
-import yaml
-from plannerbenchmark.generic.planner_registry import PlannerRegistry
+from dataclasses import dataclass
+from hydra.core.config_store import ConfigStore
+from plannerbenchmark.generic.planner_registry import PlannerRegistry, PlannerConfigRegistry
+from omegaconf import OmegaConf
 
 class PlannerSettingIncomplete(Exception):
     pass
 
 @dataclass
-class PlannerConfig():
+class PlannerConfig(metaclass=PlannerConfigRegistry):
     interval: int = 1
     n: int = 2
     name: str = 'Planner'
     robot_type: str = 'pointRobot'
+
+cs = ConfigStore.instance()
+cs.store(name="base_planner", node=PlannerConfig)
+
 
 class Planner(metaclass=PlannerRegistry):
     def __init__(self, exp, **kwargs):
@@ -65,7 +70,7 @@ class Planner(metaclass=PlannerRegistry):
 
     def save(self, folderPath):
         with open(folderPath + "/planner.yaml", 'w') as file:
-            yaml.dump(asdict(self.config), file)
+            OmegaConf.save(self.config, file)
 
     @abstractmethod
     def computeAction(self, q, qdot):

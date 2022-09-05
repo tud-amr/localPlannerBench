@@ -1,5 +1,6 @@
 import re
-import yaml
+from hydra.core.config_store import ConfigStore
+from dataclasses import dataclass
 
 
 class PlannerRegistry(type):
@@ -28,6 +29,22 @@ class PlannerRegistry(type):
     def create_planner(cls, exp, setup, **kwargs):
         cls.parseSetup(setup)
         name = cls._setup['name']
-        print(cls.REGISTRY)
         planner = cls.REGISTRY[name]
         return planner(exp, **cls._setup)
+
+
+cs = ConfigStore.instance()
+
+class PlannerConfigRegistry(type):
+    def __new__(cls, name, bases, attrs):
+        new_cls = type.__new__(cls, name, bases, attrs)
+
+        if "PlannerConfig" in [b.__name__ for b in bases]:
+            # NOTE: Dirty trick to register proper dataclass to ConfigStore.
+            dataclass(new_cls)
+            name_match = re.match(r'(.*)Config', name)
+            cs.store(group="planner", name=f"base_{name_match.group(1).lower()}", node=new_cls)
+            new_cls = type.__new__(cls, name, bases, attrs)
+
+        return new_cls
+

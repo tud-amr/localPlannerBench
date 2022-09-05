@@ -2,10 +2,11 @@ import yaml
 import csv
 import gym
 import numpy as np
-import casadi as ca
 from omegaconf import OmegaConf, MISSING
 from dataclasses import dataclass
+from hydra.core.config_store import ConfigStore
 from typing import List, Dict, Optional, Any
+import logging
 
 import planarenvs.point_robot
 import planarenvs.n_link_reacher
@@ -15,6 +16,7 @@ import urdfenvs.panda_reacher
 import urdfenvs.mobile_reacher
 import urdfenvs.albert_reacher
 import urdfenvs.boxer_robot
+import urdfenvs.point_robot_urdf
 
 from forwardkinematics.fksCommon.fk_creator import FkCreator
 from MotionPlanningEnv.obstacleCreator import ObstacleCreator
@@ -63,8 +65,12 @@ class ExperimentConfig:
     limits: Dict[str, List[float]] = MISSING
     r_body: float = MISSING
     randomObstacles: Dict[str, int] = MISSING
-    obstacles: Optional[Dict[str, SphereObstacleConfig]] = MISSING
+    obstacles: Optional[Dict[str, Any]] = MISSING
     selfCollision: SelfCollisionConfig = MISSING
+
+cs = ConfigStore.instance()
+cs.store(group="experiment", name="base_experiment", node=ExperimentConfig)
+
 
 class Experiment(object):
     def __init__(self, cfg):
@@ -187,7 +193,7 @@ class Experiment(object):
         try:
             env.add_goal(self.goal())
         except Exception as e:
-            print(e)
+            logging.error(f"Error occured when adding goal to the scene, {e}")
 
     def shuffleInitConfiguration(self):
         q0_new = np.random.uniform(low=self.limits()[0], high=self.limits()[1])
