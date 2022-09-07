@@ -1,3 +1,5 @@
+defaults:
+  - base_experiment
 T: 5000
 dynamic: False
 dt: 0.01

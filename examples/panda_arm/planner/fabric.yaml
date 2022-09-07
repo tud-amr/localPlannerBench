@@ -1,3 +1,5 @@
+defaults:
+  - base_fabric
 interval: 1
 name: fabric
 robot_type: simPanda

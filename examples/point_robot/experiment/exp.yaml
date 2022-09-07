@@ -1,101 +1,87 @@
 defaults:
   - base_experiment
-T: 5000
+T: 500
 dynamic: False
-dt: 0.01
-env: panda-reacher-acc-v0
-robot_type: panda
-n: 7
+dt: 0.05
+env: point-robot-acc-v0
+robot_type: pointRobot
+n: 2
 goal:
-  subgoal1:
+  subgoal0:
     prime: True
-    m: 3
+    m: 2
     w: 1
     indices:
       - 0
       - 1
-      - 2
     parent_link: 0
-    child_link: 7
+    child_link: 1
     desired_position:
-      - 0.5
-      - -0.4
-      - 0.3
+      - 4.0
+      - 0.2
     low:
-      - -0.4
-      - -0.4
-      - 0.1
+      - -4.0
+      - -4.0
     high: 
-      - 0.7
-      - 0.0
-      - 1.1
+      - 4.0
+      - 4.0
     type: staticSubGoal
-    epsilon: 0.05
+    epsilon: 0.1
 initState:
-  q0: 
-    - 1.0
+  q0:
     - 0.0
-    - 0.0
-    - -1.50
-    - 0.0
-    - 1.8675
     - 0.0
   q0dot:
     - 0.0
     - 0.0
-    - 0.0
-    - 0.0
-    - 0.0
-    - 0.0
-    - 0.0
 limits:
-  low: 
-    - -2.8973
-    - -1.7628
-    - -2.8973
-    - -3.0718
-    - -2.8973
-    - -0.0175
-    - -2.8973
+  low:
+    - -5.0
+    - -5.0
   high:
-    - 2.8973
-    - 1.7628
-    - 2.8973
-    - 0.0698
-    - 2.8973
-    - 3.7525
-    - 2.8973
-r_body: 0.15
-selfCollision:
-  pairs:
-    - [0, 6]
-    - [0, 7]
-    - [1, 6]
-    - [1, 7]
-    - [2, 6]
-    - [2, 7]
+    - 5.0
+    - 5.0
+r_body: 0.2
+randomObstacles:
+  number: 5
 obstacles:
   obst0:
-    geometry:
-      position:
-        - 0.7
-        - 0.3
-        - 0.6
-      radius: 0.15
     type: sphereObstacle
-    dim: 3
+    dim: 2
+    geometry:
+      position: 
+        - 2.0
+        - 0.2
+      radius: 1.0
     low:
       position:
-        - -1.0
-        - -1.0
-        - 0.0
+        - -5.0
+        - -5.0
       radius: 0.0
     high:
       position:
-        - 1.0
-        - 0.3
-        - 1.0
-      radius: 0.2
-randomObstacles:
-  number: 5
+        - 5.0
+        - 5.0
+      radius: 1.0
+  obst1:
+    type: sphereObstacle
+    dim: 2
+    geometry:
+      position: 
+        - 2.4
+        - 0.4
+      radius: 1.0
+    low:
+      position:
+        - -5.0
+        - -5.0
+      radius: 0.0
+    high:
+      position:
+        - 5.0
+        - 5.0
+      radius: 1.0
+selfCollision:
+  pairs:
+    
 

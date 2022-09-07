@@ -190,7 +190,7 @@ class Runner(object):
             logging.info(f"Completed {completedRuns} runs")
             self.stopEnvironment()
 
-@hydra.main(version_base=None, config_path="../../examples/point_robot", config_name="config")
+@hydra.main(version_base=None, config_path="../../examples/point_robot", config_name="runner")
 def main(cfg):
     myRunner = Runner()
     myRunner.parseArguments(cfg)

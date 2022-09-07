@@ -1,6 +1,0 @@
-defaults:
-  - base_config
-  - planner: pd1
-  - experiment: point1
-  - _self_
-

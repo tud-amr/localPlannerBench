@@ -1,3 +1,5 @@
+defaults:
+  - base_acadosmpc
 name: AcadosMpc
 N: 20
 w_pos: 4.0

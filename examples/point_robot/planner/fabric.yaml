@@ -2,26 +2,26 @@ defaults:
   - base_fabric
 interval: 1
 name: fabric
-robot_type: simPanda
-n: 7
-m_base: 1.0
+robot_type: pointRobot
+n: 2
+m_base: 0.2
 obst:
-  exp: 1.0
+  exp: 0.1
   lam: 1.0
 selfCol:
-  exp: 3.0
+  exp: 1.0
   lam: 2.0
 attractor:
-  k_psi: 15.0
-limits:
-  exp: 1.0
-  lam: 1.0
+  k_psi: 1.0
 speed:
-  ex_factor: 1.0
+  ex_factor: 5.0
+limits:
+  lam: 10.0
+  exp: 3.0
 damper:
-  r_d: 0.05
-  b:
-    - 0.01
-    - 3.5
+  r_d: 0.80
+  b: 
+   - 0.1
+   - 6.5
 dynamic: False
 

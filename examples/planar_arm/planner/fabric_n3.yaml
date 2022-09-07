@@ -1,7 +1,9 @@
+defaults:
+  - base_fabric
 interval: 1
 name: fabric
 robot_type: planarArm
-n: 5
+n: 3
 m_base: 1.0
 obst:
   exp: 1.0
@@ -15,7 +17,7 @@ limits:
   exp: 1.0
   lam: 1.0
 speed:
-  ex_factor: 2.0
+  ex_factor: 1.0
 damper:
   r_d: 0.2
   b:

@@ -1,3 +1,5 @@
+defaults:
+  - base_acadosmpc
 name: AcadosMpc
 w_pos: 0.30
 w_input: 0.01
