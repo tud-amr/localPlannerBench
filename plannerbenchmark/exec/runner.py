@@ -169,11 +169,11 @@ class Runner(object):
             start=time.perf_counter()
             self.setPlanner()
             logging.info(f"Planner composed in {np.round(time.perf_counter()-start, decimals=2)} sec")
-            q0, q0dot = self._experiment.initState()
             timeStamp = "{:%Y%m%d_%H%M%S_%f}".format(datetime.datetime.now())
             if self._compare:
                 timeStamp = self._compareTimeStamp
             for planner in self._planners:
+                q0, q0dot = self._experiment.initState()
                 ob, t0 = self.reset(q0, q0dot)
                 if not self._ros:
                     self._experiment.addScene(self._env)
