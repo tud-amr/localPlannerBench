@@ -12,16 +12,10 @@ from plannerbenchmark.generic.experiment import Experiment, ExperimentInfeasible
 from plannerbenchmark.generic.logger import Logger
 
 from plannerbenchmark.generic.planner  import PlannerRegistry
+from plannerbenchmark.generic.utils import import_custom_planners
+import_custom_planners()
+import plannerbenchmark.planner
 
-# Import different planners
-try:
-    from plannerbenchmark.planner.fabricPlanner import FabricPlanner
-except Exception as e:
-    logging.warning(f"The fabrics mpc planner cannot be used, {e}")
-try:
-    from plannerbenchmark.planner.mpcPlanner import MPCPlanner
-except Exception as e:
-    logging.warning(f"The forces-pro mpc planner cannot be used, {e}")
 
 log_levels = {"WARNING": 30, "INFO": 20, "DEBUG": 10, "QUIET": 100}
 
