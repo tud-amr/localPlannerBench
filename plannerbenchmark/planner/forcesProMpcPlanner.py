@@ -174,7 +174,6 @@ class ForcesProMpcPlanner(Planner):
     def concretize(self):
         self._actionCounter = self.config.interval
         if not os.path.isdir(self._solverFile):
-            print(self._solverFile)
             createSolver(N=self._config.H, dt=self._config.dt, robotType=self._exp.robotType(), slack=self._config.slack)
 
         self.load_solver()
