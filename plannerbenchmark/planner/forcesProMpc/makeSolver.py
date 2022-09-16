@@ -1,3 +1,4 @@
+import os
 import logging
 
 from robotmpcs.models.pointRobotMpcModel import PointRobotMpcModel
@@ -6,12 +7,8 @@ from robotmpcs.models.boxerMpcModel import BoxerMpcModel
 from robotmpcs.models.pandaMpcModel import PandaMpcModel
 
 
-def createSolver():
-    robotType = "pointRobot"
+def createSolver(N=30, dt=0.1, robotType="pointRobot", slack=False):
     debug = False
-    slack = False
-    dt = 0.1
-    N = 30
     if robotType == 'planarArm':
         n = 2
         mpcModel = PlanarArmMpcModel(2, N, n)
@@ -33,7 +30,7 @@ def createSolver():
     mpcModel.setObstacles(5, mpcModel._m, inCostFunction=False)
     mpcModel.setModel()
     mpcModel.setCodeoptions(debug=debug)
-    location = "./solverCollection/"
+    location = f"{os.path.dirname(os.path.abspath(__file__))}/solverCollection/"
     if debug:
         location += "debug/"
     mpcModel.generateSolver(location=location)

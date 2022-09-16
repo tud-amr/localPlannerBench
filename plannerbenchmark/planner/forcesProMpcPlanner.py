@@ -9,10 +9,11 @@ from dataclasses import dataclass, field
 from typing import Dict
 
 from plannerbenchmark.generic.planner import Planner, PlannerConfig
+from plannerbenchmark.planner.forcesProMpc.makeSolver import createSolver
 
 path_name = (
     os.path.dirname(os.path.realpath(__file__))
-    + "/mpc/solverCollection/"
+    + "/forcesProMpc/solverCollection/"
 )
 sys.path.append(path_name)
 
@@ -60,7 +61,7 @@ class ForcesProMpcPlanner(Planner):
         ).replace("int", "1nt")
         if not self.config.slack:
             self._solverFile += "_noSlack"
-        self.load_solver()
+        self.concretize()
 
     def load_solver(self):
         logging.info(f"Loading solver {self._solverFile}")
@@ -171,7 +172,12 @@ class ForcesProMpcPlanner(Planner):
                 self._params[self._npar * i + self._paramMap["g"][j]] = primeGoal.position()[j]
 
     def concretize(self):
-        pass
+        self._actionCounter = self.config.interval
+        if not os.path.isdir(self._solverFile):
+            print(self._solverFile)
+            createSolver(N=self._config.H, dt=self._config.dt, robotType=self._exp.robotType(), slack=self._config.slack)
+
+        self.load_solver()
 
     def shiftHorizon(self, output, ob):
         for key in output.keys():
@@ -245,9 +251,6 @@ class ForcesProMpcPlanner(Planner):
         logging.debug(f"prediction : {output['x02'][0:self._nx]}")
         self.shiftHorizon(output, ob)
         return action, info
-
-    def concretize(self):
-        self._actionCounter = self.config.interval
 
     def computeAction(self, *args):
         ob = np.concatenate(args)
