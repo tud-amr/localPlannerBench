@@ -88,7 +88,8 @@ class Runner(object):
         self._random_goal = args.random_goal
         self._numberRuns = args.numberRuns
         self._verbose = args.verbose
-        logging.basicConfig(level=log_levels[args.log_level])
+        logging.basicConfig()
+        logging.getLogger().setLevel(log_levels[args.log_level])
         self._render = args.render
         self._res_folder = os.getcwd() + '/' + args.res_folder
         self._planners = []
