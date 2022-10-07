@@ -70,6 +70,8 @@ class Runner(object):
         self._parser.add_argument("--no-verbose", dest="verbose", action="store_false")
         self._parser.add_argument("--render", dest="render", action="store_true")
         self._parser.add_argument("--compare", dest="compare", action="store_true")
+        self._parser.add_argument("--global-planning", dest="global_planning", action="store_true")
+        self._parser.set_defaults(global_planning=False)
         self._parser.set_defaults(save=True)
         self._parser.set_defaults(ros=False)
         self._parser.set_defaults(random_goal=False)
@@ -88,6 +90,7 @@ class Runner(object):
         self._random_goal = args.random_goal
         self._numberRuns = args.numberRuns
         self._verbose = args.verbose
+        self._global_planning = args.global_planning
         logging.basicConfig()
         logging.getLogger().setLevel(log_levels[args.log_level])
         self._render = args.render
@@ -97,6 +100,8 @@ class Runner(object):
 
         # NOTE: Shuffle at least once to make sure experiment.obstacles() has right shape. Important for mpc problem formulation in __init__ functions.
         self._experiment.shuffle(self._random_obst, self._random_init, self._random_goal)
+        if self._global_planning:
+            self._experiment.compute_global_path()
 
         self._ros = args.ros
         self._compare = args.compare

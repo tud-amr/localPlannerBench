@@ -132,7 +132,7 @@ class ForcesProMpcPlanner(Planner):
 
     def updateDynamicObstacles(self, obstArray):
         nbDynamicObsts = int(obstArray.size / 3 / self.m())
-        for j in range(self.config.nbObst):
+        for j in range(self.config.obst['nbObst']):
             if j < nbDynamicObsts:
                 obstPos = obstArray[:self.m()]
                 obstVel = obstArray[self.m():2*self.m()]
@@ -144,7 +144,7 @@ class ForcesProMpcPlanner(Planner):
             for i in range(self.config.H):
                 for m_i in range(self.m()):
                     paramsIndexObstX = self._npar * i + self._paramMap['obst'][j * (self.m() + 1) + m_i]
-                    predictedPosition = obstPos[m_i] + obstVel[m_i] * self.dt() * i + 0.5 * (self.dt() * i)**2 * obstAcc[m_i]
+                    predictedPosition = obstPos[m_i] + obstVel[m_i] * self.config.dt * i + 0.5 * (self.config.dt * i)**2 * obstAcc[m_i]
                     self._params[paramsIndexObstX] = predictedPosition
                 paramsIndexObstR = self._npar * i + self._paramMap['obst'][j * (self.m() + 1) + self.m()]
                 self._params[paramsIndexObstR] = self._r

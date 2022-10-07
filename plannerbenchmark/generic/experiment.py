@@ -194,6 +194,69 @@ class Experiment(object):
                 missingKeys += key + ", "
         if incomplete:
             raise ExperimentIncompleteError("Missing keys: %s" % missingKeys[:-2])
+    
+    def point_in_collision_with_obstacle(self, state, obstacle):
+        state_array = np.array([state[i] for i in range(2)])
+        distance = np.linalg.norm(state_array - obstacle.position()) - obstacle.radius()
+        return distance < 0
+
+    def is_state_valid(self, state):
+        for obstacle in self.obstacles():
+            if self.point_in_collision_with_obstacle(state, obstacle):
+                return False
+        return True
+
+    def compute_global_path(self):
+        logging.info("Creating global plan using OMPL.")
+        from ompl import base as ob
+        from ompl import geometric as og
+
+
+        self._setup['goal']['subgoal0']['type'] = 'splineSubGoal'
+        self._setup['goal']
+        new_setup = self._motionPlanningGoal.toDict()
+        new_setup['subgoal0']['type'] = 'splineSubGoal'
+        start = list(self.fk(self.initState()[0], self.n()))
+        start_list = [float(start[i]) for i in range(len(start))]
+        goal = list(self._motionPlanningGoal.primeGoal().position())
+        self._setup['dynamic'] = True
+        new_setup['subgoal0'].pop('desired_position', None)
+
+
+        space = ob.RealVectorStateSpace(len(start))
+        bounds = ob.RealVectorBounds(2)
+        bounds.setLow(-5)
+        bounds.setHigh(5)
+        space.setBounds(bounds)
+        ss = og.SimpleSetup(space)
+        ss.setStateValidityChecker(ob.StateValidityCheckerFn(self.is_state_valid))
+        start_vector = ob.State(space)
+        goal_vector = ob.State(space)
+        for i in range(len(start)):
+            start_vector[i] = start[i]
+            goal_vector[i] = goal[i]
+        ss.setStartAndGoalStates(start_vector, goal_vector)
+     
+        # this will automatically choose a default planner with
+        # default parameters
+        solved = ss.solve(1.0)
+        if solved:
+            # try to shorten the path
+            ss.simplifySolution()
+            # print the simplified path
+            shortest_path = ss.getSolutionPath()
+            shortest_path.interpolate()
+            x = [shortest_path.getStates()[i][0] for i in range(shortest_path.getStateCount())]
+            y = [shortest_path.getStates()[i][1] for i in range(shortest_path.getStateCount())]
+            control_points = [[x[i], y[i]] for i in range(shortest_path.getStateCount())]
+
+
+        new_setup['subgoal0']['trajectory'] = {
+                'controlPoints': control_points,
+                'degree': 2,
+                'duration': 10,
+            }
+        self._motionPlanningGoal = GoalComposition(name="mpg", contentDict=new_setup)
 
     def checkFeasibility(self, checkGoalReachible):
         for o in self.obstacles():
