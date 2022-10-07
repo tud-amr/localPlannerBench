@@ -101,19 +101,16 @@ class CaseEvaluation(object):
         A problem was sucessfully solved if the goal was reached and no
         collision occured during execution (minClearance > 0).
         """
-        try:
-            successMetric = SuccessMetric(
-                "success",
-                [],
-                {
-                    "minClearance": self._kpis["clearance"]["short"],
-                    "reachingFlag": self._kpis["time2Goal"]["short"],
-                },
-            )
-            self._kpis["success"] = successMetric.computeMetric(self._res)
-        except KeyError:
-            logging.info("Reaching or clearance metric not found: Success assumed.")
-            self._kpis["success"] = {'short': 1}
+        success_factors = {}
+        for factor in ['clearance', 'time2Goal', 'invClearance']:
+            if factor in self._kpis:
+                success_factors[factor] = self._kpis[factor]['short']
+        successMetric = SuccessMetric(
+            "success",
+            [],
+            success_factors
+        )
+        self._kpis["success"] = successMetric.computeMetric(self._res)
 
     def process(self) -> None:
         """Processing the experiment."""

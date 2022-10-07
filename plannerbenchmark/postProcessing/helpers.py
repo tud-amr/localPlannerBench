@@ -41,7 +41,7 @@ def createMetricsFromNames(
     """
     metrics = []
     goal_indices = experiment.primeGoal().indices()
-    dimension_obstacle = experiment.obstacles()[0].dim()
+    dimension_obstacle = experiment.obstacles()[0].dimension()
     n = experiment.n()
     fksNames = []
     eeNames = []

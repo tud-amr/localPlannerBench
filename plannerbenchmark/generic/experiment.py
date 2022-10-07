@@ -57,7 +57,7 @@ class Experiment(object):
         with open(self._setupFile, "r") as setupStream:
             self._setup = yaml.safe_load(setupStream)
         self.checkCompleteness()
-        self._motionPlanningGoal = GoalComposition(name="mpg", contentDict=self._setup['goal'])
+        self._motionPlanningGoal = GoalComposition(name="mpg", content_dict=self._setup['goal'])
         self.parseObstacles()
 
     def parseObstacles(self):
@@ -68,7 +68,7 @@ class Experiment(object):
                 obstData = self._setup["obstacles"][obst]
                 obstType = obstData['type']
                 obstName = obst
-                self._obstacles.append(self._obstacleCreator.createObstacle(obstType, obstName, obstData))
+                self._obstacles.append(self._obstacleCreator.create_obstacle(obstType, obstName, obstData))
 
     def dynamic(self):
         return self._setup['dynamic']
@@ -136,11 +136,11 @@ class Experiment(object):
         return self._motionPlanningGoal
 
     def primeGoal(self, **kwargs):
-        return self._motionPlanningGoal.primeGoal()
+        return self._motionPlanningGoal.primary_goal()
         if 't' in kwargs:
             return self._motionPlanningGoal.evaluatePrimeGoal(kwargs.get('t'))
         else:
-            return self._motionPlanningGoal.primeGoal()
+            return self._motionPlanningGoal.primary_goal()
 
     def evaluatePrimeGoal(self, t):
         return self.primeGoal().position(t=t)
@@ -172,7 +172,7 @@ class Experiment(object):
         obstType = obstData['type']
         for i in range(self._setup["randomObstacles"]["number"]):
             obstName = 'obst' + str(i)
-            randomObst = self._obstacleCreator.createObstacle(obstType, obstName, obstData)
+            randomObst = self._obstacleCreator.create_obstacle(obstType, obstName, obstData)
             randomObst.shuffle()
             self._obstacles.append(randomObst)
 
@@ -221,13 +221,13 @@ class Experiment(object):
                 raise ExperimentInfeasible("Goal unreachible")
 
     def save(self, folderPath):
-        self._setup["goal"] = self._motionPlanningGoal.toDict()
+        self._setup["goal"] = self._motionPlanningGoal.dict()
         obstsDict = {}
         obstFile = folderPath + "/obst"
         initStateFilename = folderPath + "/initState.csv"
         for i, obst in enumerate(self._obstacles):
-            obstsDict[obst.name()] = obst.toDict()
-            obst.toCSV(obstFile + "_" + str(i) + ".csv")
+            obstsDict[obst.name()] = obst.dict()
+            obst.csv(obstFile + "_" + str(i) + ".csv")
         self._setup["obstacles"] = obstsDict
         with open(folderPath + "/exp.yaml", "w") as file:
             yaml.dump(self._setup, file)

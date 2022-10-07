@@ -126,7 +126,7 @@ class FabricPlanner(Planner):
         self._limits = limits
 
     def setGoal(self, goal):
-        self._dynamic_goal = isinstance(goal.primeGoal(), DynamicSubGoal) 
+        self._dynamic_goal = isinstance(goal.primary_goal(), DynamicSubGoal) 
         self._goal = goal
 
     def concretize(self):
@@ -147,17 +147,23 @@ class FabricPlanner(Planner):
         self._runtime_arguments['qdot'] = args[1]
         if self._dynamic_goal:
             self._runtime_arguments['x_ref_goal_0_leaf'] = args[2]
-            self._runtime_arguments['xdot_ref_goal_0_leaf'] = args[3]
-            self._runtime_arguments['xddot_ref_goal_0_leaf'] = args[4]
+            if self._config.dynamic:
+                self._runtime_arguments['xdot_ref_goal_0_leaf'] = args[3] * 0
+                self._runtime_arguments['xddot_ref_goal_0_leaf'] = args[4] * 0
+            self._runtime_arguments[f'weight_goal_0'] = np.array(self._goal.sub_goals()[0].weight() * self.config.attractor['k_psi'])
         else:
-            for i, sub_goal in enumerate(self._goal.subGoals()):
+            for i, sub_goal in enumerate(self._goal.sub_goals()):
                 self._runtime_arguments[f'x_goal_{i}'] = np.array(sub_goal.position())
                 self._runtime_arguments[f'weight_goal_{i}'] = np.array(sub_goal.weight() * self.config.attractor['k_psi'])
         for i, obst in enumerate(self._dynamic_obsts):
             for j in self._collision_links:
-                self._runtime_arguments[f'x_ref_dynamic_obst_{i}_{j}_leaf'] = args[1 + 3*i+1]
-                self._runtime_arguments[f'xdot_ref_dynamic_obst_{i}_{j}_leaf'] = args[1 + 3*i + 2]
-                self._runtime_arguments[f'xddot_ref_dynamic_obst_{i}_{j}_leaf'] = args[1 + 3*i + 3]
+                self._runtime_arguments[f'x_ref_dynamic_obst_{i}_{j}_leaf'] = args[5 + 3*i+0]
+                if self._config.dynamic:
+                    self._runtime_arguments[f'xdot_ref_dynamic_obst_{i}_{j}_leaf'] = args[5 + 3*i + 1]
+                    self._runtime_arguments[f'xddot_ref_dynamic_obst_{i}_{j}_leaf'] = args[5 + 3*i + 2]
+                else:
+                    self._runtime_arguments[f'xdot_ref_dynamic_obst_{i}_{j}_leaf'] = args[5 + 3*i + 1] * 0
+                    self._runtime_arguments[f'xddot_ref_dynamic_obst_{i}_{j}_leaf'] = args[5 + 3*i + 2] * 0
 
 
         pass

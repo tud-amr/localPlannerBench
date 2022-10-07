@@ -17,11 +17,11 @@ keywords = ["robotics", "motion-planning", "benchmark"]
 [tool.poetry.dependencies]
 python = "^3.6.5,<3.10"
 planarenvs = "^1.0.3" 
-urdfenvs = "^0.2.2"
-motion-planning-scenes= "^0.1.22"
+motion-planning-scenes= ">=0.2"
 forwardkinematics = "^1.0.4"
 robotmpcs = {version = "^0.1.4", optional = true}
-#fabrics = {path = "../../../../code/fabrics", optional = true}
+fabrics = {path = "../../../../code/fabrics", optional = true}
+urdfenvs = {path = "../../../../code/gym/env/urdfEnvs"}
 
 [tool.poetry.extras]
 fabric = ['fabrics']
