@@ -6,9 +6,8 @@ robot_type: planarArm
 n: 5
 goal:
   subgoal1:
-    prime: True
-    m: 2
-    w: 1
+    is_primary_goal: True
+    weight: 1
     indices:
       - 0
       - 1
@@ -86,7 +85,6 @@ limits:
 r_body: 0.10
 obstacles:
   obst0:
-    dim: 2
     type: sphereObstacle
     geometry:
       position:

@@ -68,7 +68,7 @@ class FabricPlanner(Planner):
         )
         self._planner = ParameterizedFabricPlanner(
             self.config.n,
-            self._exp.robotType(),
+            self._exp.robot_type(),
             base_energy=base_energy,
             collision_geometry=collision_geometry,
             collision_finsler=collision_finsler,
@@ -126,7 +126,7 @@ class FabricPlanner(Planner):
         self._limits = limits
 
     def setGoal(self, goal):
-        self._dynamic_goal = isinstance(goal.primeGoal(), DynamicSubGoal) 
+        self._dynamic_goal = isinstance(goal.primary_goal(), DynamicSubGoal) 
         self._goal = goal
 
     def concretize(self):
@@ -142,17 +142,17 @@ class FabricPlanner(Planner):
         self.initialize_runtime_arguments()
 
 
-    def adapt_runtime_arguments(self, args):
-        self._runtime_arguments['q'] = args[0]
-        self._runtime_arguments['qdot'] = args[1]
+    def adapt_runtime_arguments(self, observation):
+        self._runtime_arguments['q'] = observation['joint_state']['position']
+        self._runtime_arguments['qdot'] = observation['joint_state']['velocity']
         if self._dynamic_goal:
-            self._runtime_arguments['x_ref_goal_0_leaf'] = args[2]
-            self._runtime_arguments['xdot_ref_goal_0_leaf'] = args[3]
-            self._runtime_arguments['xddot_ref_goal_0_leaf'] = args[4]
+            self._runtime_arguments['x_ref_goal_0_leaf'] = observation['goal'][0]
+            self._runtime_arguments['xdot_ref_goal_0_leaf'] = observation['goal'][1]
+            self._runtime_arguments['xddot_ref_goal_0_leaf'] = observation['goal'][2]
         else:
-            for i, sub_goal in enumerate(self._goal.subGoals()):
-                self._runtime_arguments[f'x_goal_{i}'] = np.array(sub_goal.position())
-                self._runtime_arguments[f'weight_goal_{i}'] = np.array(sub_goal.weight() * self.config.attractor['k_psi'])
+            for i, sub_goal in enumerate(self._goal.sub_goals()):
+                self._runtime_arguments[f'x_goal_{i}'] = sub_goal.position()
+                self._runtime_arguments[f'weight_goal_{i}'] = sub_goal.weight() * self.config.attractor['k_psi']
         for i, obst in enumerate(self._dynamic_obsts):
             for j in self._collision_links:
                 self._runtime_arguments[f'x_ref_dynamic_obst_{i}_{j}_leaf'] = args[1 + 3*i+1]
@@ -162,8 +162,8 @@ class FabricPlanner(Planner):
 
         pass
 
-    def computeAction(self, *args):
-        self.adapt_runtime_arguments(args)
+    def computeAction(self, observation):
+        self.adapt_runtime_arguments(observation)
         action = self._planner.compute_action(**self._runtime_arguments)
         if np.linalg.norm(action) < 1e-5:
             action *= 0

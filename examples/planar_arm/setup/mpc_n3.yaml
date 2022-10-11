@@ -1,4 +1,4 @@
-name: mpc
+name: forcesprompc
 n: 3
 dt: 0.5
 H: 20
@@ -8,5 +8,6 @@ weights:
   wvel: 5.0
   ws: 1e10
   wu: 5.0
+  wobst: 0.0
 obst:
   nbObst: 5

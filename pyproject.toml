@@ -16,16 +16,18 @@ keywords = ["robotics", "motion-planning", "benchmark"]
 
 [tool.poetry.dependencies]
 python = "^3.6.5,<3.10"
-planarenvs = "^1.0.3" 
-urdfenvs = "^0.2.2"
-motion-planning-scenes= "^0.1.22"
+planarenvs = "^1.1.0" 
+motion-planning-scenes= "^0.3.0"
 forwardkinematics = "^1.0.4"
+urdfenvs = {path = "../../../../code/gym/env/urdfEnvs"}
 robotmpcs = {version = "^0.1.4", optional = true}
-#fabrics = {path = "../../../../code/fabrics", optional = true}
+fabrics = {path = "../../../../code/fabrics", optional = true}
+acados-template = {path = "../../../../../../develop/acados/interfaces/acados_template", optional = true}
 
 [tool.poetry.extras]
 fabric = ['fabrics']
 mpc = ['robotmpcs']
+acados = ['acados']
 
 [tool.poetry.scripts]
 runner = 'plannerbenchmark.exec.runner:main'

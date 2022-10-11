@@ -40,8 +40,8 @@ def createMetricsFromNames(
         Returns a list of all metrics for which the name was specified.
     """
     metrics = []
-    goal_indices = experiment.primeGoal().indices()
-    dimension_obstacle = experiment.obstacles()[0].dim()
+    goal_indices = experiment.primary_goal().indices()
+    dimension_obstacle = experiment.obstacles()[0].dimension()
     n = experiment.n()
     fksNames = []
     eeNames = []
@@ -116,7 +116,7 @@ def createMetricsFromNames(
                 TimeToReachGoalMetric(
                     name,
                     eeNames + goalNames + ["t"],
-                    {"goal_indices": goal_indices, "des_distance": experiment.primeGoal().epsilon()},
+                    {"goal_indices": goal_indices, "des_distance": experiment.primary_goal().epsilon()},
                 )
             )
         if name == "pathLength":
@@ -126,7 +126,7 @@ def createMetricsFromNames(
                 IntegratedErrorMetric(
                     name,
                     eeNames + goalNames + ["t"],
-                    {"dimension_obstacle": dimension_obstacle, "des_distance": 10* experiment.primeGoal().epsilon()},
+                    {"dimension_obstacle": dimension_obstacle, "des_distance": 10* experiment.primary_goal().epsilon()},
                 )
             )
     return metrics

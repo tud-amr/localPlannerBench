@@ -13,25 +13,25 @@ from MotionPlanningEnv.sphereObstacle import SphereObstacle
 
 
 class ActionConverterNode(object):
-    def __init__(self, dt, rate_int, robotType):
+    def __init__(self, dt, rate_int, robot_type):
         rospy.init_node("ActionConverter", anonymous=True)
         self._rate = rospy.Rate(rate_int)
         self._dt = dt
 
-        if robotType == 'panda':
+        if robot_type == 'panda':
             self._frame_id = 'panda_link0'
             self._n = 7
             self._nu = 7
             self._actionIndices = [2, 3, 4, 5, 6, 7, 8]
             self._stateIndices = [5, 6, 7, 8, 9, 10, 11]
             self._qdotIndices = []
-        elif robotType == 'boxer':
+        elif robot_type == 'boxer':
             self._n = 3
             self._nu = 2
             self._actionIndices = [0, 1]
             self._stateIndices = [0, 1, 2]
             self._qdotIndices = [3, 4]
-        elif robotType == 'albert':
+        elif robot_type == 'albert':
             self._frame_id = 'map'
             self._n = 10
             self._nu = 9

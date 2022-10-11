@@ -1,14 +1,13 @@
 T: 5000
 dynamic: False
 dt: 0.01
-env: panda-reacher-acc-v0
+control_mode: acc
 robot_type: panda
 n: 7
 goal:
   subgoal1:
-    prime: True
-    m: 3
-    w: 1
+    is_primary_goal: True
+    weight: 1
     indices:
       - 0
       - 1
@@ -81,7 +80,6 @@ obstacles:
         - 0.6
       radius: 0.15
     type: sphereObstacle
-    dim: 3
     low:
       position:
         - -1.0

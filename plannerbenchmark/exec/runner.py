@@ -19,9 +19,13 @@ try:
 except Exception as e:
     logging.warning(f"The fabrics mpc planner cannot be used, {e}")
 try:
-    from plannerbenchmark.planner.mpcPlanner import MPCPlanner
+    from plannerbenchmark.planner.forcesProMpcPlanner import ForcesProMpcPlanner
 except Exception as e:
     logging.warning(f"The forces-pro mpc planner cannot be used, {e}")
+try:
+    from plannerbenchmark.planner.acadosMpcPlanner import AcadosMpcPlanner
+except Exception as e:
+    logging.warning(f"The acados mpc planner cannot be used, {e}")
 
 log_levels = {"WARNING": 30, "INFO": 20, "DEBUG": 10, "QUIET": 100}
 
@@ -119,7 +123,7 @@ class Runner(object):
         from plannerbenchmark.ros.ros_converter_node import ActionConverterNode
         dt = self._experiment.dt()
         rate_int = int(1/dt)
-        self._rosConverter = ActionConverterNode(dt, rate_int, self._experiment.robotType())
+        self._rosConverter = ActionConverterNode(dt, rate_int, self._experiment.robot_type())
 
     def setPlanner(self):
         for planner in self._planners:
@@ -133,7 +137,7 @@ class Runner(object):
     def applyAction(self, action, t_exp):
         if self._ros:
             ob, t = self._rosConverter.publishAction(action)
-            self._rosConverter.setGoal(self._experiment.primeGoal(), t=t_exp)
+            self._rosConverter.setGoal(self._experiment.primary_goal(), t=t_exp)
             for i, obst in enumerate(self._experiment.obstacles()):
                 self._rosConverter.setObstacle(obst, i, t=t_exp)
         else:
@@ -144,7 +148,7 @@ class Runner(object):
     def reset(self, q0, q0dot):
         if self._ros:
             ob, t0 = self._rosConverter.ob()
-            self._rosConverter.setGoal(self._experiment.primeGoal())
+            self._rosConverter.setGoal(self._experiment.primary_goal())
             for i, obst in enumerate(self._experiment.obstacles()):
                 self._rosConverter.setObstacle(obst, i)
         else:
@@ -163,6 +167,15 @@ class Runner(object):
     def run(self):
         logging.info("Starting runner...")
         completedRuns = 0
+        primary_goal= self._experiment.primary_goal()
+        observation = {
+            'joint_state': {
+                'position': self._experiment.initState()[0],
+                'velocity': self._experiment.initState()[1],
+            },
+            'goal': self._experiment.evaluate_primary_goal(t=0),
+            'obstacles': self._experiment.evaluateObstacles(t=0),
+        }
         while completedRuns < self._numberRuns:
             self._experiment.shuffle(self._random_obst, self._random_init, self._random_goal)
             try:
@@ -191,30 +204,24 @@ class Runner(object):
                         break
                     if i % 1000 == 0:
                         logging.info(f"Timestep : {i}")
-                    if 'x' in ob:
-                        q = ob['x']
-                        qdot = ob['xdot']
-                    elif 'joint_state' in ob:
-                        q = ob['joint_state']['position']
-                        qdot = ob['joint_state']['velocity']
-                    if self._experiment.dynamic():
-                        envEval = self._experiment.evaluate(t)
-                        if not planner.config.dynamic:
-                            envEval[1] = np.zeros(envEval[1].size)
-                            envEval[2] = np.zeros(envEval[2].size)
-                        observation = [q, qdot] + envEval
-                    else:
-                        observation = [q, qdot]
-                    if self._experiment.robotType() in ['groundRobot', 'boxer', 'albert']:
+                    if 'robot_0' in ob:
+                        ob = ob["robot_0"]
+                    q = ob['joint_state']['position']
+                    qdot = ob['joint_state']['velocity']
+                    envEval = self._experiment.evaluate(t)
+                    observation['joint_state']['position'] = q
+                    observation['joint_state']['velocity'] = qdot
+                    observation.update(envEval)
+                    if self._experiment.robot_type() in ['groundRobot', 'boxer', 'albert']:
                         qudot = np.concatenate((ob['joint_state']['forward_velocity'], ob['joint_state']['velocity'][2:]))
-                        observation += [qudot]
+
+                        observation['joint_state']['forward'] = [qudot]
                     t_before = time.perf_counter()
-                    action = planner.computeAction(*observation)
+                    action = planner.computeAction(observation)
                     solving_time = time.perf_counter() - t_before
-                    primeGoal = [self._experiment.evaluatePrimeGoal(t)]
+                    primary_goal= self._experiment.evaluate_primary_goal(t)
                     obsts = self._experiment.evaluateObstacles(t)
-                    obsts_cleaned = [obsts[i:i+3] for i in range(0, len(obsts), 3)]
-                    logger.addResultPoint(t, q, qdot, action, solving_time, primeGoal, obsts_cleaned)
+                    logger.addResultPoint(t, q, qdot, action, solving_time, primary_goal, obsts)
                     ob, t_new = self.applyAction(action, t)
                     t = t_new - t0
                 if self._save:

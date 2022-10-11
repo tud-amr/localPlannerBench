@@ -122,7 +122,7 @@ class ClearanceMetric(Metric):
 
     def computeMetric(self, data):
         obstacles = self._params["obstacles"]
-        m = obstacles[0].dim()
+        m = obstacles[0].dimension()
         n = self._params["n"]
         r_body = self._params["r_body"]
         rawData = np.stack([data[name] for name in self._measNames])
@@ -132,7 +132,7 @@ class ClearanceMetric(Metric):
         for i, obst in enumerate(obstacles):
             for i_fk in range(0, n):
                 distancesToObst = (
-                    computeDistances(fks[:, i_fk, :], np.array(obst.position()))
+                    computeDistances(fks[:, i_fk, :], obst.position())
                     - obst.radius()
                     - r_body
                 )
@@ -140,7 +140,7 @@ class ClearanceMetric(Metric):
                 minDistances.append(minDistToObst)
                 distanceToObsts["obst" + str(i) + "_fk" + str(i_fk)] = {
                     "dist": minDistToObst,
-                    "loc": list(obst.position()),
+                    "loc": obst.position().tolist(),
                     "r": obst.radius(),
                 }
         return {"short": float(min(minDistances)), "allMinDist": distanceToObsts}

@@ -1,4 +1,4 @@
-T: 500
+T: 5000
 dynamic: False
 dt: 0.05
 env: point-robot-acc-v0
@@ -6,9 +6,8 @@ robot_type: pointRobot
 n: 2
 goal:
   subgoal0:
-    prime: True
-    m: 2
-    w: 1
+    is_primary_goal: True
+    weight: 1
     indices:
       - 0
       - 1
@@ -45,7 +44,6 @@ randomObstacles:
 obstacles:
   obst0:
     type: sphereObstacle
-    dim: 2
     geometry:
       position: 
         - 2.0
@@ -63,7 +61,6 @@ obstacles:
       radius: 1.0
   obst1:
     type: sphereObstacle
-    dim: 2
     geometry:
       position: 
         - 2.4

@@ -6,9 +6,8 @@ robot_type: planarArm
 n: 3
 goal:
   subgoal1:
-    prime: True
-    m: 2
-    w: 1
+    is_primary_goal: True
+    weight: 1
     indices:
       - 0
       - 1
@@ -25,36 +24,6 @@ goal:
       - 2.0
     type: staticSubGoal
     epsilon: 0.15
-# subgoal2:
-#   prime: False
-#   m: 1
-#   w: 1
-#   indices:
-#     - 0
-#   parent_link: 4
-#   child_link: 5
-#   desired_position:
-#     - 0.0
-# subgoal3:
-#   prime: False
-#   m: 1
-#   w: 1
-#   indices:
-#     - 0
-#   parent_link: 3
-#   child_link: 4
-#   desired_position:
-#     - 0.0
-# subgoal4:
-#   prime: False
-#   m: 1
-#   w: 1
-#   indices:
-#     - 1
-#   parent_link: 2
-#   child_link: 3
-#   desired_position:
-#     - 0.0
 initState:
   q0:
     - 1.57
@@ -77,7 +46,6 @@ r_body: 0.10
 obstacles:
   obst0:
     type: sphereObstacle
-    dim: 2
     geometry:
       position:
         - 2.3

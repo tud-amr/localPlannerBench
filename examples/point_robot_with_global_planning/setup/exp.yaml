@@ -16,7 +16,7 @@ goal:
     child_link: 1
     desired_position:
       - 4.0
-      - 0.2
+      - -1.2
     low:
       - -4.0
       - -4.0
@@ -27,8 +27,8 @@ goal:
     epsilon: 0.1
 initState:
   q0:
-    - 0.0
-    - 0.0
+    - -2.0
+    - 3.0
   q0dot:
     - 0.0
     - 0.0
@@ -67,8 +67,8 @@ obstacles:
     geometry:
       position: 
         - 2.0
-        - -1.5
-      radius: 2.0
+        - -1.0
+      radius: 1.0
     low:
       position:
         - -5.0
@@ -78,6 +78,14 @@ obstacles:
       position:
         - 5.0
         - 5.0
+      radius: 1.0
+  obst2:
+    type: analyticSphere
+    dim: 2
+    geometry:
+      trajectory:
+      - '6.0 - 0.5 * t'
+      - '2.0 + 0.0 * t'
       radius: 1.0
 selfCollision:
   pairs:
