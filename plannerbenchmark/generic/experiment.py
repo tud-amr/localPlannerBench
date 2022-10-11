@@ -98,6 +98,10 @@ class Experiment(object):
     def evaluate(self, t):
         evalObsts = self.evaluateObstacles(t=t)
         evalGoal = self._motionPlanningGoal.evaluate(t=t)
+        dimension_goal = evalGoal[0].size
+        for i in range(3):
+            if np.isnan(evalGoal[i]).any():
+                evalGoal[i] = np.zeros(dimension_goal)
 
         return {'goal': evalGoal, 'obstacles': evalObsts}
 
@@ -156,11 +160,14 @@ class Experiment(object):
         return self._motionPlanningGoal.dynamicGoals()
 
     def env(self, render=False):
-        if self.robot_type() == 'planarArm':
-            return gym.make(self.envName(), render=render, n=self.n(), dt=self.dt())
+        if self.robot_type() in ["planarArm", "pointRobot"]:
+            return gym.make(self.env_name(), render=render, n=self.n(), dt=self.dt())
         else:
             robots = [create_robot(self.robot_type(), self.control_mode())]
             return gym.make("urdf-env-v0", robots=robots, render=render, dt=self.dt())
+
+    def env_name(self):
+        return self._setup['env']
 
     def addScene(self, env):
         for obst in self._obstacles:
@@ -215,7 +222,7 @@ class Experiment(object):
 
         self._setup['goal']['subgoal0']['type'] = 'splineSubGoal'
         self._setup['goal']
-        new_setup = self._motionPlanningGoal.toDict()
+        new_setup = self._motionPlanningGoal.dict()
         new_setup['subgoal0']['type'] = 'splineSubGoal'
         self._setup['dynamic'] = True
         new_setup['subgoal0'].pop('desired_position', None)
@@ -224,7 +231,7 @@ class Experiment(object):
                 'degree': 2,
                 'duration': 10,
             }
-        self._motionPlanningGoal = GoalComposition(name="mpg", contentDict=new_setup)
+        self._motionPlanningGoal = GoalComposition(name="mpg", content_dict=new_setup)
 
     def checkFeasibility(self, checkGoalReachible):
         for o in self.obstacles():

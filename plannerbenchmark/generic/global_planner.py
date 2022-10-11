@@ -10,7 +10,7 @@ class GlobalPlannerFoundNoSolution(Exception):
 
 def point_in_collision_with_obstacle(state: base.State, obstacle: CollisionObstacle):
     robot_radius = 0.1
-    state_array = np.array([state[i] for i in range(obstacle.dim())])
+    state_array = np.array([state[i] for i in range(obstacle.dimension())])
     distance = np.linalg.norm(state_array - obstacle.position()) - obstacle.radius() - robot_radius
     return distance < 0
 

@@ -2,13 +2,13 @@ T: 500
 dynamic: False
 dt: 0.05
 env: point-robot-acc-v0
+control_mode: acc
 robot_type: pointRobot
 n: 2
 goal:
   subgoal0:
-    prime: True
-    m: 2
-    w: 1
+    is_primary_goal: True
+    weight: 1
     indices:
       - 0
       - 1
@@ -45,7 +45,6 @@ randomObstacles:
 obstacles:
   obst0:
     type: sphereObstacle
-    dim: 2
     geometry:
       position: 
         - 2.0
@@ -63,7 +62,6 @@ obstacles:
       radius: 2.0
   obst1:
     type: sphereObstacle
-    dim: 2
     geometry:
       position: 
         - 2.0
@@ -79,14 +77,13 @@ obstacles:
         - 5.0
         - 5.0
       radius: 1.0
-  obst2:
-    type: analyticSphere
-    dim: 2
-    geometry:
-      trajectory:
-      - '6.0 - 0.5 * t'
-      - '2.0 + 0.0 * t'
-      radius: 1.0
+# obst2:
+#   type: analyticSphere
+#   geometry:
+#     trajectory:
+#     - '6.0 - 0.5 * t'
+#     - '2.0 + 0.0 * t'
+#     radius: 1.0
 selfCollision:
   pairs:
     

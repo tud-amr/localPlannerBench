@@ -1,5 +1,6 @@
 import os
 import sys
+from urllib.request import proxy_bypass
 import yaml
 import logging
 import csv

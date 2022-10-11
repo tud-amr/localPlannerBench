@@ -1,15 +1,11 @@
 import numpy as np
 from acados_template import AcadosOcp, AcadosOcpSolver, acados_ocp_solver 
 from typing import List
-import matplotlib.pyplot as plt 
-import matplotlib.patches as mpatches 
-from matplotlib import markers
 import logging
 
-from forwardkinematics.fksCommon.fk_creator import FkCreator
+
 from dataclasses import dataclass, field
 import numpy as np
-import casadi as cd 
 
 from plannerbenchmark.generic.planner import Planner, PlannerConfig
 

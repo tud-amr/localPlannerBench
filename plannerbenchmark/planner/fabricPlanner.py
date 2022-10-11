@@ -147,17 +147,26 @@ class FabricPlanner(Planner):
         self._runtime_arguments['qdot'] = observation['joint_state']['velocity']
         if self._dynamic_goal:
             self._runtime_arguments['x_ref_goal_0_leaf'] = observation['goal'][0]
+            self._runtime_arguments[f'weight_goal_0'] = self._goal.sub_goals()[0].weight() * self.config.attractor['k_psi']
             self._runtime_arguments['xdot_ref_goal_0_leaf'] = observation['goal'][1]
             self._runtime_arguments['xddot_ref_goal_0_leaf'] = observation['goal'][2]
+            if not self.config.dynamic:
+                self._runtime_arguments['xdot_ref_goal_0_leaf'] *= 0.0
+                self._runtime_arguments['xddot_ref_goal_0_leaf'] *= 0.0
         else:
             for i, sub_goal in enumerate(self._goal.sub_goals()):
                 self._runtime_arguments[f'x_goal_{i}'] = sub_goal.position()
                 self._runtime_arguments[f'weight_goal_{i}'] = sub_goal.weight() * self.config.attractor['k_psi']
+        number_obstacles = len(observation['obstacles'])
         for i, obst in enumerate(self._dynamic_obsts):
+            obstacle = observation['obstacles'][number_obstacles - i - 1]
             for j in self._collision_links:
-                self._runtime_arguments[f'x_ref_dynamic_obst_{i}_{j}_leaf'] = args[1 + 3*i+1]
-                self._runtime_arguments[f'xdot_ref_dynamic_obst_{i}_{j}_leaf'] = args[1 + 3*i + 2]
-                self._runtime_arguments[f'xddot_ref_dynamic_obst_{i}_{j}_leaf'] = args[1 + 3*i + 3]
+                self._runtime_arguments[f'x_ref_dynamic_obst_{i}_{j}_leaf'] = obstacle[0]
+                self._runtime_arguments[f'xdot_ref_dynamic_obst_{i}_{j}_leaf'] = obstacle[1]
+                self._runtime_arguments[f'xddot_ref_dynamic_obst_{i}_{j}_leaf'] = obstacle[2]
+                if not self.config.dynamic:
+                    self._runtime_arguments[f'xdot_ref_dynamic_obst_{i}_{j}_leaf'] *= 0.0
+                    self._runtime_arguments[f'xddot_ref_dynamic_obst_{i}_{j}_leaf'] *= 0.0
 
 
         pass

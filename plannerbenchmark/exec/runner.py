@@ -17,7 +17,7 @@ from plannerbenchmark.generic.planner  import PlannerRegistry
 try:
     from plannerbenchmark.planner.fabricPlanner import FabricPlanner
 except Exception as e:
-    logging.warning(f"The fabrics mpc planner cannot be used, {e}")
+    logging.warning(f"The fabrics planner cannot be used, {e}")
 try:
     from plannerbenchmark.planner.forcesProMpcPlanner import ForcesProMpcPlanner
 except Exception as e:
@@ -218,6 +218,10 @@ class Runner(object):
                         observation['joint_state']['forward'] = [qudot]
                     t_before = time.perf_counter()
                     action = planner.computeAction(observation)
+                    if np.isnan(action).any():
+                        logging.warn(f"Action computed ignored because of nan value action: {action}")
+                        logging.warn(f"Observation in this time step {observation}")
+                        action = np.zeros(self._experiment.n())
                     solving_time = time.perf_counter() - t_before
                     primary_goal= self._experiment.evaluate_primary_goal(t)
                     obsts = self._experiment.evaluateObstacles(t)
