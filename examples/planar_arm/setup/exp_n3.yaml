@@ -2,6 +2,7 @@ T: 3000
 dt: 0.05
 dynamic: False
 env: nLink-reacher-acc-v0
+control_mode: acc
 robot_type: planarArm
 n: 3
 goal:
