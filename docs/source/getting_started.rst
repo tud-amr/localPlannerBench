@@ -14,22 +14,50 @@ Pre-requisites
 - [Optional] `poetry <https://python-poetry.org/docs/>`_
 - [Optional] `embotech forces pro <https://www.embotech.com/products/forcespro/overview/>`_ for mpc
 - [Optional] `acados_template <https://github.com/acados/acados/tree/master/interfaces/acados_template>`_ for mpc
+- [Optional] `ompl with python bindings <https://ompl.kavrakilab.org/installation.html>`_ for global planning
 
 
 Installation
 ------------
 
-You first have to download the repository
+As the package is still under heavy development, we recommend downloading th
+source code with
 
 .. code:: bash
 
-    git clone git@github.com:maxspahn/localPlannerBench.git
+    git clone git@github.com:tud-amr/localPlannerBench.git
 
 Then, you can install the package using pip as:
 
 .. code:: bash
 
     pip3 install .
+
+Alternatively, you can also download the package through pip. Be aware that
+helpful example will not be downloaded then.
+
+.. code:: bash
+
+   pip3 install plannerbenchmark
+
+OMPL (open motion planning library)
+----------------
+
+We provide a wrapper to OMPL for global planning. As ompl does not support
+an installation with pip, you must install ompl from source with the 
+python bindings. We have the experience, that it is usually installed with
+the system python version on your computer. If you use a virtual environment, 
+you need to add the ompl directory to the PYTHONPATH. Usually the path
+is the one you find below. To check, import ompl in a python shell and
+output the path by typing `print(ompl.__path__)`.
+
+.. code:: bash
+
+   export PYTHONPATH=$PYTHONPATH:/usr/dist/lib/python3/dist-packages/
+
+Then you should be able to use the option `--global-planning`.
+Effectively, it uses the static goal and creates a spline goal out of it.
+Set the planner to `dynamic` to allow for trajectory following.
 
 Optional: Installation with poetry
 ------------------------------------
