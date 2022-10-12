@@ -45,6 +45,7 @@ class PDPlanner(Planner):
         self._curError = newError
 
     def computeAction(self, observation):
+        self._goal_position = observation["goal"][0]
         self.evalError(observation["joint_state"]["position"])
         return self.config.p * self._curError + self.config.k * self._curErrorDot
 

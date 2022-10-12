@@ -108,7 +108,7 @@ class Experiment(object):
     def evaluateObstacles(self, t):
         evals = []
         for obst in self._obstacles:
-            evals.append([obst.position(t=t), obst.velocity(t=t), obst.acceleration(t=t)])
+            evals.append([obst.position(t=t), obst.velocity(t=t), obst.acceleration(t=t), obst.radius()])
         return evals
 
     def robot_type(self):

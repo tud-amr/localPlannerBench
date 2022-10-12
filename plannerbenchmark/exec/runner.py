@@ -200,6 +200,9 @@ class Runner(object):
                         qudot = np.concatenate((ob['joint_state']['forward_velocity'], ob['joint_state']['velocity'][2:]))
 
                         observation['joint_state']['forward'] = [qudot]
+
+                    # NOTE: work-around to update the observation with the obstacle positions defined in the configuration.
+                    # TODO: add obstacle sensors to the robot env to extract the observations directly from the environment.
                     env_evaluation = self._experiment.evaluate(t)
                     observation.update(env_evaluation)
                     t_before = time.perf_counter()
