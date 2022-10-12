@@ -108,7 +108,7 @@ class Runner(object):
         from plannerbenchmark.ros.ros_converter_node import ActionConverterNode
         dt = self._experiment.dt()
         rate_int = int(1/dt)
-        self._rosConverter = ActionConverterNode(dt, rate_int, self._experiment.robotType())
+        self._rosConverter = ActionConverterNode(dt, rate_int, self._experiment.robot_type())
 
     def setPlanner(self):
         for planner in self._planners:
@@ -175,35 +175,36 @@ class Runner(object):
                 logger = Logger(self._res_folder, timeStamp)
                 logger.setSetups(self._experiment, planner)
                 t = 0.0
+                observation = {
+                    "joint_state":{
+                        "position": np.zeros(self._experiment.n()),
+                        "velocity": np.zeros(self._experiment.n()),
+                    },
+                    "goal": [],
+                    "obstacles": [],
+                }
                 for i in range(self._experiment.T()):
                     if self._aborted:
                         break
                     if i % 1000 == 0:
                         logging.info(f"Timestep : {i}")
-                    if 'x' in ob:
-                        q = ob['x']
-                        qdot = ob['xdot']
-                    elif 'joint_state' in ob:
-                        q = ob['joint_state']['position']
-                        qdot = ob['joint_state']['velocity']
-                    if self._experiment.dynamic():
-                        envEval = self._experiment.evaluate(t)
-                        if not planner.config.dynamic:
-                            envEval[1] = np.zeros(envEval[1].size)
-                            envEval[2] = np.zeros(envEval[2].size)
-                        observation = [q, qdot] + envEval
-                    else:
-                        observation = [q, qdot]
-                    if self._experiment.robotType() in ['groundRobot', 'boxer', 'albert']:
+                    if 'robot_0' in ob:
+                        ob = ob['robot_0']
+                    observation['joint_state'] = ob['joint_state']
+                    if self._experiment.robot_type() in ['groundRobot', 'boxer', 'albert']:
                         qudot = np.concatenate((ob['joint_state']['forward_velocity'], ob['joint_state']['velocity'][2:]))
-                        observation += [qudot]
+
+                        observation['joint_state']['forward'] = [qudot]
+                    env_evaluation = self._experiment.evaluate(t)
+                    observation.update(env_evaluation)
                     t_before = time.perf_counter()
-                    action = planner.computeAction(*observation)
+                    action = planner.computeAction(observation)
+                    if np.isnan(action).any():
+                        logging.warn(f"Action computed ignored because of nan value action: {action}")
+                        logging.warn(f"Observation in this time step {observation}")
+                        action = np.zeros(self._experiment.n())
                     solving_time = time.perf_counter() - t_before
-                    primeGoal = [self._experiment.evaluatePrimeGoal(t)]
-                    obsts = self._experiment.evaluateObstacles(t)
-                    obsts_cleaned = [obsts[i:i+3] for i in range(0, len(obsts), 3)]
-                    logger.addResultPoint(t, q, qdot, action, solving_time, primeGoal, obsts_cleaned)
+                    logger.add_result_point(t, observation, action, solving_time)
                     ob, t_new = self.applyAction(action, t)
                     t = t_new - t0
                 if self._save:
