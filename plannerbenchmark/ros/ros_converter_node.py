@@ -1,8 +1,10 @@
 import rospy
 import numpy as np
 import time
+import tf
 
-from geometry_msgs.msg import Pose2D, Twist
+from geometry_msgs.msg import Pose2D, Twist, PoseStamped
+from nav_msgs.msg import Odometry
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64MultiArray, Bool
 from visualization_msgs.msg import Marker, MarkerArray
@@ -13,7 +15,7 @@ from MotionPlanningEnv.sphereObstacle import SphereObstacle
 
 
 class ActionConverterNode(object):
-    def __init__(self, dt, rate_int, robot_type):
+    def __init__(self, dt, rate_int, robot_type, use_single_obst=False):
         rospy.init_node("ActionConverter", anonymous=True)
         self._rate = rospy.Rate(rate_int)
         self._dt = dt
@@ -43,6 +45,10 @@ class ActionConverterNode(object):
             '/joint_acc_des', 
             Float64MultiArray, queue_size=100
         )
+        self._use_single_obst = use_single_obst
+        self._tf_listener = tf.TransformListener()
+        if self._use_single_obst:
+            self._hand_state_sub = rospy.Subscriber("/mocap_node/hand/position_velocity_orientation_estimation", Odometry, self.single_obst_state_cb)
         self._stop_pub = rospy.Publisher(
             '/motion_stop_request',
             Bool, queue_size=10
@@ -75,13 +81,40 @@ class ActionConverterNode(object):
         self._obst_markers = MarkerArray()
         self._obst_counter = 0
 
-    def joint_state_cb(self, data):
+    def joint_state_cb(self, data: JointState):
         self._x = np.array([data.position[i] for i in self._stateIndices])
         self._xdot = np.array([data.velocity[i] for i in self._stateIndices])
         self._qdot = np.array([data.velocity[i] for i in self._qdotIndices])
 
+    def single_obst_state_cb(self, data: Odometry):
+        pose_panda_link0 = self._tf_listener.transformPose('/panda_link0', PoseStamped(header=data.Header, pose=data.pose.pose))
+
+        transform_twist = self._tf_listener.lookupTransform('/panda_link0', data.child_frame_id, data.header.stamp)
+ 
+        out_rot = transform_twist.getBasis() * data.twist.twist.angular;
+        out_vel = transform_twist.getBasis()* data.twist.twist.linear + transform_twist.getOrigin().cross(out_rot);
+
+        pos = [
+            pose_panda_link0.position.x,
+            pose_panda_link0.position.y,
+            pose_panda_link0.position.z
+        ]
+
+        vel = [
+            out_vel.x,
+            out_vel.y,
+            out_vel.z
+        ]
+
+        self._single_obst_state = np.array([pos, vel])
+
     def ob(self):
-        return {'x': self._x, 'xdot': self._xdot, 'vel': self._qdot}, rospy.get_time()
+        return {
+            'x': self._x, 
+            'xdot': self._xdot, 
+            'vel': self._qdot, 
+            'obstacles': np.array([self._single_obst_state])
+        }, rospy.get_time()
 
     def setGoal(self, goal, t=0):
         self._goal_marker.pose.position.x = goal.position(t=t)[0]
