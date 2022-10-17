@@ -88,25 +88,16 @@ class ActionConverterNode(object):
         self._observation['joint_state']['forward_velocity'] = np.array([data.velocity[i] for i in self._qdotIndices])
 
     def single_obst_state_cb(self, data: Odometry):
-        pose_panda_link0 = self._tf_listener.transformPose('/panda_link0', PoseStamped(header=data.Header, pose=data.pose.pose))
+        pose_panda_link0 = self._tf_listener.transformPose('/panda_link0', PoseStamped(header=data.header, pose=data.pose.pose))
 
-        transform_twist = self._tf_listener.lookupTransform('/panda_link0', data.child_frame_id, data.header.stamp)
- 
-        out_rot = transform_twist.getBasis() * data.twist.twist.angular;
-        out_vel = transform_twist.getBasis()* data.twist.twist.linear + transform_twist.getOrigin().cross(out_rot);
+        (linear_twist, angular_twist) = self._tf_listener.lookupTwist('/panda_link0', data.child_frame_id, data.header.stamp)
 
         pos = [
             pose_panda_link0.position.x,
             pose_panda_link0.position.y,
             pose_panda_link0.position.z
         ]
-
-        vel = [
-            out_vel.x,
-            out_vel.y,
-            out_vel.z
-        ]
-
+        vel = linear_twist
         self._single_obst_state = np.array([pos, vel])
 	self._observation['obstacles'] = np.array([self._single_obst_state])
 
