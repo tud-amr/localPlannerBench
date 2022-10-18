@@ -161,6 +161,7 @@ class FabricPlanner(Planner):
         for i, obst in enumerate(self._dynamic_obsts):
             obstacle = observation['obstacles'][number_obstacles - i - 1]
             for j in self._collision_links:
+                #print(f"Entering dynamic obstacle {obstacle}")
                 self._runtime_arguments[f'x_ref_dynamic_obst_{i}_{j}_leaf'] = obstacle[0]
                 self._runtime_arguments[f'xdot_ref_dynamic_obst_{i}_{j}_leaf'] = obstacle[1]
                 self._runtime_arguments[f'xddot_ref_dynamic_obst_{i}_{j}_leaf'] = obstacle[2]
@@ -173,6 +174,8 @@ class FabricPlanner(Planner):
 
     def computeAction(self, observation):
         self.adapt_runtime_arguments(observation)
+        #print(f"positions: {observation['obstacles'][0][0]}")
+        print(f"velocities : {observation['obstacles'][0][1]}")
         action = self._planner.compute_action(**self._runtime_arguments)
         if np.linalg.norm(action) < 1e-5:
             action *= 0

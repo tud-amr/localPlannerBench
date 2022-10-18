@@ -15,11 +15,10 @@ from MotionPlanningEnv.sphereObstacle import SphereObstacle
 
 
 class ActionConverterNode(object):
-    def __init__(self, dt, rate_int, robot_type, use_single_obst=False):
+    def __init__(self, dt, rate_int, robot_type, use_single_obst=True):
         rospy.init_node("ActionConverter", anonymous=True)
         self._rate = rospy.Rate(rate_int)
         self._dt = dt
-
         if robot_type == 'panda':
             self._frame_id = 'panda_link0'
             self._n = 7
@@ -40,6 +39,15 @@ class ActionConverterNode(object):
             self._actionIndices = [0, 1, 2, 3, 4, 5, 6, 7, 8]
             self._stateIndices = [0, 1, 2, 5, 6, 7, 8, 9, 10, 11]
             self._qdotIndices = [3, 4]
+        self._observation = {
+            'joint_state': {
+                'position': np.zeros(self._n),
+                'velocity': np.zeros(self._n),
+                'forward_velocity': np.zeros(self._nu)
+            },
+            'obstacles': [],
+        }
+
         self._joint_state_sub = rospy.Subscriber("/joint_states_filtered", JointState, self.joint_state_cb)
         self._acc_pub = rospy.Publisher(
             '/joint_acc_des', 
@@ -53,7 +61,6 @@ class ActionConverterNode(object):
             '/motion_stop_request',
             Bool, queue_size=10
         )
-        self._observation = {'joint_state': {'position': np.zeros(self._n), 'velocity': np.zeros(self._n), 'forward_velocity': np.zeros(self._nu)}}
         self._x = np.zeros(self._n)
         self._xdot = np.zeros(self._n)
         self._qdot = np.zeros(self._nu)
@@ -88,20 +95,31 @@ class ActionConverterNode(object):
         self._observation['joint_state']['forward_velocity'] = np.array([data.velocity[i] for i in self._qdotIndices])
 
     def single_obst_state_cb(self, data: Odometry):
-        pose_panda_link0 = self._tf_listener.transformPose('/panda_link0', PoseStamped(header=data.header, pose=data.pose.pose))
-
-        (linear_twist, angular_twist) = self._tf_listener.lookupTwist('/panda_link0', data.child_frame_id, data.header.stamp)
-
+        while True:
+            try:
+                data.header.stamp = rospy.Time(0)
+                pose_panda_link0 = self._tf_listener.transformPose('/panda_link0', PoseStamped(header=data.header, pose=data.pose.pose))
+                (linear_twist, angular_twist) = self._tf_listener.lookupTwist(
+                    '/hand',
+                    '/panda_link0',
+                    data.header.stamp,
+                    rospy.Duration(0.1)
+                )
+                break
+            except Exception as e:
+                print(e)
+                time.sleep(0.1)
         pos = [
-            pose_panda_link0.position.x,
-            pose_panda_link0.position.y,
-            pose_panda_link0.position.z
+            pose_panda_link0.pose.position.x,
+            pose_panda_link0.pose.position.y,
+            pose_panda_link0.pose.position.z
         ]
         vel = linear_twist
-        self._single_obst_state = np.array([pos, vel])
-	self._observation['obstacles'] = np.array([self._single_obst_state])
+        self._single_obst_state = [np.array(pos), np.array(vel), np.zeros(3)]
+        self._observation['obstacles'] = [self._single_obst_state]
 
     def ob(self):
+        #print(self._observation['obstacles'])
         return self._observation, rospy.get_time()
 
     def setGoal(self, goal, t=0):

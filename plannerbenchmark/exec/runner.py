@@ -204,7 +204,9 @@ class Runner(object):
                     # NOTE: work-around to update the observation with the obstacle positions defined in the configuration.
                     # TODO: add obstacle sensors to the robot env to extract the observations directly from the environment.
                     env_evaluation = self._experiment.evaluate(t)
-                    observation.update(env_evaluation)
+                    observation['goals'] = env_evaluation['goal']
+                    observation['obstacles'] = ob['obstacles']
+                    #observation.update(env_evaluation)
                     t_before = time.perf_counter()
                     action = planner.computeAction(observation)
                     if np.isnan(action).any():
