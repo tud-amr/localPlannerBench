@@ -1,9 +1,9 @@
 import yaml
 import csv
 import gym
-from enum import Enum
 import numpy as np
 import logging
+from copy import deepcopy
 
 import planarenvs.point_robot
 import planarenvs.n_link_reacher
@@ -68,6 +68,7 @@ class Experiment(object):
             self._setup = yaml.safe_load(setupStream)
         self.checkCompleteness()
         self._motionPlanningGoal = GoalComposition(name="mpg", content_dict=self._setup['goal'])
+        self._original_setup = deepcopy(self._setup)
         self.parseObstacles()
 
     def parseObstacles(self):
@@ -187,7 +188,7 @@ class Experiment(object):
         obstType = obstData['type']
         for i in range(self._setup["randomObstacles"]["number"]):
             obstName = 'obst' + str(i)
-            randomObst = self._obstacleCreator.createObstacle(obstType, obstName, obstData)
+            randomObst = self._obstacleCreator.create_obstacle(obstType, obstName, obstData)
             randomObst.shuffle()
             self._obstacles.append(randomObst)
 
@@ -209,14 +210,19 @@ class Experiment(object):
                 missingKeys += key + ", "
         if incomplete:
             raise ExperimentIncompleteError("Missing keys: %s" % missingKeys[:-2])
-    
+
+    def restore_original_goal(self):
+        self._motionPlanningGoal = GoalComposition(name = "mpg", content_dict = self._original_setup['goal'])
+ 
     def compute_global_path(self):
         logging.info("Creating global plan using OMPL.")
         from plannerbenchmark.generic.global_planner import GlobalPlanner
-        global_planner = GlobalPlanner(self.obstacles(), 2)
-        start = self.fk(self.initState()[0], self.n())
-        start_list = np.array([float(start[i]) for i in range(len(start))])
-        goal = self._motionPlanningGoal.primary_goal().position()
+        global_planner = GlobalPlanner(self.obstacles(), self.primary_goal().dimension())
+        start = self.fk(self.initState()[0], self.n(), positionOnly=True)
+        if not isinstance(start, np.ndarray):
+            start = np.array([float(start[i]) for i in range(len(start))])
+        goal = self.primary_goal().position()
+        global_planner.initialize_search_space(low=[-0.0, -1.0, 0.2], high=[1.0, 1.0, 1.2])
         global_planner.setup_planning_problem(start, goal)
         global_planner.solve_planning_problem()
 
@@ -268,7 +274,7 @@ class Experiment(object):
             obst.csv(obstFile + "_" + str(i) + ".csv")
         self._setup["obstacles"] = obstsDict
         with open(folderPath + "/exp.yaml", "w") as file:
-            yaml.dump(self._setup, file)
+            yaml.dump(self._setup, file, default_flow_style=False)
         with open(initStateFilename, "w") as file:
             csv_writer = csv.writer(file, delimiter=",")
             csv_writer.writerow(self.initState()[0])

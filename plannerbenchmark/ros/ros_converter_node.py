@@ -47,9 +47,9 @@ class ActionConverterNode(object):
             '/motion_stop_request',
             Bool, queue_size=10
         )
-        self._x = np.zeros(self._n)
-        self._xdot = np.zeros(self._n)
-        self._qdot = np.zeros(self._nu)
+        self._q = np.zeros(self._n)
+        self._qdot = np.zeros(self._n)
+        self._qudot = np.zeros(self._nu)
         self._acc_msg = Float64MultiArray()
         # fixed message date size for the albert robot, some remain zeros 
         self._acc_msg.data = np.zeros(9)
@@ -76,12 +76,10 @@ class ActionConverterNode(object):
         self._obst_counter = 0
 
     def joint_state_cb(self, data):
-        self._x = np.array([data.position[i] for i in self._stateIndices])
-        self._xdot = np.array([data.velocity[i] for i in self._stateIndices])
-        self._qdot = np.array([data.velocity[i] for i in self._qdotIndices])
+        self._q = np.array([data.position[i] for i in self._stateIndices])
+        self._qdot = np.array([data.velocity[i] for i in self._stateIndices])
+        self._qudot = np.array([data.velocity[i] for i in self._qdotIndices])
 
-    def ob(self):
-        return {'x': self._x, 'xdot': self._xdot, 'vel': self._qdot}, rospy.get_time()
 
     def setGoal(self, goal, t=0):
         self._goal_marker.pose.position.x = goal.position(t=t)[0]
@@ -114,14 +112,23 @@ class ActionConverterNode(object):
         marker.scale.z = obst.radius()
         self._obst_markers.markers.append(marker)
 
-    def publishAction(self, action):
+    def publish_action(self, action):
         for i in range(self._nu):
             self._acc_msg.data[self._actionIndices[i]] = action[i]
         self._acc_pub.publish(self._acc_msg)
         self._goal_pub.publish(self._goal_marker)
         self._obst_pub.publish(self._obst_markers)
         self._rate.sleep()
-        return self.ob()
+
+    def observe(self):
+        observation = {
+            "joint_state": {
+                "position": self._q,
+                "velocity": self._qdot,
+                "forward_velocity": self._qdot,
+            }
+        }
+        return observation, rospy.get_time()
 
     def stopMotion(self):
         rospy.loginfo("Stopping ros converter")

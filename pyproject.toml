@@ -21,8 +21,8 @@ forwardkinematics = "^1.0.4"
 robotmpcs = {version = "^0.1.4", optional = true}
 motion-planning-scenes = "^0.3.0"
 urdfenvs = "^0.3.0"
-#fabrics = {path = "relative/path/to/fabrics", optional = true}
 #acados-template = {path = "relative/path/to/acados/interface/acados-template", optional = true}
+fabrics = {path = "../../../../code/fabrics", optional = true}
 
 [tool.poetry.extras]
 fabric = ['fabrics']

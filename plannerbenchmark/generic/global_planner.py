@@ -20,12 +20,12 @@ class GlobalPlanner(object):
     def __init__(self, obstacles: list, m: int):
         self._obstacles = obstacles
         self._m = m
-        self.initialize_search_space()
 
-    def initialize_search_space(self):
+    def initialize_search_space(self, low: list, high: list):
         bounds = base.RealVectorBounds(self._m)
-        bounds.setLow(-5)
-        bounds.setHigh(5)
+        for i in range(self._m):
+            bounds.low[i] = low[i]
+            bounds.high[i] = high[i]
         self._space = base.RealVectorStateSpace(self._m)
         self._space.setBounds(bounds)
 

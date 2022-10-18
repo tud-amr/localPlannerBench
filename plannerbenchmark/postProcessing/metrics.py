@@ -1,6 +1,7 @@
 import numpy as np
 from abc import ABC, abstractmethod
 from typing import Callable
+import logging
 
 
 def computeDistances(points_a: np.ndarray, points_b: np.ndarray):
@@ -276,10 +277,21 @@ class SuccessMetric(Metric):
     """
 
     def computeMetric(self, data):
-        minClearance = self._params["minClearance"]
-        reachingFlag = self._params["reachingFlag"]
-        if reachingFlag < 0:
-            return {"short": -2}
-        if minClearance < 0:
-            return {"short": -1}
-        return {"short": 1}
+        if 'time2Goal' in self._params:
+            goal_reached = self._params['time2Goal']
+        else:
+            logging.info("`time2Goal` metric not used. Assuming the goal was reached.")
+            goal_reached = True
+        if 'clearance' in self._params:
+            collided = self._params['clearance'] < 0
+        elif 'invClearance' in self._params:
+            collided = self._params['invClearance'] < 0
+        else:
+            collided = False
+            logging.info("`clearance` metric not used. Assuming no collision occured.")
+        result = {'short' : 1}
+        if collided:
+            result['short'] = -1
+        if not goal_reached:
+            result ['short'] = -2
+        return result

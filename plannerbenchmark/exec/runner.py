@@ -16,6 +16,7 @@ from plannerbenchmark.generic.utils import import_custom_planners
 import_custom_planners()
 import plannerbenchmark.planner
 
+from plannerbenchmark.generic.global_planner import GlobalPlannerFoundNoSolution
 
 log_levels = {"WARNING": 30, "INFO": 20, "DEBUG": 10, "QUIET": 100}
 
@@ -94,8 +95,6 @@ class Runner(object):
 
         # NOTE: Shuffle at least once to make sure experiment.obstacles() has right shape. Important for mpc problem formulation in __init__ functions.
         self._experiment.shuffle(self._random_obst, self._random_init, self._random_goal)
-        if self._global_planning:
-            self._experiment.compute_global_path()
 
         self._ros = args.ros
         self._compare = args.compare
@@ -113,7 +112,7 @@ class Runner(object):
         from plannerbenchmark.ros.ros_converter_node import ActionConverterNode
         dt = self._experiment.dt()
         rate_int = int(1/dt)
-        self._rosConverter = ActionConverterNode(dt, rate_int, self._experiment.robot_type())
+        self._ros_converter = ActionConverterNode(dt, rate_int, self._experiment.robot_type())
 
     def setPlanner(self):
         for planner in self._planners:
@@ -124,23 +123,45 @@ class Runner(object):
             planner.setGoal(self._experiment.goal())
             planner.concretize()
 
-    def applyAction(self, action, t_exp):
+    def step(self, action: np.ndarray, t_exp) -> tuple:
+        """Steps the simulation by one time step and applies the action.
+
+        If the gym environment is used, the simulation is discrete in time.
+        When the ros bridge is used on the other side, a pseude discrete step
+        is used. As the the real world moves on, the action is only applied at
+        one moment and the observation belongs to the newest data available at
+        that moment.
+
+        Parameters
+        -----------
+
+        action: np.ndarray
+            action that is send to the robot.
+
+
+        Returns
+        -------------
+        observation: dict
+            observation dictionary that contains all the information about
+            joint states and environment.
+        """
         if self._ros:
-            ob, t = self._rosConverter.publishAction(action)
-            self._rosConverter.setGoal(self._experiment.primeGoal(), t=t_exp)
-            for i, obst in enumerate(self._experiment.obstacles()):
-                self._rosConverter.setObstacle(obst, i, t=t_exp)
+            self._ros_converter.publish_action(action)
+            observation, t = self._ros_converter.observe()
+            #self._ros_converter.setGoal(self._experiment.primary_goal(), t=t_exp)
+            #for i, obst in enumerate(self._experiment.obstacles()):
+            #    self._ros_converter.setObstacle(obst, i, t=t_exp)
         else:
-            ob, _, _, _ = self._env.step(action)
-            t = t_exp + self._experiment.dt()
-        return ob, t
+            observation, _, _, _ = self._env.step(action)
+            t = self._env.t()
+        return observation, t
 
     def reset(self, q0, q0dot):
         if self._ros:
-            ob, t0 = self._rosConverter.ob()
-            self._rosConverter.setGoal(self._experiment.primeGoal())
+            ob, t0 = self._ros_converter.observe()
+            self._ros_converter.setGoal(self._experiment.primary_goal())
             for i, obst in enumerate(self._experiment.obstacles()):
-                self._rosConverter.setObstacle(obst, i)
+                self._ros_converter.setObstacle(obst, i)
         else:
             ob = self._env.reset(pos=q0, vel=q0dot)
             t0 = 0.0
@@ -158,6 +179,7 @@ class Runner(object):
         logging.info("Starting runner...")
         completedRuns = 0
         while completedRuns < self._numberRuns:
+            self._experiment.restore_original_goal()
             self._experiment.shuffle(self._random_obst, self._random_init, self._random_goal)
             try:
                 self._experiment.checkFeasibility(checkGoalReachible=False)
@@ -165,6 +187,12 @@ class Runner(object):
             except ExperimentInfeasible as e:
                 logging.warn(f"Case not feasible, {e}")
                 continue
+            if self._global_planning:
+                try:
+                    self._experiment.compute_global_path()
+                except GlobalPlannerFoundNoSolution as e:
+                    logging.warn(f"Could not find global path")
+                    continue
             logging.info("Composing the planner")
             start=time.perf_counter()
             self.setPlanner()
@@ -210,7 +238,7 @@ class Runner(object):
                         action = np.zeros(self._experiment.n())
                     solving_time = time.perf_counter() - t_before
                     logger.add_result_point(t, observation, action, solving_time)
-                    ob, t_new = self.applyAction(action, t)
+                    ob, t_new = self.step(action, t)
                     t = t_new - t0
                 if self._save:
                     logger.save()

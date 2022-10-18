@@ -4,7 +4,7 @@ inFile=seriesFolder."successTable.csv"
 planner_types(file_name)=system("awk NR!=1'{print $1}' ".file_name)
 planner_names=planner_types(inFile)
 nb_planner=words(planner_names)
-nb_cases=10
+nb_cases=50
 outFileHist=seriesFolder."/success.eps"
 
 set output outFileHist

@@ -5,4 +5,5 @@ planner1=${2}
 planner2=${3}
 N=${4}
 gnuplot -c "makeSeriesPlot.gnuplot" $seriesFolder $planner1 $N
+gnuplot -c "makeSeriesPlot.gnuplot" $seriesFolder $planner2 $N
 gnuplot -c "makeSuccessPlot.gnuplot" $seriesFolder $planner1 $planner2
