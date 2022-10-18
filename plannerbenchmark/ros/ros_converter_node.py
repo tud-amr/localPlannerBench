@@ -3,7 +3,7 @@ import numpy as np
 import time
 import tf
 
-from geometry_msgs.msg import Pose2D, Twist, PoseStamped
+from geometry_msgs.msg import Pose2D, Twist, PoseStamped, Vector3Stamped
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64MultiArray, Bool
@@ -99,11 +99,9 @@ class ActionConverterNode(object):
             try:
                 data.header.stamp = rospy.Time(0)
                 pose_panda_link0 = self._tf_listener.transformPose('/panda_link0', PoseStamped(header=data.header, pose=data.pose.pose))
-                (linear_twist, angular_twist) = self._tf_listener.lookupTwist(
-                    '/hand',
-                    '/panda_link0',
-                    data.header.stamp,
-                    rospy.Duration(0.1)
+                twist_vector3 = self._tf_listener.transformVector3(
+                    '/panda_link0', 
+                    Vector3Stamped(header=std_msgs.Header(frame_id='/hand', stamp=data.header.stamp), vector=data.twist.twist.linear)
                 )
                 break
             except Exception as e:
@@ -114,7 +112,11 @@ class ActionConverterNode(object):
             pose_panda_link0.pose.position.y,
             pose_panda_link0.pose.position.z
         ]
-        vel = linear_twist
+        vel = [
+            twist_vector3.vector.x,
+            twist_vector3.vector.y,
+            twist_vector3.vector.z
+        ]
         self._single_obst_state = [np.array(pos), np.array(vel), np.zeros(3)]
         self._observation['obstacles'] = [self._single_obst_state]
 
