@@ -1,6 +1,6 @@
 interval: 1
 name: dynamicFabric
-robot_type: simPanda
+robot_type: panda
 n: 7
 m_base: 0.1
 obst:

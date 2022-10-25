@@ -169,18 +169,6 @@ class DynamicClearanceMetric(Metric):
     robot links and all obstacles are computed and the returned.
     """
 
-class InverseDynamicClearanceMetric(ClearanceMetric):
-
-    """Metric to compute the inverse of the minimum clearance from any obstacle.
-
-    InverseClearance is the inverse of ClearanceMetric.
-    """
-
-    def computeMetric(self, data):
-        evaluation = super().computeMetric(data)
-        evaluation['short'] = 1.0 / evaluation['short']
-        return evaluation
-
     def computeMetric(self, data):
         m = self._params["dimension_obstacle"]
         n = self._params["n"]
@@ -211,7 +199,20 @@ class InverseDynamicClearanceMetric(ClearanceMetric):
                     "r_body": r_body,
                     "r_obst": r_obsts[i],
                 }
-        return {"short": 1.0/float(min(minDistances)), "allMinDist": distanceToObsts}
+        return {"short": float(min(minDistances)), "allMinDist": distanceToObsts}
+
+class InverseDynamicClearanceMetric(DynamicClearanceMetric):
+
+    """Metric to compute the inverse of the minimum clearance from any obstacle.
+
+    InverseDynamicClearance is the inverse of DynamicClearanceMetric.
+    """
+
+    def computeMetric(self, data):
+        evaluation = super().computeMetric(data)
+        evaluation['short'] = 1.0 / evaluation['short']
+        return evaluation
+
 
 
 class SelfClearanceMetric(Metric):
@@ -278,7 +279,7 @@ class SuccessMetric(Metric):
 
     def computeMetric(self, data):
         if 'time2Goal' in self._params:
-            goal_reached = self._params['time2Goal']
+            goal_reached = self._params['time2Goal'] > 0
         else:
             logging.info("`time2Goal` metric not used. Assuming the goal was reached.")
             goal_reached = True
@@ -292,6 +293,6 @@ class SuccessMetric(Metric):
         result = {'short' : 1}
         if collided:
             result['short'] = -1
-        if not goal_reached:
+        if not collided and not goal_reached:
             result ['short'] = -2
         return result

@@ -76,9 +76,8 @@ def acados_n_link_model(pr, exp):
 
     return model 
 
-def n_link_params(exp: Experiment) -> np.ndarray:
-    start_joint_states = np.array(exp.initState()[0])
-    goal_ee = exp.primary_goal().position()
-    obs = np.array([[*o.position(), o.radius()] for o in exp.obstacles()]).flatten()
+def n_link_params(exp: Experiment, goal, obs) -> np.ndarray:
+    start = exp.initState()[0]
+    obs = np.array([[*o[0], o[-1]] for o in obs]).flatten()
     r_body = [exp.rBody()]
-    return np.concatenate((start_joint_states, goal_ee, obs, r_body))
+    return np.concatenate((start, goal[0], obs, r_body))

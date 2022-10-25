@@ -83,6 +83,9 @@ class AcadosMpcPlanner(Planner):
             ))
             logging.debug(f"STATE {robot_state_current}")
 
+            goal = observation["goal"]
+            obstacles = observation["obstacles"]
+
             # Force solver initial state to be the current robot state
             self._acados_ocp_solver.constraints_set(0, 'lbx', np.array(robot_state_current))
             self._acados_ocp_solver.constraints_set(0, 'ubx', np.array(robot_state_current))
@@ -100,7 +103,7 @@ class AcadosMpcPlanner(Planner):
                 x_traj_init = np.tile(np.array(robot_state_current).reshape((-1, 1)), (1, self._config.N))
                 u_traj_init = self._mpc_u_plan = np.zeros((self._exp.n(), self._config.N))
 
-            param_this_stage = self._extract_params(self._exp)
+            param_this_stage = self._extract_params(self._exp, goal, obstacles)
 
             for iStage in range(0, self._config.N):
                 self._acados_ocp_solver.set(iStage, 'x', x_traj_init[:, iStage])

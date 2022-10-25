@@ -1,8 +1,10 @@
 import rospy
 import numpy as np
 import time
+import tf
 
-from geometry_msgs.msg import Pose2D, Twist
+from geometry_msgs.msg import Pose2D, Twist, PoseStamped, Vector3Stamped
+from nav_msgs.msg import Odometry
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64MultiArray, Bool
 from visualization_msgs.msg import Marker, MarkerArray
@@ -13,7 +15,7 @@ from MotionPlanningEnv.sphereObstacle import SphereObstacle
 
 
 class ActionConverterNode(object):
-    def __init__(self, dt, rate_int, robot_type):
+    def __init__(self, dt, rate_int, robot_type, use_single_obst=True):
         rospy.init_node("ActionConverter", anonymous=True)
         self._rate = rospy.Rate(rate_int)
         self._dt = dt
@@ -38,18 +40,31 @@ class ActionConverterNode(object):
             self._actionIndices = [0, 1, 2, 3, 4, 5, 6, 7, 8]
             self._stateIndices = [0, 1, 2, 5, 6, 7, 8, 9, 10, 11]
             self._qdotIndices = [3, 4]
+        self._observation = {
+            'joint_state': {
+                'position': np.zeros(self._n),
+                'velocity': np.zeros(self._n),
+                'forward_velocity': np.zeros(self._nu)
+            },
+            'obstacles': [],
+        }
+
         self._joint_state_sub = rospy.Subscriber("/joint_states_filtered", JointState, self.joint_state_cb)
         self._acc_pub = rospy.Publisher(
             '/joint_acc_des', 
             Float64MultiArray, queue_size=100
         )
+        self._use_single_obst = use_single_obst
+        self._tf_listener = tf.TransformListener()
+        if self._use_single_obst:
+            self._hand_state_sub = rospy.Subscriber("/mocap_node/hand/position_velocity_orientation_estimation", Odometry, self.single_obst_state_cb)
         self._stop_pub = rospy.Publisher(
             '/motion_stop_request',
             Bool, queue_size=10
         )
-        self._q = np.zeros(self._n)
-        self._qdot = np.zeros(self._n)
-        self._qudot = np.zeros(self._nu)
+        self._x = np.zeros(self._n)
+        self._xdot = np.zeros(self._n)
+        self._qdot = np.zeros(self._nu)
         self._acc_msg = Float64MultiArray()
         # fixed message date size for the albert robot, some remain zeros 
         self._acc_msg.data = np.zeros(9)
@@ -75,11 +90,39 @@ class ActionConverterNode(object):
         self._obst_markers = MarkerArray()
         self._obst_counter = 0
 
-    def joint_state_cb(self, data):
-        self._q = np.array([data.position[i] for i in self._stateIndices])
-        self._qdot = np.array([data.velocity[i] for i in self._stateIndices])
-        self._qudot = np.array([data.velocity[i] for i in self._qdotIndices])
+    def joint_state_cb(self, data: JointState):
+        self._observation['joint_state']['position'] = np.array([data.position[i] for i in self._stateIndices])
+        self._observation['joint_state']['velocity'] = np.array([data.velocity[i] for i in self._stateIndices])
+        self._observation['joint_state']['forward_velocity'] = np.array([data.velocity[i] for i in self._qdotIndices])
 
+    def single_obst_state_cb(self, data: Odometry):
+        while True:
+            try:
+                data.header.stamp = rospy.Time(0)
+                pose_panda_link0 = self._tf_listener.transformPose('/panda_link0', PoseStamped(header=data.header, pose=data.pose.pose))
+                twist_vector3 = self._tf_listener.transformVector3(
+                    '/panda_link0', 
+                    Vector3Stamped(header=std_msgs.Header(frame_id='/hand', stamp=data.header.stamp), vector=data.twist.twist.linear)
+                )
+                break
+            except Exception as e:
+                print(e)
+                time.sleep(0.1)
+        pos = [
+            pose_panda_link0.pose.position.x,
+            pose_panda_link0.pose.position.y,
+            pose_panda_link0.pose.position.z
+        ]
+        vel = [
+            twist_vector3.vector.x,
+            twist_vector3.vector.y,
+            twist_vector3.vector.z
+        ]
+        self._single_obst_state = [np.array(pos), np.array(vel), np.zeros(3)]
+        self._observation['obstacles'] = [self._single_obst_state]
+
+    def ob(self):
+        return self._observation, rospy.get_time()
 
     def setGoal(self, goal, t=0):
         self._goal_marker.pose.position.x = goal.position(t=t)[0]
@@ -116,19 +159,12 @@ class ActionConverterNode(object):
         for i in range(self._nu):
             self._acc_msg.data[self._actionIndices[i]] = action[i]
         self._acc_pub.publish(self._acc_msg)
-        self._goal_pub.publish(self._goal_marker)
-        self._obst_pub.publish(self._obst_markers)
+        #self._goal_pub.publish(self._goal_marker)
+        #self._obst_pub.publish(self._obst_markers)
         self._rate.sleep()
 
     def observe(self):
-        observation = {
-            "joint_state": {
-                "position": self._q,
-                "velocity": self._qdot,
-                "forward_velocity": self._qdot,
-            }
-        }
-        return observation, rospy.get_time()
+	return self._observation, rospy.get_time()
 
     def stopMotion(self):
         rospy.loginfo("Stopping ros converter")

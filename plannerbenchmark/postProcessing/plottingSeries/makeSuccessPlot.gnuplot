@@ -18,7 +18,8 @@ set style data histogram
 set style histogram rowstacked
 set border 9
 set boxwidth 0.5
-set xtics (word(planner_names, 1) 0, word(planner_names, 2) 1, word(planner_names, 3) 2) scale 1.0 font ',35' rotate by 90 offset 0, -14.0 nomirror
+#set xtics (word(planner_names, 1) 0, word(planner_names, 2) 1, word(planner_names, 3) 2) scale 1.0 font ',35' rotate by 90 offset 0, -14.0 nomirror
+set xtics ("Static Fabric" 0, "MPC" 1) scale 1.0 font ',35' rotate by 90 offset 0, -14.0 nomirror
 unset ytics
 set xrange [-0.5:nb_planner - 0.5]
 set y2range [0:1.6 * nb_cases]

@@ -16,7 +16,10 @@ from plannerbenchmark.generic.utils import import_custom_planners
 import_custom_planners()
 import plannerbenchmark.planner
 
-from plannerbenchmark.generic.global_planner import GlobalPlannerFoundNoSolution
+try:
+    from plannerbenchmark.generic.global_planner import GlobalPlannerFoundNoSolution
+except Exception as e:
+    logging.warning("OMPL not found, could not import global planner.")
 
 log_levels = {"WARNING": 30, "INFO": 20, "DEBUG": 10, "QUIET": 100}
 
@@ -152,9 +155,9 @@ class Runner(object):
             #for i, obst in enumerate(self._experiment.obstacles()):
             #    self._ros_converter.setObstacle(obst, i, t=t_exp)
         else:
-            observation, _, _, _ = self._env.step(action)
-            t = self._env.t()
-        return observation, t
+            ob, _, _, _ = self._env.step(action)
+            t = t_exp + self._experiment.dt()
+        return ob, t
 
     def reset(self, q0, q0dot):
         if self._ros:
@@ -183,16 +186,15 @@ class Runner(object):
             self._experiment.shuffle(self._random_obst, self._random_init, self._random_goal)
             try:
                 self._experiment.checkFeasibility(checkGoalReachible=False)
+                if self._global_planning:
+                    self._experiment.compute_global_path()
                 completedRuns += 1
             except ExperimentInfeasible as e:
                 logging.warn(f"Case not feasible, {e}")
                 continue
-            if self._global_planning:
-                try:
-                    self._experiment.compute_global_path()
-                except GlobalPlannerFoundNoSolution as e:
-                    logging.warn(f"Could not find global path")
-                    continue
+            except GlobalPlannerFoundNoSolution as e:
+                logging.warn(f"Could not find global path")
+                continue
             logging.info("Composing the planner")
             start=time.perf_counter()
             self.setPlanner()
@@ -213,7 +215,7 @@ class Runner(object):
                         "position": np.zeros(self._experiment.n()),
                         "velocity": np.zeros(self._experiment.n()),
                     },
-                    "goal": [],
+                    "goals": [],
                     "obstacles": [],
                 }
                 for i in range(self._experiment.T()):
@@ -228,8 +230,13 @@ class Runner(object):
                         qudot = np.concatenate((ob['joint_state']['forward_velocity'], ob['joint_state']['velocity'][2:]))
 
                         observation['joint_state']['forward'] = [qudot]
+
+                    # NOTE: work-around to update the observation with the obstacle positions defined in the configuration.
+                    # TODO: add obstacle sensors to the robot env to extract the observations directly from the environment.
                     env_evaluation = self._experiment.evaluate(t)
-                    observation.update(env_evaluation)
+                    observation['goals'] = env_evaluation['goal']
+                    observation['obstacles'] = env_evaluation['obstacles']
+                    #observation.update(env_evaluation)
                     t_before = time.perf_counter()
                     action = planner.computeAction(observation)
                     if np.isnan(action).any():

@@ -19,7 +19,7 @@ class Logger(object):
 
     def add_result_point(self, t, observation: dict, action: np.ndarray, solving_time: float):
         resDict = {'t': t, 't_planning': solving_time}
-        goal = observation['goal']
+        goal = observation['goals']
         obstacles = observation['obstacles']
         q = observation['joint_state']['position']
         qdot = observation['joint_state']['velocity']
@@ -42,7 +42,7 @@ class Logger(object):
             for j_dim, goal_dim in enumerate(goal_der):
                 resDict['goal_' + str(j_dim) + '_' + str(i_der)] = goal_dim
         for k_obst, obst in enumerate(obstacles):
-            for i_der, obst_der in enumerate(obst):
+            for i_der, obst_der in enumerate(obst[:-1]):
                 for j_dim in range(obst_der.size):
                     resDict['obst_' + str(k_obst) + '_' + str(j_dim) + '_' + str(i_der)] = obst_der[j_dim]
         self._res.append(resDict)

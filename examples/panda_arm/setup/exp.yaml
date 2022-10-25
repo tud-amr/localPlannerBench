@@ -27,7 +27,7 @@ goal:
       - 0.0
       - 1.1
     type: staticSubGoal
-    epsilon: 0.05
+    epsilon: 0.02
 initState:
   q0: 
     - 1.0

@@ -58,9 +58,8 @@ def acados_point_mass_model(pr, exp):
 
     return model
 
-def point_mass_params(exp: Experiment) -> np.ndarray:
+def point_mass_params(exp: Experiment, goal, obs) -> np.ndarray:
     start = exp.initState()[0]
-    goal = exp.primary_goal().position()
-    obs = np.array([[*o.position(), o.radius()] for o in exp.obstacles()]).flatten()
+    obs = np.array([[*o[0], o[-1]] for o in obs]).flatten()
     r_body = [exp.rBody()]
-    return np.concatenate((start, goal, obs, r_body))
+    return np.concatenate((start, goal[0], obs, r_body))

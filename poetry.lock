@@ -213,7 +213,7 @@ url = "../../../../code/fabrics"
 
 [[package]]
 name = "forwardkinematics"
-version = "1.0.6"
+version = "1.0.8"
 description = "\"Light-weight implementation of forward kinematics using casadi.\""
 category = "main"
 optional = false
@@ -431,7 +431,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "motion-planning-scenes"
-version = "0.3.2"
+version = "0.3.4"
 description = "Generic motion planning scenes, including goals and obstacles."
 category = "main"
 optional = false
@@ -552,7 +552,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "planarenvs"
-version = "1.1.0"
+version = "1.1.1"
 description = "Lightweight open-ai gym environments for planar kinematic chains."
 category = "main"
 optional = false
@@ -561,7 +561,7 @@ python-versions = ">=3.6.5,<3.10"
 [package.dependencies]
 forwardkinematics = ">=1.0.3,<2.0.0"
 gym = ">=0.21.0,<0.22.0"
-motion-planning-scenes = ">=0.3.0,<0.4.0"
+motion-planning-scenes = ">=0.3.3,<0.4.0"
 numpy = ">=1.5.1,<2.0.0"
 pyglet = ">=1.5.21,<2.0.0"
 pylint = ">=2.13.3,<3.0.0"
@@ -780,7 +780,7 @@ six = ">=1.5"
 
 [[package]]
 name = "pytz"
-version = "2022.4"
+version = "2022.5"
 description = "World timezone definitions, modern and historical"
 category = "dev"
 optional = false
@@ -1025,7 +1025,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "trimesh"
-version = "3.15.4"
+version = "3.15.5"
 description = "Import, export, process, analyze and view triangular meshes."
 category = "main"
 optional = false
@@ -1035,9 +1035,9 @@ python-versions = "*"
 numpy = "*"
 
 [package.extras]
-all = ["jsonschema", "networkx", "setuptools", "rtree", "lxml", "chardet", "shapely", "xxhash", "scikit-image", "pycollada", "mapbox-earcut", "python-fcl", "meshio", "pyglet", "scipy", "sympy", "colorlog", "xatlas", "msgpack", "pillow", "requests", "svg.path", "psutil", "glooey"]
-easy = ["svg.path", "jsonschema", "networkx", "setuptools", "rtree", "lxml", "chardet", "shapely", "scipy", "sympy", "xxhash", "pycollada", "mapbox-earcut", "colorlog", "msgpack", "pillow", "requests", "pyglet"]
-test = ["pytest-cov", "ezdxf", "pyinstrument", "pytest", "coveralls"]
+all = ["pillow", "requests", "svg.path", "meshio", "xxhash", "sympy", "xatlas", "colorlog", "python-fcl", "glooey", "chardet", "psutil", "msgpack", "shapely", "mapbox-earcut", "scipy", "scikit-image", "pyglet", "networkx", "rtree", "pycollada", "lxml", "setuptools", "jsonschema"]
+easy = ["pillow", "requests", "chardet", "msgpack", "xxhash", "setuptools", "shapely", "sympy", "jsonschema", "mapbox-earcut", "pyglet", "networkx", "rtree", "pycollada", "lxml", "colorlog", "svg.path", "scipy"]
+test = ["pyinstrument", "pytest", "coveralls", "pytest-cov", "ezdxf"]
 
 [[package]]
 name = "typed-ast"
@@ -1281,8 +1281,8 @@ docutils = [
 ]
 fabrics = []
 forwardkinematics = [
-    {file = "forwardkinematics-1.0.6-py3-none-any.whl", hash = "sha256:b046653ebd85925a0483d97bbb258156f6abc5c3d43b0e0bfc99c83e50906b97"},
-    {file = "forwardkinematics-1.0.6.tar.gz", hash = "sha256:f7992cf7781a983981657d638ac1acf1540df3c586f3afac9dc8daa43c4ac7aa"},
+    {file = "forwardkinematics-1.0.8-py3-none-any.whl", hash = "sha256:830bbe8c37577fdc530043415a3963992567a34e430e2cd59dc2aacb72d479b1"},
+    {file = "forwardkinematics-1.0.8.tar.gz", hash = "sha256:a25fa3e266995b1ed796f4260c1cfbe9d4ca56029fa04f16d283489aa97bb9b2"},
 ]
 freetype-py = [
     {file = "freetype-py-2.2.0.zip", hash = "sha256:cf43716bc5246cd54a64b2238b942e8dc80b79eda92f814c720286fa6fab387a"},
@@ -1601,8 +1601,8 @@ mccabe = [
     {file = "mccabe-0.7.0.tar.gz", hash = "sha256:348e0240c33b60bbdf4e523192ef919f28cb2c3d7d5c7794f74009290f236325"},
 ]
 motion-planning-scenes = [
-    {file = "motion_planning_scenes-0.3.2-py3-none-any.whl", hash = "sha256:e552aab053da329a754755e4603a1df4d77c5bedfe9ab523cacd68aceffd0d5f"},
-    {file = "motion_planning_scenes-0.3.2.tar.gz", hash = "sha256:c4db70c340957e73a742d8472a629b10d0482951eb3db0846dcb6167b2408260"},
+    {file = "motion_planning_scenes-0.3.4-py3-none-any.whl", hash = "sha256:e8c258f0c1cc52722a29509a089f66ac2c85938c0f3326cd100071d7a00e70b1"},
+    {file = "motion_planning_scenes-0.3.4.tar.gz", hash = "sha256:44179c55fa466d35dcec7189e5b7b39efb40098bac4db68484e54cb9b316ec1a"},
 ]
 mypy-extensions = [
     {file = "mypy_extensions-0.4.3-py2.py3-none-any.whl", hash = "sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d"},
@@ -1729,8 +1729,8 @@ pillow = [
     {file = "Pillow-8.4.0.tar.gz", hash = "sha256:b8e2f83c56e141920c39464b852de3719dfbfb6e3c99a2d8da0edf4fb33176ed"},
 ]
 planarenvs = [
-    {file = "planarenvs-1.1.0-py3-none-any.whl", hash = "sha256:0e01c95cd8ba854404c18f3a2f24d055846e5ceef34bb4875b4d0335e472db1c"},
-    {file = "planarenvs-1.1.0.tar.gz", hash = "sha256:389c9fd168af5ab1ce71e12510a59f2a838cac9c15096dd725aa478cac5b1c0f"},
+    {file = "planarenvs-1.1.1-py3-none-any.whl", hash = "sha256:85cc5b6e4b65bb63d64890a66d0af2f7351a26d79812fdffeb732fe1f70024f9"},
+    {file = "planarenvs-1.1.1.tar.gz", hash = "sha256:c1626684d4e187e494ee840a6976ed7b8ac37a322cb65ae6a52fe363ad2f88df"},
 ]
 platformdirs = [
     {file = "platformdirs-2.4.0-py3-none-any.whl", hash = "sha256:8868bbe3c3c80d42f20156f22e7131d2fb321f5bc86a2a345375c6481a67021d"},
@@ -1804,8 +1804,8 @@ python-dateutil = [
     {file = "python_dateutil-2.8.2-py2.py3-none-any.whl", hash = "sha256:961d03dc3453ebbc59dbdea9e4e11c5651520a876d0f4db161e8674aae935da9"},
 ]
 pytz = [
-    {file = "pytz-2022.4-py2.py3-none-any.whl", hash = "sha256:2c0784747071402c6e99f0bafdb7da0fa22645f06554c7ae06bf6358897e9c91"},
-    {file = "pytz-2022.4.tar.gz", hash = "sha256:48ce799d83b6f8aab2020e369b627446696619e79645419610b9facd909b3174"},
+    {file = "pytz-2022.5-py2.py3-none-any.whl", hash = "sha256:335ab46900b1465e714b4fda4963d87363264eb662aab5e65da039c25f1f5b22"},
+    {file = "pytz-2022.5.tar.gz", hash = "sha256:c4d88f472f54d615e9cd582a5004d1e5f624854a6a27a6211591c251f22a6914"},
 ]
 pyyaml = [
     {file = "PyYAML-6.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:d4db7c7aef085872ef65a8fd7d6d09a14ae91f691dec3e87ee5ee0539d516f53"},
@@ -1934,8 +1934,8 @@ tomli = [
     {file = "tomli-1.2.3.tar.gz", hash = "sha256:05b6166bff487dc068d322585c7ea4ef78deed501cc124060e0f238e89a9231f"},
 ]
 trimesh = [
-    {file = "trimesh-3.15.4-py3-none-any.whl", hash = "sha256:b405b79a3e266a0ec6152c74853570c2bc9d2a3d787d2bba0ad0f483d229d6f8"},
-    {file = "trimesh-3.15.4.tar.gz", hash = "sha256:0fd8609da5fd61d62f600a48739201da11f22522459bd4e089ae4a970339e91c"},
+    {file = "trimesh-3.15.5-py3-none-any.whl", hash = "sha256:22c3d6708c287dc454c65c86b8546a80f75e7f3866ef56c84446239132d9642f"},
+    {file = "trimesh-3.15.5.tar.gz", hash = "sha256:8f3404b2b0b0481f8e63d5c69b3b64bdb3366734f899492e62f3bce9e77a5d47"},
 ]
 typed-ast = [
     {file = "typed_ast-1.5.4-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:669dd0c4167f6f2cd9f57041e03c3c2ebf9063d0757dc89f79ba1daa2bfca9d4"},
