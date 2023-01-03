@@ -178,6 +178,16 @@ class Runner(object):
         """
         return
 
+    def modify_observation_for_urdf_env(self, ob: dict) -> dict:
+        ob = ob['robot_0']
+        for i, goal in enumerate(ob['goals']):
+            goal.append(np.zeros_like(goal[0]))
+            goal.append(self._experiment.goal().sub_goals()[i].is_primary_goal())
+            goal.append(self._experiment.goal().sub_goals()[i].weight())
+            goal.append(self._experiment.goal().sub_goals()[i].type())
+        return ob
+
+
     def run(self):
         logging.info("Starting runner...")
         completedRuns = 0
@@ -210,41 +220,27 @@ class Runner(object):
                 logger = Logger(self._res_folder, timeStamp)
                 logger.setSetups(self._experiment, planner)
                 t = 0.0
-                observation = {
-                    "joint_state":{
-                        "position": np.zeros(self._experiment.n()),
-                        "velocity": np.zeros(self._experiment.n()),
-                    },
-                    "goals": [],
-                    "obstacles": [],
-                }
+                ob, t_new = self.step(np.zeros(self._experiment.n()), t)
                 for i in range(self._experiment.T()):
                     if self._aborted:
                         break
                     if i % 1000 == 0:
                         logging.info(f"Timestep : {i}")
                     if 'robot_0' in ob:
-                        ob = ob['robot_0']
-                    observation['joint_state'] = ob['joint_state']
+                        ob = self.modify_observation_for_urdf_env(ob)
                     if self._experiment.robot_type() in ['groundRobot', 'boxer', 'albert']:
                         qudot = np.concatenate((ob['joint_state']['forward_velocity'], ob['joint_state']['velocity'][2:]))
 
-                        observation['joint_state']['forward'] = [qudot]
+                        ob['joint_state']['forward'] = [qudot]
 
-                    # NOTE: work-around to update the observation with the obstacle positions defined in the configuration.
-                    # TODO: add obstacle sensors to the robot env to extract the observations directly from the environment.
-                    env_evaluation = self._experiment.evaluate(t)
-                    observation['goals'] = env_evaluation['goal']
-                    observation['obstacles'] = env_evaluation['obstacles']
-                    #observation.update(env_evaluation)
                     t_before = time.perf_counter()
-                    action = planner.computeAction(observation)
+                    action = planner.computeAction(ob)
                     if np.isnan(action).any():
                         logging.warn(f"Action computed ignored because of nan value action: {action}")
                         logging.warn(f"Observation in this time step {observation}")
                         action = np.zeros(self._experiment.n())
                     solving_time = time.perf_counter() - t_before
-                    logger.add_result_point(t, observation, action, solving_time)
+                    logger.add_result_point(t, ob, action, solving_time)
                     ob, t_new = self.step(action, t)
                     t = t_new - t0
                 if self._save:

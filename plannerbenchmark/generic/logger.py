@@ -1,7 +1,4 @@
 import os
-import sys
-from urllib.request import proxy_bypass
-import yaml
 import logging
 import csv
 import numpy as np
@@ -42,7 +39,7 @@ class Logger(object):
             for j_dim, goal_dim in enumerate(goal_der):
                 resDict['goal_' + str(j_dim) + '_' + str(i_der)] = goal_dim
         for k_obst, obst in enumerate(obstacles):
-            for i_der, obst_der in enumerate(obst[:-1]):
+            for i_der, obst_der in enumerate(obst[:-2]):
                 for j_dim in range(obst_der.size):
                     resDict['obst_' + str(k_obst) + '_' + str(j_dim) + '_' + str(i_der)] = obst_der[j_dim]
         self._res.append(resDict)

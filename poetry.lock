@@ -431,7 +431,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "motion-planning-scenes"
-version = "0.3.4"
+version = "0.3.5"
 description = "Generic motion planning scenes, including goals and obstacles."
 category = "main"
 optional = false
@@ -1069,7 +1069,7 @@ pyyaml = "*"
 
 [[package]]
 name = "urdfenvs"
-version = "0.3.0"
+version = "0.4.0"
 description = "Simple simulation environment for robots, based on the urdf files."
 category = "main"
 optional = false
@@ -1082,7 +1082,7 @@ pybullet = ">=3.2.1,<4.0.0"
 urdfpy = ">=0.0.22,<0.0.23"
 
 [package.extras]
-scenes = ["motion-planning-scenes (>=0.3.0,<0.4.0)"]
+scenes = ["motion-planning-scenes (>=0.3.4,<0.4.0)"]
 keyboard = ["multiprocess (>=0.70.12,<0.71.0)", "pynput (>=1.7.6,<2.0.0)"]
 
 [[package]]
@@ -1149,7 +1149,7 @@ mpc = ["robotmpcs"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.5,<3.10"
-content-hash = "26726216a28f12cee1575718fcdef9725ad0d83333f55e7875399877653fc2a5"
+content-hash = "2c0bcc51690deebbb0b4a9153c5b4f5d82e2dadad687affe922ec88100e9ed96"
 
 [metadata.files]
 alabaster = [
@@ -1601,8 +1601,8 @@ mccabe = [
     {file = "mccabe-0.7.0.tar.gz", hash = "sha256:348e0240c33b60bbdf4e523192ef919f28cb2c3d7d5c7794f74009290f236325"},
 ]
 motion-planning-scenes = [
-    {file = "motion_planning_scenes-0.3.4-py3-none-any.whl", hash = "sha256:e8c258f0c1cc52722a29509a089f66ac2c85938c0f3326cd100071d7a00e70b1"},
-    {file = "motion_planning_scenes-0.3.4.tar.gz", hash = "sha256:44179c55fa466d35dcec7189e5b7b39efb40098bac4db68484e54cb9b316ec1a"},
+    {file = "motion_planning_scenes-0.3.5-py3-none-any.whl", hash = "sha256:f4be577528aed31ade6ab04276301384b19fd2fab5a74e2aec1c2acd04cdf980"},
+    {file = "motion_planning_scenes-0.3.5.tar.gz", hash = "sha256:1a49bee3b7fcd5a2ad183cdd9c566cd2dec7b9016c088833a79d7a5f6d521299"},
 ]
 mypy-extensions = [
     {file = "mypy_extensions-0.4.3-py2.py3-none-any.whl", hash = "sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d"},
@@ -1971,8 +1971,8 @@ urdf-parser-py = [
     {file = "urdf_parser_py-0.0.4.tar.gz", hash = "sha256:e983f637145fded67bcff6a542302069bb975b2edf1b18318c093abba1b794cc"},
 ]
 urdfenvs = [
-    {file = "urdfenvs-0.3.0-py3-none-any.whl", hash = "sha256:d06f692c3e5e4d8995a0bf06dcfbf932a94507352a161816d47a1838cbd9a420"},
-    {file = "urdfenvs-0.3.0.tar.gz", hash = "sha256:6b34e7449cb0178fa5a5996cc58cde812cac815bda8eb056c4326f9bfc77e939"},
+    {file = "urdfenvs-0.4.0-py3-none-any.whl", hash = "sha256:81b2b2f176bd414ecf72bd1d581282fe06cd95585d23762420b84d3f1f45eb23"},
+    {file = "urdfenvs-0.4.0.tar.gz", hash = "sha256:d75eed20953d24338cabc13411823e534a90d3d75fd5d3599c889edf13b60b9e"},
 ]
 urdfpy = [
     {file = "urdfpy-0.0.22-py3-none-any.whl", hash = "sha256:ec9d944bd8a28fe0914b6038e8119ebd53905bc4c507744e35b46a3fa02529bd"},

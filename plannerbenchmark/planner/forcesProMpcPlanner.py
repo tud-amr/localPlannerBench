@@ -144,33 +144,14 @@ class ForcesProMpcPlanner(Planner):
 
     def update_dynamic_obstacles(self, obstacles_states: list):
         for i_obstacle, obstacle in enumerate(obstacles_states):
-            obstacle_predictions = self.predict_future_state(obstacle)
+            obstacle_predictions = self.predict_future_state(obstacle[0:3])
             for i in range(self.config.H):
                 for j in range(self.m()):
                     paramsIndexObstX = self._npar * i + self._paramMap['obst'][i_obstacle * (self.m() + 1) + j]
                     self._params[paramsIndexObstX] = obstacle_predictions[i][0][j]
-        """
-        nbDynamicObsts = int(obstArray.size / 3 / self.m())
-        for j in range(self.config.obst['nbObst']):
-            if j < nbDynamicObsts:
-                obstPos = obstArray[:self.m()]
-                obstVel = obstArray[self.m():2*self.m()]
-                obstAcc = obstArray[2*self.m():3*self.m()]
-            else:
-                obstPos = np.ones(self.m()) * -100
-                obstVel = np.zeros(self.m())
-                obstAcc = np.zeros(self.m())
-            for i in range(self.config.H):
-                for m_i in range(self.m()):
-                    paramsIndexObstX = self._npar * i + self._paramMap['obst'][j * (self.m() + 1) + m_i]
-                    predictedPosition = obstPos[m_i] + obstVel[m_i] * self.config.dt * i + 0.5 * (self.config.dt * i)**2 * obstAcc[m_i]
-                    self._params[paramsIndexObstX] = predictedPosition
-                paramsIndexObstR = self._npar * i + self._paramMap['obst'][j * (self.m() + 1) + self.m()]
-                self._params[paramsIndexObstR] = self._r
-        """
 
     def update_dynamic_goal(self, goal_state: list):
-        predictions = self.predict_future_state(goal_state)
+        predictions = self.predict_future_state(goal_state[0][0:3])
         for i in range(self.config.H):
             for j in range(self.m()):
                 self._params[self._npar * i + self._paramMap['g'][j]] = predictions[i+1][0][j]
@@ -285,7 +266,7 @@ class ForcesProMpcPlanner(Planner):
     def computeAction(self, observation: dict):
         if self.config.dynamic:
             self.update_dynamic_obstacles(observation['obstacles'])
-            self.update_dynamic_goal(observation['goal'])
+            self.update_dynamic_goal(observation['goals'])
         joint_states_array = np.concatenate((
             observation['joint_state']['position'], 
             observation['joint_state']['velocity'], 

@@ -8,10 +8,12 @@ from copy import deepcopy
 import planarenvs.point_robot
 import planarenvs.n_link_reacher
 import planarenvs.ground_robots
+from planarenvs.sensors.full_sensor import FullSensor as FullSensorPlanar
 from urdfenvs.robots.generic_urdf import GenericUrdfReacher
 from urdfenvs.robots.albert import AlbertRobot
 from urdfenvs.robots.tiago import TiagoRobot
 from urdfenvs.robots.boxer import BoxerRobot
+from urdfenvs.sensors.full_sensor import FullSensor as FullSensorUrdf
 
 from forwardkinematics.fksCommon.fk_creator import FkCreator
 from MotionPlanningEnv.obstacleCreator import ObstacleCreator
@@ -96,22 +98,6 @@ class Experiment(object):
     def fk(self, q, n, positionOnly=False):
         return self._fk.fk(q, n, positionOnly=positionOnly)
 
-    def evaluate(self, t):
-        evalObsts = self.evaluateObstacles(t=t)
-        evalGoal = self._motionPlanningGoal.evaluate(t=t)
-        dimension_goal = evalGoal[0].size
-        for i in range(3):
-            if np.isnan(evalGoal[i]).any():
-                evalGoal[i] = np.zeros(dimension_goal)
-
-        return {'goal': evalGoal, 'obstacles': evalObsts}
-
-    def evaluateObstacles(self, t):
-        evals = []
-        for obst in self._obstacles:
-            evals.append([obst.position(t=t), obst.velocity(t=t), obst.acceleration(t=t), obst.radius()])
-        return evals
-
     def robot_type(self):
         return self._setup["robot_type"]
 
@@ -162,10 +148,22 @@ class Experiment(object):
 
     def env(self, render=False):
         if self.robot_type() in ["planarArm", "pointRobot"]:
-            return gym.make(self.env_name(), render=render, n=self.n(), dt=self.dt())
+
+            env = gym.make(self.env_name(), render=render, n=self.n(), dt=self.dt())
+            self._full_sensor = FullSensorPlanar(
+                ['position', 'velocity', 'acceleration', 'is_primary_goal', 'weight', 'type'], 
+                ['position', 'velocity', 'acceleration', 'radius', 'type'],
+                variance=0.0,
+            )
         else:
             robots = [create_robot(self.robot_type(), self.control_mode())]
-            return gym.make("urdf-env-v0", robots=robots, render=render, dt=self.dt())
+            env =  gym.make("urdf-env-v0", robots=robots, render=render, dt=self.dt())
+            self._full_sensor = FullSensorUrdf(
+                ['position', 'velocity'], 
+                ['position', 'velocity', 'radius'],
+                variance=0.0,
+            )
+        return env
 
     def env_name(self):
         return self._setup['env']
@@ -174,9 +172,14 @@ class Experiment(object):
         for obst in self._obstacles:
             env.add_obstacle(obst)
         try:
-            env.add_goal(self.goal())
+            for sub_goal in self.goal().sub_goals():
+                env.add_goal(sub_goal)
         except Exception as e:
             logging.error(f"Error occured when adding goal to the scene, {e}")
+        if self.robot_type() in ['planarArm', 'pointRobot']:
+            env.add_sensor(self._full_sensor)
+        else:
+            env.add_sensor(self._full_sensor, [0])
 
     def shuffleInitConfiguration(self):
         q0_new = np.random.uniform(low=self.limits()[0], high=self.limits()[1])

@@ -21,6 +21,7 @@ class FabricConfig(PlannerConfig):
     m_base: float = 0.2
     m_ratio: float = 1.0
     obst: Dict[str, float] = field(default_factory = lambda: ({'exp': 1.0, 'lam': 1.0}))
+    obst_fin: Dict[str, float] = field(default_factory = lambda: ({'exp': 1.0, 'lam': 1.0}))
     selfCol: Dict[str, float] = field(default_factory = lambda: ({'exp': 1.0, 'lam': 1.0}))
     attractor: Dict[str, float] = field(default_factory = lambda: ({'k_psi': 3.0}))
     speed: Dict[str, float] = field(default_factory = lambda : ({'ex_factor': 1.0}))
@@ -44,10 +45,10 @@ class FabricPlanner(Planner):
             "0.5 * sym('base_inertia') * ca.dot(xdot, xdot)"
         )
         collision_geometry: str = (
-            "-0.1 / (x ** sym('obst_geo_exp')) * xdot ** 2"
+            "-sym('obst_geo_lam') / (x ** sym('obst_geo_exp')) * xdot ** 2"
         )
         collision_finsler: str = (
-            "sym('obst_geo_lam')/(x**1) * (-0.5 * (ca.sign(xdot) - 1)) * xdot**2"
+            "sym('obst_fin_lam')/(x ** sym('obst_fin_exp')) * (-0.5 * (ca.sign(xdot) - 1)) * xdot**2"
         )
         limit_geometry: str = (
             "-0.1 / (x ** 1) * xdot ** 2"
@@ -101,6 +102,8 @@ class FabricPlanner(Planner):
             for i in self._collision_links:
                 self._runtime_arguments[f'obst_geo_exp_obst_{j}_{i}_leaf'] = np.array([self.config.obst['exp']])
                 self._runtime_arguments[f'obst_geo_lam_obst_{j}_{i}_leaf'] = np.array([self.config.obst['lam']])
+                self._runtime_arguments[f'obst_fin_exp_obst_{j}_{i}_leaf'] = np.array([self.config.obst_fin['exp']])
+                self._runtime_arguments[f'obst_fin_lam_obst_{j}_{i}_leaf'] = np.array([self.config.obst_fin['lam']])
                 self._runtime_arguments[f'radius_body_{i}'] = np.array([self._r_body])
         for j in range(self._number_dynamic_obstacles):
             self._runtime_arguments[f'radius_dynamic_obst_{j}'] = np.array([self._dynamic_obsts[j].radius()])
@@ -168,32 +171,33 @@ class FabricPlanner(Planner):
                 [observation['joint_state']['forward_velocity'][0]] + 
                 observation['joint_state']['velocity'][2:].tolist()
             )
-        if self._dynamic_goal:
-            self._runtime_arguments['x_ref_goal_0_leaf'] = observation['goals'][0]
-            self._runtime_arguments[f'weight_goal_0'] = self._goal.sub_goals()[0].weight() * self.config.attractor['k_psi']
-            self._runtime_arguments['xdot_ref_goal_0_leaf'] = observation['goals'][1]
-            self._runtime_arguments['xddot_ref_goal_0_leaf'] = observation['goals'][2]
-            if not self.config.dynamic:
-                self._runtime_arguments['xdot_ref_goal_0_leaf'] *= 0.0
-                self._runtime_arguments['xddot_ref_goal_0_leaf'] *= 0.0
-        else:
-            for i, sub_goal in enumerate(self._goal.sub_goals()):
-                self._runtime_arguments[f'x_goal_{i}'] = sub_goal.position()
-                self._runtime_arguments[f'weight_goal_{i}'] = sub_goal.weight() * self.config.attractor['k_psi']
-        number_obstacles = len(observation['obstacles'])
-        for i, obst in enumerate(self._dynamic_obsts):
-            obstacle = observation['obstacles'][number_obstacles - i - 1]
-            for j in self._collision_links:
-                #print(f"Entering dynamic obstacle {obstacle}")
-                self._runtime_arguments[f'x_ref_dynamic_obst_{i}_{j}_leaf'] = obstacle[0]
-                self._runtime_arguments[f'xdot_ref_dynamic_obst_{i}_{j}_leaf'] = obstacle[1]
-                self._runtime_arguments[f'xddot_ref_dynamic_obst_{i}_{j}_leaf'] = obstacle[2]
-                if not self.config.dynamic:
-                    self._runtime_arguments[f'xdot_ref_dynamic_obst_{i}_{j}_leaf'] *= 0.0
-                    self._runtime_arguments[f'xddot_ref_dynamic_obst_{i}_{j}_leaf'] *= 0.0
+        counter_dynamic_goal = 0
+        counter_static_goal = 0
+        for goal in observation['goals']:
+            self._runtime_arguments[f'weight_goal_{counter_dynamic_goal+counter_static_goal}'] = goal[-2] * self.config.attractor['k_psi']
+            if goal[-1] == 'staticSubGoal':
+                self._runtime_arguments[f'x_goal_{counter_static_goal}'] = goal[0]
+                counter_static_goal += 1
+            else:
+                self._runtime_arguments[f'x_ref_goal_{counter_dynamic_goal}_leaf'] = goal[0]
+                self._runtime_arguments[f'xdot_ref_goal_{counter_dynamic_goal}_leaf'] = goal[1]
+                self._runtime_arguments[f'xddot_ref_goal_{counter_dynamic_goal}_leaf'] = goal[2]
+                counter_dynamic_goal += 1
+
+        counter_dynamic_obstacles = 0
+        counter_static_obstacles = 0
+        for obst in observation['obstacles']:
+            if not obst[-1] == 'sphereObstacle':
+                for j in self._collision_links:
+                    self._runtime_arguments[f'x_ref_dynamic_obst_{counter_dynamic_obstacles}_{j}_leaf'] = obst[0]
+                    self._runtime_arguments[f'xdot_ref_dynamic_obst_{counter_dynamic_obstacles}_{j}_leaf'] = obst[1]
+                    self._runtime_arguments[f'xddot_ref_dynamic_obst_{counter_dynamic_obstacles}_{j}_leaf'] = obst[2]
+                    if not self.config.dynamic:
+                        self._runtime_arguments[f'xdot_ref_dynamic_obst_{counter_dynamic_obstacles}_{j}_leaf'] *= 0.0
+                        self._runtime_arguments[f'xddot_ref_dynamic_obst_{counter_dynamic_obstacles}_{j}_leaf'] *= 0.0
+                counter_dynamic_obstacles += 1
 
 
-        pass
 
     def computeAction(self, observation):
         self.adapt_runtime_arguments(observation)
