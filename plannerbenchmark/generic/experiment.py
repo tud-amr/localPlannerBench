@@ -154,13 +154,21 @@ class Experiment(object):
         else:
             return gym.make(self.envName(), render=render, dt=self.dt())
 
-    def addScene(self, env):
+    def showLidar(self, env, sensor_data, q, body_ids_old, number_lidar_rays, show_lidar_mode):
+        if show_lidar_mode == "spheres":
+            body_ids = env.show_lidar_spheres(sensor_data, q, body_ids_old, number_lidar_rays)
+        return body_ids
+    
+    def addScene(self, env, nb_rays=0):
         for obst in self._obstacles:
             env.add_obstacle(obst)
         try:
             env.add_goal(self.goal())
         except Exception as e:
             logging.error(f"Error occured when adding goal to the scene, {e}")
+        if nb_rays > 0:
+            lidar = Lidar(4, nb_rays=nb_rays, raw_data=False)
+            env.add_sensor(lidar)
 
     def shuffleInitConfiguration(self):
         q0_new = np.random.uniform(low=self.limits()[0], high=self.limits()[1])

@@ -56,6 +56,9 @@ class Runner(object):
         self._parser.add_argument(
             "--numberRuns", "-n", type=int, default=1, help="Number of runs of the experiment"
         )
+        self._parser.add_argument(
+            "--show-rays", "-sr", type=bool, default=False, help="Show LiDAR ray visualization by setting to True"
+        )
         self._parser.add_argument("--ros", dest="ros", action="store_true")
         self._parser.add_argument("--no-save", dest="save", action="store_false")
         self._parser.add_argument("--random-goal", dest="random_goal", action="store_true")
@@ -94,6 +97,7 @@ class Runner(object):
 
         self._ros = args.ros
         self._compare = args.compare
+        self._show_rays = args.show_rays
         if self._compare:
             self._compareTimeStamp = args.caseSetup[-24:-9]
         if self._ros:
@@ -170,7 +174,16 @@ class Runner(object):
                 timeStamp = self._compareTimeStamp
             for planner in self._planners:
                 ob, t0 = self.reset(q0, q0dot)
+                try:
+                    # Sets the LiDAR data to 100.0 for the first step.
+                    ob['lidarSensor'] = np.full([planner._config.number_lidar_rays*2,], 100.0)
+                except AttributeError:
+                    print("No LiDAR sensor available to set default values to 100.0")
                 if not self._ros:
+                    try:
+                        self._experiment.addScene(self._env, planner._config.number_lidar_rays)
+                    except AttributeError:
+                        print("No LiDAR sensor found, using default environment.")
                     self._experiment.addScene(self._env)
                 logger = Logger(self._res_folder, timeStamp)
                 logger.setSetups(self._experiment, planner)
@@ -197,6 +210,18 @@ class Runner(object):
                     if self._experiment.robotType() in ['groundRobot', 'boxer', 'albert']:
                         qudot = np.concatenate((ob['joint_state']['forward_velocity'], ob['joint_state']['velocity'][2:]))
                         observation += [qudot]
+                    try:
+                        sensor_data = ob['lidarSensor']
+                        if self._show_rays:
+                            if i == 0:
+                                body_ids_old = None
+                            show_lidar_mode = "spheres"
+                            show_lidar_step = 1
+                            if i in range(1, self._experiment.T(), show_lidar_step):
+                                body_ids_old = self._experiment.showLidar(self._env, sensor_data, q, body_ids_old, planner._config.number_lidar_rays, show_lidar_mode)
+                        observation += [sensor_data]
+                    except KeyError as key_error:
+                        observation += [0]
                     t_before = time.perf_counter()
                     action = planner.computeAction(*observation)
                     solving_time = time.perf_counter() - t_before

@@ -3,6 +3,10 @@ try:
 except ModuleNotFoundError as e:
     print(f"Module fabricPlanner not found: {e}")
 try:
+    from plannerbenchmark.planner.sensorFabricPlanner import SensorFabricPlanner
+except ModuleNotFoundError as e:
+    print(f"Module sensorFabricPlanner not found: {e}")
+try:
     from plannerbenchmark.planner.forcesProMpcPlanner import ForcesProMpcPlanner
 except ModuleNotFoundError as e:
     print(f"Module forcesProMpcPlanner not found: {e}")
