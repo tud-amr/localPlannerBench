@@ -1,6 +1,7 @@
 import numpy as np
 from abc import ABC, abstractmethod
 from typing import Callable
+import logging
 
 
 def computeDistances(points_a: np.ndarray, points_b: np.ndarray):
@@ -122,7 +123,7 @@ class ClearanceMetric(Metric):
 
     def computeMetric(self, data):
         obstacles = self._params["obstacles"]
-        m = obstacles[0].dim()
+        m = obstacles[0].dimension()
         n = self._params["n"]
         r_body = self._params["r_body"]
         rawData = np.stack([data[name] for name in self._measNames])
@@ -132,7 +133,7 @@ class ClearanceMetric(Metric):
         for i, obst in enumerate(obstacles):
             for i_fk in range(0, n):
                 distancesToObst = (
-                    computeDistances(fks[:, i_fk, :], np.array(obst.position()))
+                    computeDistances(fks[:, i_fk, :], obst.position())
                     - obst.radius()
                     - r_body
                 )
@@ -140,7 +141,7 @@ class ClearanceMetric(Metric):
                 minDistances.append(minDistToObst)
                 distanceToObsts["obst" + str(i) + "_fk" + str(i_fk)] = {
                     "dist": minDistToObst,
-                    "loc": list(obst.position()),
+                    "loc": obst.position().tolist(),
                     "r": obst.radius(),
                 }
         return {"short": float(min(minDistances)), "allMinDist": distanceToObsts}
@@ -167,18 +168,6 @@ class DynamicClearanceMetric(Metric):
     of the dynamic obstacles, `r_obsts`. Minimum distances between all
     robot links and all obstacles are computed and the returned.
     """
-
-class InverseDynamicClearanceMetric(ClearanceMetric):
-
-    """Metric to compute the inverse of the minimum clearance from any obstacle.
-
-    InverseClearance is the inverse of ClearanceMetric.
-    """
-
-    def computeMetric(self, data):
-        evaluation = super().computeMetric(data)
-        evaluation['short'] = 1.0 / evaluation['short']
-        return evaluation
 
     def computeMetric(self, data):
         m = self._params["dimension_obstacle"]
@@ -210,7 +199,20 @@ class InverseDynamicClearanceMetric(ClearanceMetric):
                     "r_body": r_body,
                     "r_obst": r_obsts[i],
                 }
-        return {"short": 1.0/float(min(minDistances)), "allMinDist": distanceToObsts}
+        return {"short": float(min(minDistances)), "allMinDist": distanceToObsts}
+
+class InverseDynamicClearanceMetric(DynamicClearanceMetric):
+
+    """Metric to compute the inverse of the minimum clearance from any obstacle.
+
+    InverseDynamicClearance is the inverse of DynamicClearanceMetric.
+    """
+
+    def computeMetric(self, data):
+        evaluation = super().computeMetric(data)
+        evaluation['short'] = 1.0 / evaluation['short']
+        return evaluation
+
 
 
 class SelfClearanceMetric(Metric):
@@ -276,10 +278,21 @@ class SuccessMetric(Metric):
     """
 
     def computeMetric(self, data):
-        minClearance = self._params["minClearance"]
-        reachingFlag = self._params["reachingFlag"]
-        if reachingFlag < 0:
-            return {"short": -2}
-        if minClearance < 0:
-            return {"short": -1}
-        return {"short": 1}
+        if 'time2Goal' in self._params:
+            goal_reached = self._params['time2Goal'] > 0
+        else:
+            logging.info("`time2Goal` metric not used. Assuming the goal was reached.")
+            goal_reached = True
+        if 'clearance' in self._params:
+            collided = self._params['clearance'] < 0
+        elif 'invClearance' in self._params:
+            collided = self._params['invClearance'] < 0
+        else:
+            collided = False
+            logging.info("`clearance` metric not used. Assuming no collision occured.")
+        result = {'short' : 1}
+        if collided:
+            result['short'] = -1
+        if not collided and not goal_reached:
+            result ['short'] = -2
+        return result

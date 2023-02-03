@@ -1,6 +1,7 @@
 T: 2000
 dt: 0.05
 dynamic: false
+control_mode: acc
 env: point-robot-acc-v0
 goal:
   subgoal0:
@@ -19,11 +20,10 @@ goal:
     low:
     - -4.0
     - -4.0
-    m: 2
     parent_link: 0
-    prime: true
+    is_primary_goal: true
     type: staticSubGoal
-    w: 5.0
+    weight: 5.0
 initState:
   q0:
   - 0.0
@@ -41,7 +41,6 @@ limits:
 n: 2
 obstacles:
   obst0:
-    dim: 2
     geometry:
       position:
       - -2.0

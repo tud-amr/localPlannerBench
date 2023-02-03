@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "plannerbenchmark"
-version = "1.0.0"
+version = "1.0.0.dev1"
 description = "Benchmark suite for local planner in dynamic environments. Multiple planners can be compared on different kinematic chains in different environment. The suite is highly extendable for new planners, robots and environments."
 authors = ["Max Spahn <m.spahn@tudelft.nl>"]
 maintainers = [
@@ -16,16 +16,18 @@ keywords = ["robotics", "motion-planning", "benchmark"]
 
 [tool.poetry.dependencies]
 python = "^3.6.5,<3.10"
-planarenvs = "^1.0.3" 
-urdfenvs = "^0.2.2"
-motion-planning-scenes= "^0.1.22"
 forwardkinematics = "^1.0.4"
 robotmpcs = {version = "^0.1.4", optional = true}
-#fabrics = {path = "../../../../code/fabrics", optional = true}
+motion-planning-scenes = "^0.3.0"
+urdfenvs = "^0.4.0"
+#acados-template = {path = "relative/path/to/acados/interface/acados-template", optional = true}
+planarenvs = "^1.1.1"
+#fabrics = {path = "../fabrics"}
 
 [tool.poetry.extras]
 fabric = ['fabrics']
 mpc = ['robotmpcs']
+acados = ['acados']
 
 [tool.poetry.scripts]
 runner = 'plannerbenchmark.exec.runner:main'

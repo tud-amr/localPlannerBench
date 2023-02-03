@@ -9,13 +9,13 @@ import os
 def create_mpc_solver(pr, exp):
 
     # TODO: support more experiment envs
-    if exp.envName() == "point-robot-acc-v0":
+    if exp.robot_type() == "pointRobot":
         model_ac = acados_point_mass_model(pr, exp)
         extract_params = point_mass_params
-    elif exp.envName() == "nLink-reacher-acc-v0":
+    elif exp.robot_type() == "planarArm":
         model_ac = acados_n_link_model(pr, exp)
         extract_params = n_link_params
-    elif exp.envName() == "panda-reacher-acc-v0":
+    elif exp.robot_type() == "panda":
         model_ac = acados_panda_arm_model(pr, exp)
         extract_params = panda_arm_params
 

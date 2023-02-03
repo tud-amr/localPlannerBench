@@ -1,15 +1,11 @@
 import numpy as np
 from acados_template import AcadosOcp, AcadosOcpSolver, acados_ocp_solver 
 from typing import List
-import matplotlib.pyplot as plt 
-import matplotlib.patches as mpatches 
-from matplotlib import markers
 import logging
 
-from forwardkinematics.fksCommon.fk_creator import FkCreator
+
 from dataclasses import dataclass, field
 import numpy as np
-import casadi as cd 
 
 from plannerbenchmark.generic.planner import Planner, PlannerConfig
 
@@ -44,6 +40,7 @@ class AcadosMpcPlanner(Planner):
         self._mpc_feasible = False
 
         self._init_problem()
+        self._action_counter = self.config.interval
 
     def _init_problem(self):
         # Regenerate solver
@@ -74,56 +71,68 @@ class AcadosMpcPlanner(Planner):
     def concretize(self):
         pass
 
-    def computeAction(self, *args):
-        robot_state_current = np.array(args).flatten() # [x, y , vx, vy]
-        logging.debug(f"STATE {robot_state_current}")
-
-        # Force solver initial state to be the current robot state
-        self._acados_ocp_solver.constraints_set(0, 'lbx', np.array(robot_state_current))
-        self._acados_ocp_solver.constraints_set(0, 'ubx', np.array(robot_state_current))
-
-        if not hasattr(self, "_mpc_x_plan"):
-            self._mpc_x_plan = np.tile(np.array(robot_state_current).reshape((-1, 1)), (1, self._config.N))
-
-        if not hasattr(self, "_mpc_u_plan"):
-            self._mpc_u_plan = np.zeros((self._exp.n(), self._config.N))
-
-        if self._mpc_feasible:
-            x_traj_init = np.concatenate((self._mpc_x_plan[:, 1:], self._mpc_x_plan[:, -1:]), axis=1)
-            u_traj_init = np.concatenate((self._mpc_u_plan[:, 1:], self._mpc_u_plan[:, -1:]), axis=1)
+    def computeAction(self, observation):
+        if self._action_counter < self.config.interval:
+            self._action_counter += 1
+            return self._action
         else:
-            x_traj_init = np.tile(np.array(robot_state_current).reshape((-1, 1)), (1, self._config.N))
-            u_traj_init = self._mpc_u_plan = np.zeros((self._exp.n(), self._config.N))
+            self._action_counter = 0
+            robot_state_current = np.concatenate((
+                observation["joint_state"]["position"], 
+                observation["joint_state"]["velocity"], 
+            ))
+            logging.debug(f"STATE {robot_state_current}")
 
-        param_this_stage = self._extract_params(self._exp)
+            goal = observation["goal"]
+            obstacles = observation["obstacles"]
 
-        for iStage in range(0, self._config.N):
-            self._acados_ocp_solver.set(iStage, 'x', x_traj_init[:, iStage])
-            self._acados_ocp_solver.set(iStage, 'u', u_traj_init[:, iStage])
-            self._acados_ocp_solver.set(iStage, 'p', param_this_stage)
+            # Force solver initial state to be the current robot state
+            self._acados_ocp_solver.constraints_set(0, 'lbx', np.array(robot_state_current))
+            self._acados_ocp_solver.constraints_set(0, 'ubx', np.array(robot_state_current))
 
-        self._acados_ocp_solver.set(iStage+1, 'p', param_this_stage)
+            if not hasattr(self, "_mpc_x_plan"):
+                self._mpc_x_plan = np.tile(np.array(robot_state_current).reshape((-1, 1)), (1, self._config.N))
 
-        # Call the solver
-        status = self._acados_ocp_solver.solve()
+            if not hasattr(self, "_mpc_u_plan"):
+                self._mpc_u_plan = np.zeros((self._exp.n(), self._config.N))
 
-        # NOTE: In case of solver infeasibility, keeps previous action.
-        if status != 0:     # infeasible 
-            # print('acados returned status {} in closed loop iteration.'.format(status))
-            self._mpc_feasible = False 
-            # use previous action
-            return np.array(self._mpc_u_plan[:, 0]) 
+            if self._mpc_feasible:
+                x_traj_init = np.concatenate((self._mpc_x_plan[:, 1:], self._mpc_x_plan[:, -1:]), axis=1)
+                u_traj_init = np.concatenate((self._mpc_u_plan[:, 1:], self._mpc_u_plan[:, -1:]), axis=1)
+            else:
+                x_traj_init = np.tile(np.array(robot_state_current).reshape((-1, 1)), (1, self._config.N))
+                u_traj_init = self._mpc_u_plan = np.zeros((self._exp.n(), self._config.N))
 
-        # Obtain solution
-        for iStage in range(0, self._config.N):
-            self._mpc_x_plan[:, iStage] = self._acados_ocp_solver.get(iStage, 'x')
-            self._mpc_u_plan[:, iStage] = self._acados_ocp_solver.get(iStage, 'u')
+            param_this_stage = self._extract_params(self._exp, goal, obstacles)
 
-        self._mpc_feasible = True 
-        robot_control_current = list(self._mpc_u_plan[:, 0])
+            for iStage in range(0, self._config.N):
+                self._acados_ocp_solver.set(iStage, 'x', x_traj_init[:, iStage])
+                self._acados_ocp_solver.set(iStage, 'u', u_traj_init[:, iStage])
+                self._acados_ocp_solver.set(iStage, 'p', param_this_stage)
 
-        logging.debug(f"ACTION {robot_control_current}")
-        return np.array(robot_control_current)
+            self._acados_ocp_solver.set(iStage+1, 'p', param_this_stage)
+
+            # Call the solver
+            status = self._acados_ocp_solver.solve()
+
+            # NOTE: In case of solver infeasibility, keeps previous action.
+            if status != 0:     # infeasible 
+                # print('acados returned status {} in closed loop iteration.'.format(status))
+                self._mpc_feasible = False 
+                # use previous action
+                return np.array(self._mpc_u_plan[:, 0]) 
+
+            # Obtain solution
+            for iStage in range(0, self._config.N):
+                self._mpc_x_plan[:, iStage] = self._acados_ocp_solver.get(iStage, 'x')
+                self._mpc_u_plan[:, iStage] = self._acados_ocp_solver.get(iStage, 'u')
+
+            self._mpc_feasible = True 
+            robot_control_current = list(self._mpc_u_plan[:, 0])
+
+            logging.debug(f"ACTION {robot_control_current}")
+            self._action = np.array(robot_control_current)
+            return self._action
 
 
 

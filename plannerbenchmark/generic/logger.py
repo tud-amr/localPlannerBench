@@ -1,8 +1,7 @@
 import os
-import sys
-import yaml
 import logging
 import csv
+import numpy as np
 
 
 class Logger(object):
@@ -15,15 +14,19 @@ class Logger(object):
         self._exp = exp
         self._planner = planner
 
-    def addResultPoint(self, t, q, qdot, action, solving_time, goal, obsts):
+    def add_result_point(self, t, observation: dict, action: np.ndarray, solving_time: float):
         resDict = {'t': t, 't_planning': solving_time}
+        goal = observation['goals']
+        obstacles = observation['obstacles']
+        q = observation['joint_state']['position']
+        qdot = observation['joint_state']['velocity']
         for a_i, a in enumerate(action):
             resDict['a' + str(a_i)] = a
         for n_i in range(self._exp.n() + 1):
             if n_i < self._exp.n():
                 resDict['q' + str(n_i)] = q[n_i]
                 resDict['q' + str(n_i) + 'dot'] = qdot[n_i]
-            if self._exp.robotType() in ['panda', 'mobilePanda', 'tiago', 'albert']:
+            if self._exp.robot_type() in ['panda', 'mobilePanda', 'tiago', 'albert']:
                 fk = self._exp.fk(q, n_i, positionOnly=True)
                 resDict['fk' + str(n_i) + "_x"] = fk[0]
                 resDict['fk' + str(n_i) + "_y"] = fk[1]
@@ -35,8 +38,8 @@ class Logger(object):
         for i_der, goal_der in enumerate(goal):
             for j_dim, goal_dim in enumerate(goal_der):
                 resDict['goal_' + str(j_dim) + '_' + str(i_der)] = goal_dim
-        for k_obst, obst in enumerate(obsts):
-            for i_der, obst_der in enumerate(obst):
+        for k_obst, obst in enumerate(obstacles):
+            for i_der, obst_der in enumerate(obst[:-2]):
                 for j_dim in range(obst_der.size):
                     resDict['obst_' + str(k_obst) + '_' + str(j_dim) + '_' + str(i_der)] = obst_der[j_dim]
         self._res.append(resDict)

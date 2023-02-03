@@ -65,7 +65,7 @@ class Planner(metaclass=PlannerRegistry):
 
     def save(self, folderPath):
         with open(folderPath + "/planner.yaml", 'w') as file:
-            yaml.dump(asdict(self.config), file)
+            yaml.dump(asdict(self.config), file, default_flow_style=False)
 
     @abstractmethod
     def computeAction(self, q, qdot):

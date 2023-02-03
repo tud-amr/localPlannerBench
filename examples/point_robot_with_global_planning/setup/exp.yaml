@@ -1,0 +1,90 @@
+T: 500
+dynamic: False
+dt: 0.05
+env: point-robot-acc-v0
+control_mode: acc
+robot_type: pointRobot
+n: 2
+goal:
+  subgoal0:
+    is_primary_goal: True
+    weight: 1
+    indices:
+      - 0
+      - 1
+    parent_link: 0
+    child_link: 1
+    desired_position:
+      - 4.0
+      - -1.2
+    low:
+      - -4.0
+      - -4.0
+    high: 
+      - 4.0
+      - 4.0
+    type: staticSubGoal
+    epsilon: 0.1
+initState:
+  q0:
+    - -2.0
+    - 3.0
+  q0dot:
+    - 0.0
+    - 0.0
+limits:
+  low:
+    - -5.0
+    - -5.0
+  high:
+    - 5.0
+    - 5.0
+r_body: 0.2
+randomObstacles:
+  number: 5
+obstacles:
+  obst0:
+    type: sphereObstacle
+    geometry:
+      position: 
+        - 2.0
+        - 1.5
+      radius: 1.0
+    low:
+      position:
+        - -5.0
+        - -5.0
+      radius: 0.0
+    high:
+      position:
+        - 5.0
+        - 5.0
+      radius: 2.0
+  obst1:
+    type: sphereObstacle
+    geometry:
+      position: 
+        - 2.0
+        - -1.0
+      radius: 1.0
+    low:
+      position:
+        - -5.0
+        - -5.0
+      radius: 0.0
+    high:
+      position:
+        - 5.0
+        - 5.0
+      radius: 1.0
+# obst2:
+#   type: analyticSphere
+#   geometry:
+#     trajectory:
+#     - '6.0 - 0.5 * t'
+#     - '2.0 + 0.0 * t'
+#     radius: 1.0
+selfCollision:
+  pairs:
+    
+

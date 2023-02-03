@@ -63,7 +63,7 @@ class SeriesEvaluation(object):
         """Writes kpis to postProcess.yaml file."""
         postProcessFile = self._folder + "/postProcess.yaml"
         with open(postProcessFile, "w") as file:
-            yaml.dump(self._kpis, file)
+            yaml.dump(self._kpis, file, default_flow_style=False)
 
     def success(self, plannerName: str, timeStamp: str) -> dict:
         """Gets evaluation of success metric."""

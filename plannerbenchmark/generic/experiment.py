@@ -3,21 +3,33 @@ import csv
 import gym
 import numpy as np
 import logging
+from copy import deepcopy
 
 import planarenvs.point_robot
 import planarenvs.n_link_reacher
 import planarenvs.ground_robots
-import urdfenvs.tiago_reacher
-import urdfenvs.panda_reacher
-import urdfenvs.mobile_reacher
-import urdfenvs.albert_reacher
-import urdfenvs.boxer_robot
-import urdfenvs.point_robot_urdf
+from planarenvs.sensors.full_sensor import FullSensor as FullSensorPlanar
+from urdfenvs.robots.generic_urdf import GenericUrdfReacher
+from urdfenvs.robots.albert import AlbertRobot
+from urdfenvs.robots.tiago import TiagoRobot
+from urdfenvs.robots.boxer import BoxerRobot
+from urdfenvs.sensors.full_sensor import FullSensor as FullSensorUrdf
 
 from forwardkinematics.fksCommon.fk_creator import FkCreator
 from MotionPlanningEnv.obstacleCreator import ObstacleCreator
 from MotionPlanningGoal.staticSubGoal import StaticSubGoal
 from MotionPlanningGoal.goalComposition import GoalComposition
+
+def create_robot(robot_type, control_mode):
+    if robot_type == 'albert':
+        robot = AlbertRobot(mode=control_mode)
+    elif robot_type == 'tiago':
+        robot = TiagoRobot(mode=control_mode)
+    elif robot_type == 'boxer':
+        robot = BoxerRobot(mode=control_mode)
+    else:
+        robot = GenericUrdfReacher(urdf=robot_type+".urdf", mode=control_mode)
+    return robot
 
 
 
@@ -39,8 +51,8 @@ class Experiment(object):
         self._required_keys = [
             "T",
             "dt",
-            "env",
             "n",
+            "control_mode",
             "goal",
             "initState",
             "robot_type",
@@ -51,13 +63,14 @@ class Experiment(object):
             "dynamic",
         ]
         self.parseSetup()
-        self._fk = FkCreator(self.robotType(), self.n()).fk()
+        self._fk = FkCreator(self.robot_type(), self.n()).fk()
 
     def parseSetup(self):
         with open(self._setupFile, "r") as setupStream:
             self._setup = yaml.safe_load(setupStream)
         self.checkCompleteness()
-        self._motionPlanningGoal = GoalComposition(name="mpg", contentDict=self._setup['goal'])
+        self._motionPlanningGoal = GoalComposition(name="mpg", content_dict=self._setup['goal'])
+        self._original_setup = deepcopy(self._setup)
         self.parseObstacles()
 
     def parseObstacles(self):
@@ -68,7 +81,7 @@ class Experiment(object):
                 obstData = self._setup["obstacles"][obst]
                 obstType = obstData['type']
                 obstName = obst
-                self._obstacles.append(self._obstacleCreator.createObstacle(obstType, obstName, obstData))
+                self._obstacles.append(self._obstacleCreator.create_obstacle(obstType, obstName, obstData))
 
     def dynamic(self):
         return self._setup['dynamic']
@@ -85,19 +98,7 @@ class Experiment(object):
     def fk(self, q, n, positionOnly=False):
         return self._fk.fk(q, n, positionOnly=positionOnly)
 
-    def evaluate(self, t):
-        evalObsts = self.evaluateObstacles(t=t)
-        evalGoal = self._motionPlanningGoal.evaluate(t=t)
-        return evalGoal + evalObsts
-
-    def evaluateObstacles(self, t):
-        evals = []
-        for obst in self._obstacles:
-            if 'analytic' in obst.type():
-                evals += obst.traj().evaluate(t=t)
-        return evals
-
-    def robotType(self):
+    def robot_type(self):
         return self._setup["robot_type"]
 
     def n(self):
@@ -109,8 +110,9 @@ class Experiment(object):
     def dt(self):
         return self._setup["dt"]
 
-    def envName(self):
-        return self._setup["env"]
+    def control_mode(self):
+        return self._setup["control_mode"]
+
 
     def obstacles(self):
         return self._obstacles
@@ -135,32 +137,49 @@ class Experiment(object):
     def goal(self):
         return self._motionPlanningGoal
 
-    def primeGoal(self, **kwargs):
-        return self._motionPlanningGoal.primeGoal()
-        if 't' in kwargs:
-            return self._motionPlanningGoal.evaluatePrimeGoal(kwargs.get('t'))
-        else:
-            return self._motionPlanningGoal.primeGoal()
+    def primary_goal(self, **kwargs):
+        return self._motionPlanningGoal.primary_goal(**kwargs)
 
-    def evaluatePrimeGoal(self, t):
-        return self.primeGoal().position(t=t)
+    def evaluate_primary_goal(self, t):
+        return self.primary_goal().evaluate(t=t)
 
     def getDynamicGoals(self):
         return self._motionPlanningGoal.dynamicGoals()
 
     def env(self, render=False):
-        if self.robotType() == 'planarArm':
-            return gym.make(self.envName(), render=render, n=self.n(), dt=self.dt())
+        if self.robot_type() in ["planarArm", "pointRobot"]:
+
+            env = gym.make(self.env_name(), render=render, n=self.n(), dt=self.dt())
+            self._full_sensor = FullSensorPlanar(
+                ['position', 'velocity', 'acceleration', 'is_primary_goal', 'weight', 'type'], 
+                ['position', 'velocity', 'acceleration', 'radius', 'type'],
+                variance=0.0,
+            )
         else:
-            return gym.make(self.envName(), render=render, dt=self.dt())
+            robots = [create_robot(self.robot_type(), self.control_mode())]
+            env =  gym.make("urdf-env-v0", robots=robots, render=render, dt=self.dt())
+            self._full_sensor = FullSensorUrdf(
+                ['position', 'velocity'], 
+                ['position', 'velocity', 'radius'],
+                variance=0.0,
+            )
+        return env
+
+    def env_name(self):
+        return self._setup['env']
 
     def addScene(self, env):
         for obst in self._obstacles:
             env.add_obstacle(obst)
         try:
-            env.add_goal(self.goal())
+            for sub_goal in self.goal().sub_goals():
+                env.add_goal(sub_goal)
         except Exception as e:
             logging.error(f"Error occured when adding goal to the scene, {e}")
+        if self.robot_type() in ['planarArm', 'pointRobot']:
+            env.add_sensor(self._full_sensor)
+        else:
+            env.add_sensor(self._full_sensor, [0])
 
     def shuffleInitConfiguration(self):
         q0_new = np.random.uniform(low=self.limits()[0], high=self.limits()[1])
@@ -172,7 +191,7 @@ class Experiment(object):
         obstType = obstData['type']
         for i in range(self._setup["randomObstacles"]["number"]):
             obstName = 'obst' + str(i)
-            randomObst = self._obstacleCreator.createObstacle(obstType, obstName, obstData)
+            randomObst = self._obstacleCreator.create_obstacle(obstType, obstName, obstData)
             randomObst.shuffle()
             self._obstacles.append(randomObst)
 
@@ -195,17 +214,45 @@ class Experiment(object):
         if incomplete:
             raise ExperimentIncompleteError("Missing keys: %s" % missingKeys[:-2])
 
+    def restore_original_goal(self):
+        self._motionPlanningGoal = GoalComposition(name = "mpg", content_dict = self._original_setup['goal'])
+ 
+    def compute_global_path(self):
+        logging.info("Creating global plan using OMPL.")
+        from plannerbenchmark.generic.global_planner import GlobalPlanner
+        global_planner = GlobalPlanner(self.obstacles(), self.primary_goal().dimension())
+        start = self.fk(self.initState()[0], self.n(), positionOnly=True)
+        if not isinstance(start, np.ndarray):
+            start = np.array([float(start[i]) for i in range(len(start))])
+        goal = self.primary_goal().position()
+        global_planner.initialize_search_space(low=[-0.0, -1.0, 0.2], high=[1.0, 1.0, 1.2])
+        global_planner.setup_planning_problem(start, goal)
+        global_planner.solve_planning_problem()
+
+        self._setup['goal']['subgoal0']['type'] = 'splineSubGoal'
+        self._setup['goal']
+        new_setup = self._motionPlanningGoal.dict()
+        new_setup['subgoal0']['type'] = 'splineSubGoal'
+        self._setup['dynamic'] = True
+        new_setup['subgoal0'].pop('desired_position', None)
+        new_setup['subgoal0']['trajectory'] = {
+                'controlPoints': global_planner.control_points(),
+                'degree': 2,
+                'duration': 10,
+            }
+        self._motionPlanningGoal = GoalComposition(name="mpg", content_dict=new_setup)
+
     def checkFeasibility(self, checkGoalReachible):
         for o in self.obstacles():
             for i in range(1, self.n() + 1):
                 fk = self.fk(self.initState()[0], i, positionOnly=True)
-                if self.robotType() == 'boxer':
+                if self.robot_type() == 'boxer':
                     fk = fk[0:2]
                 dist_initState = np.linalg.norm(np.array(o.position()) - fk)
                 if dist_initState < (o.radius() + self.rBody()):
                     raise ExperimentInfeasible("Initial configuration in collision")
-            if not self.dynamic() and len(o.position()) == len(self.primeGoal().position()):
-                dist_goal = np.linalg.norm(np.array(o.position()) - self.primeGoal().position())
+            if not self.dynamic() and len(o.position()) == len(self.primary_goal().position()):
+                dist_goal = np.linalg.norm(np.array(o.position()) - self.primary_goal().position())
                 if dist_goal < (o.radius() + self.rBody()):
                     raise ExperimentInfeasible("Goal in collision")
         for pair in self.selfCollisionPairs():
@@ -216,21 +263,21 @@ class Experiment(object):
                 raise ExperimentInfeasible(
                     "Initial configuration in self collision"
                 )
-        if self.robotType() == "planarArm":
-            if np.linalg.norm(np.array(self.primeGoal().position())) > self.n():
+        if self.robot_type() == "planarArm":
+            if np.linalg.norm(np.array(self.primary_goal().position())) > self.n():
                 raise ExperimentInfeasible("Goal unreachible")
 
     def save(self, folderPath):
-        self._setup["goal"] = self._motionPlanningGoal.toDict()
+        self._setup["goal"] = self._motionPlanningGoal.dict()
         obstsDict = {}
         obstFile = folderPath + "/obst"
         initStateFilename = folderPath + "/initState.csv"
         for i, obst in enumerate(self._obstacles):
-            obstsDict[obst.name()] = obst.toDict()
-            obst.toCSV(obstFile + "_" + str(i) + ".csv")
+            obstsDict[obst.name()] = obst.dict()
+            obst.csv(obstFile + "_" + str(i) + ".csv")
         self._setup["obstacles"] = obstsDict
         with open(folderPath + "/exp.yaml", "w") as file:
-            yaml.dump(self._setup, file)
+            yaml.dump(self._setup, file, default_flow_style=False)
         with open(initStateFilename, "w") as file:
             csv_writer = csv.writer(file, delimiter=",")
             csv_writer.writerow(self.initState()[0])

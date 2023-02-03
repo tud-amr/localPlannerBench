@@ -33,7 +33,7 @@ class PDPlanner(Planner):
         pass
 
     def setGoal(self, goal):
-        self._goal_position = goal.primeGoal().position()
+        self._goal_position = goal.primary_goal().position()
         pass
 
     def concretize(self):
@@ -44,7 +44,8 @@ class PDPlanner(Planner):
         self._curErrorDot = (newError - self._curError) / self.dt()
         self._curError = newError
 
-    def computeAction(self, *args):
-        self.evalError(args[0])
+    def computeAction(self, observation):
+        self._goal_position = observation["goals"][0][0]
+        self.evalError(observation["joint_state"]["position"])
         return self.config.p * self._curError + self.config.k * self._curErrorDot
 

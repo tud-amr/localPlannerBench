@@ -5,9 +5,9 @@ n: 7
 obst:
   nbObst: 5
 slack: true
-name: mpc
+name: forcesprompc
 weights:
   ws: 1e10
   wu: 5.0
   wvel: 5.0
-  wx: 10.0
+  wx: 100.0

@@ -76,9 +76,8 @@ def acados_panda_arm_model(pr, exp):
 
     return model 
 
-def panda_arm_params(exp: Experiment) -> np.ndarray:
+def panda_arm_params(exp: Experiment, goal, obs) -> np.ndarray:
     start = exp.initState()[0]
-    goal = exp.goal().primeGoal().position()
-    obs = np.array([[*o.position(), o.radius()] for o in exp.obstacles()]).flatten()
+    obs = np.array([[*o[0], o[-1]] for o in obs]).flatten()
     r_body = [exp.rBody()]
-    return np.concatenate((start, goal, obs, r_body))
+    return np.concatenate((start, goal[0], obs, r_body))

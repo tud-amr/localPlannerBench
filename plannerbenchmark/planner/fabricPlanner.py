@@ -6,6 +6,7 @@ import logging
 
 # Dependencies for this specific planner
 from fabrics.planner.parameterized_planner import ParameterizedFabricPlanner
+from fabrics.planner.non_holonomic_parameterized_planner import NonHolonomicParameterizedFabricPlanner
 
 # Motion planning scenes
 from MotionPlanningEnv.dynamicSphereObstacle import DynamicSphereObstacle
@@ -20,6 +21,7 @@ class FabricConfig(PlannerConfig):
     m_base: float = 0.2
     m_ratio: float = 1.0
     obst: Dict[str, float] = field(default_factory = lambda: ({'exp': 1.0, 'lam': 1.0}))
+    obst_fin: Dict[str, float] = field(default_factory = lambda: ({'exp': 1.0, 'lam': 1.0}))
     selfCol: Dict[str, float] = field(default_factory = lambda: ({'exp': 1.0, 'lam': 1.0}))
     attractor: Dict[str, float] = field(default_factory = lambda: ({'k_psi': 3.0}))
     speed: Dict[str, float] = field(default_factory = lambda : ({'ex_factor': 1.0}))
@@ -46,7 +48,7 @@ class FabricPlanner(Planner):
             "-sym('obst_geo_lam') / (x ** sym('obst_geo_exp')) * xdot ** 2"
         )
         collision_finsler: str = (
-            "1.0/(x**1) * (-0.5 * (ca.sign(xdot) - 1)) * xdot**2"
+            "sym('obst_fin_lam')/(x ** sym('obst_fin_exp')) * (-0.5 * (ca.sign(xdot) - 1)) * xdot**2"
         )
         limit_geometry: str = (
             "-0.1 / (x ** 1) * xdot ** 2"
@@ -66,15 +68,26 @@ class FabricPlanner(Planner):
         attractor_metric: str = (
             "((2.0 - 0.3) * ca.exp(-1 * (0.75 * ca.norm_2(x))**2) + 0.3) * ca.SX(np.identity(x.size()[0]))"
         )
-        self._planner = ParameterizedFabricPlanner(
-            self.config.n,
-            self._exp.robotType(),
-            base_energy=base_energy,
-            collision_geometry=collision_geometry,
-            collision_finsler=collision_finsler,
-            self_collision_geometry=self_collision_geometry,
-            self_collision_finsler=self_collision_finsler,
-        )
+        if self._exp.robot_type() in ['boxer', 'jackal', 'albert']:
+            self._planner = NonHolonomicParameterizedFabricPlanner(
+                self.config.n,
+                self._exp.robot_type(),
+                base_energy=base_energy,
+                collision_geometry=collision_geometry,
+                collision_finsler=collision_finsler,
+                self_collision_geometry=self_collision_geometry,
+                self_collision_finsler=self_collision_finsler,
+            )
+        else:
+            self._planner = ParameterizedFabricPlanner(
+                self.config.n,
+                self._exp.robot_type(),
+                base_energy=base_energy,
+                collision_geometry=collision_geometry,
+                collision_finsler=collision_finsler,
+                self_collision_geometry=self_collision_geometry,
+                self_collision_finsler=self_collision_finsler,
+            )
         self._collision_links = [i for i in range(1, self.config.n+1)]
         self._number_obstacles = 0
         self._dynamic_goal = False
@@ -89,6 +102,8 @@ class FabricPlanner(Planner):
             for i in self._collision_links:
                 self._runtime_arguments[f'obst_geo_exp_obst_{j}_{i}_leaf'] = np.array([self.config.obst['exp']])
                 self._runtime_arguments[f'obst_geo_lam_obst_{j}_{i}_leaf'] = np.array([self.config.obst['lam']])
+                self._runtime_arguments[f'obst_fin_exp_obst_{j}_{i}_leaf'] = np.array([self.config.obst_fin['exp']])
+                self._runtime_arguments[f'obst_fin_lam_obst_{j}_{i}_leaf'] = np.array([self.config.obst_fin['lam']])
                 self._runtime_arguments[f'radius_body_{i}'] = np.array([self._r_body])
         for j in range(self._number_dynamic_obstacles):
             self._runtime_arguments[f'radius_dynamic_obst_{j}'] = np.array([self._dynamic_obsts[j].radius()])
@@ -100,6 +115,12 @@ class FabricPlanner(Planner):
             for paired_link in paired_links:
                 self._runtime_arguments[f'self_geo_lam_self_collision_{link}_{paired_link}'] = np.array([self.config.selfCol['lam']])
                 self._runtime_arguments[f'self_geo_exp_self_collision_{link}_{paired_link}'] = np.array([self.config.selfCol['exp']])
+        if self._exp.robot_type() in ['albert', 'tiago', 'jackal', 'boxer']:
+            self._runtime_arguments['m_base_x'] = self.config.m_base
+            self._runtime_arguments['m_base_y'] = self.config.m_base
+            self._runtime_arguments['m_rot'] = self.config.m_rot
+            self._runtime_arguments['m_arm'] = self.config.m_arm
+            self._runtime_arguments['l_offset'] = self.config.l_offset
 
     def setObstacles(self, obsts, r_body):
         self._dynamic_obsts = []
@@ -126,7 +147,7 @@ class FabricPlanner(Planner):
         self._limits = limits
 
     def setGoal(self, goal):
-        self._dynamic_goal = isinstance(goal.primeGoal(), DynamicSubGoal) 
+        self._dynamic_goal = isinstance(goal.primary_goal(), DynamicSubGoal) 
         self._goal = goal
 
     def concretize(self):
@@ -142,28 +163,44 @@ class FabricPlanner(Planner):
         self.initialize_runtime_arguments()
 
 
-    def adapt_runtime_arguments(self, args):
-        self._runtime_arguments['q'] = args[0]
-        self._runtime_arguments['qdot'] = args[1]
-        if self._dynamic_goal:
-            self._runtime_arguments['x_ref_goal_0_leaf'] = args[2]
-            self._runtime_arguments['xdot_ref_goal_0_leaf'] = args[3]
-            self._runtime_arguments['xddot_ref_goal_0_leaf'] = args[4]
-        else:
-            for i, sub_goal in enumerate(self._goal.subGoals()):
-                self._runtime_arguments[f'x_goal_{i}'] = np.array(sub_goal.position())
-                self._runtime_arguments[f'weight_goal_{i}'] = np.array(sub_goal.weight() * self.config.attractor['k_psi'])
-        for i, obst in enumerate(self._dynamic_obsts):
-            for j in self._collision_links:
-                self._runtime_arguments[f'x_ref_dynamic_obst_{i}_{j}_leaf'] = args[1 + 3*i+1]
-                self._runtime_arguments[f'xdot_ref_dynamic_obst_{i}_{j}_leaf'] = args[1 + 3*i + 2]
-                self._runtime_arguments[f'xddot_ref_dynamic_obst_{i}_{j}_leaf'] = args[1 + 3*i + 3]
+    def adapt_runtime_arguments(self, observation):
+        self._runtime_arguments['q'] = observation['joint_state']['position']
+        self._runtime_arguments['qdot'] = observation['joint_state']['velocity']
+        if self._exp.robot_type() in ['jackal', 'boxer', 'tiago', 'albert']:
+            self._runtime_arguments['qudot'] = np.array(
+                [observation['joint_state']['forward_velocity'][0]] + 
+                observation['joint_state']['velocity'][2:].tolist()
+            )
+        counter_dynamic_goal = 0
+        counter_static_goal = 0
+        for goal in observation['goals']:
+            self._runtime_arguments[f'weight_goal_{counter_dynamic_goal+counter_static_goal}'] = goal[-2] * self.config.attractor['k_psi']
+            if goal[-1] == 'staticSubGoal':
+                self._runtime_arguments[f'x_goal_{counter_static_goal}'] = goal[0]
+                counter_static_goal += 1
+            else:
+                self._runtime_arguments[f'x_ref_goal_{counter_dynamic_goal}_leaf'] = goal[0]
+                self._runtime_arguments[f'xdot_ref_goal_{counter_dynamic_goal}_leaf'] = goal[1]
+                self._runtime_arguments[f'xddot_ref_goal_{counter_dynamic_goal}_leaf'] = goal[2]
+                counter_dynamic_goal += 1
+
+        counter_dynamic_obstacles = 0
+        counter_static_obstacles = 0
+        for obst in observation['obstacles']:
+            if not obst[-1] == 'sphereObstacle':
+                for j in self._collision_links:
+                    self._runtime_arguments[f'x_ref_dynamic_obst_{counter_dynamic_obstacles}_{j}_leaf'] = obst[0]
+                    self._runtime_arguments[f'xdot_ref_dynamic_obst_{counter_dynamic_obstacles}_{j}_leaf'] = obst[1]
+                    self._runtime_arguments[f'xddot_ref_dynamic_obst_{counter_dynamic_obstacles}_{j}_leaf'] = obst[2]
+                    if not self.config.dynamic:
+                        self._runtime_arguments[f'xdot_ref_dynamic_obst_{counter_dynamic_obstacles}_{j}_leaf'] *= 0.0
+                        self._runtime_arguments[f'xddot_ref_dynamic_obst_{counter_dynamic_obstacles}_{j}_leaf'] *= 0.0
+                counter_dynamic_obstacles += 1
 
 
-        pass
 
-    def computeAction(self, *args):
-        self.adapt_runtime_arguments(args)
+    def computeAction(self, observation):
+        self.adapt_runtime_arguments(observation)
         action = self._planner.compute_action(**self._runtime_arguments)
         if np.linalg.norm(action) < 1e-5:
             action *= 0

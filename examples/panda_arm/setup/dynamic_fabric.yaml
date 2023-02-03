@@ -1,11 +1,11 @@
 interval: 1
-name: fabric
-robot_type: simPanda
+name: dynamicFabric
+robot_type: panda
 n: 7
-m_base: 1.0
+m_base: 0.1
 obst:
   exp: 1.0
-  lam: 1.0
+  lam: 0.2
 selfCol:
   exp: 3.0
   lam: 2.0
@@ -21,5 +21,5 @@ damper:
   b:
     - 0.01
     - 3.5
-dynamic: False
+dynamic: True
 

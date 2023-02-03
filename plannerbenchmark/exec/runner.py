@@ -16,6 +16,10 @@ from plannerbenchmark.generic.utils import import_custom_planners
 import_custom_planners()
 import plannerbenchmark.planner
 
+try:
+    from plannerbenchmark.generic.global_planner import GlobalPlannerFoundNoSolution
+except Exception as e:
+    logging.warning("OMPL not found, could not import global planner.")
 
 log_levels = {"WARNING": 30, "INFO": 20, "DEBUG": 10, "QUIET": 100}
 
@@ -64,6 +68,8 @@ class Runner(object):
         self._parser.add_argument("--no-verbose", dest="verbose", action="store_false")
         self._parser.add_argument("--render", dest="render", action="store_true")
         self._parser.add_argument("--compare", dest="compare", action="store_true")
+        self._parser.add_argument("--global-planning", dest="global_planning", action="store_true")
+        self._parser.set_defaults(global_planning=False)
         self._parser.set_defaults(save=True)
         self._parser.set_defaults(ros=False)
         self._parser.set_defaults(random_goal=False)
@@ -81,6 +87,7 @@ class Runner(object):
         self._random_init = args.random_init
         self._random_goal = args.random_goal
         self._numberRuns = args.numberRuns
+        self._global_planning = args.global_planning
         self._verbose = args.verbose
         logging.basicConfig()
         logging.getLogger().setLevel(log_levels[args.log_level])
@@ -108,7 +115,7 @@ class Runner(object):
         from plannerbenchmark.ros.ros_converter_node import ActionConverterNode
         dt = self._experiment.dt()
         rate_int = int(1/dt)
-        self._rosConverter = ActionConverterNode(dt, rate_int, self._experiment.robotType())
+        self._ros_converter = ActionConverterNode(dt, rate_int, self._experiment.robot_type())
 
     def setPlanner(self):
         for planner in self._planners:
@@ -119,12 +126,34 @@ class Runner(object):
             planner.setGoal(self._experiment.goal())
             planner.concretize()
 
-    def applyAction(self, action, t_exp):
+    def step(self, action: np.ndarray, t_exp) -> tuple:
+        """Steps the simulation by one time step and applies the action.
+
+        If the gym environment is used, the simulation is discrete in time.
+        When the ros bridge is used on the other side, a pseude discrete step
+        is used. As the the real world moves on, the action is only applied at
+        one moment and the observation belongs to the newest data available at
+        that moment.
+
+        Parameters
+        -----------
+
+        action: np.ndarray
+            action that is send to the robot.
+
+
+        Returns
+        -------------
+        observation: dict
+            observation dictionary that contains all the information about
+            joint states and environment.
+        """
         if self._ros:
-            ob, t = self._rosConverter.publishAction(action)
-            self._rosConverter.setGoal(self._experiment.primeGoal(), t=t_exp)
-            for i, obst in enumerate(self._experiment.obstacles()):
-                self._rosConverter.setObstacle(obst, i, t=t_exp)
+            self._ros_converter.publish_action(action)
+            observation, t = self._ros_converter.observe()
+            #self._ros_converter.setGoal(self._experiment.primary_goal(), t=t_exp)
+            #for i, obst in enumerate(self._experiment.obstacles()):
+            #    self._ros_converter.setObstacle(obst, i, t=t_exp)
         else:
             ob, _, _, _ = self._env.step(action)
             t = t_exp + self._experiment.dt()
@@ -132,10 +161,10 @@ class Runner(object):
 
     def reset(self, q0, q0dot):
         if self._ros:
-            ob, t0 = self._rosConverter.ob()
-            self._rosConverter.setGoal(self._experiment.primeGoal())
+            ob, t0 = self._ros_converter.observe()
+            self._ros_converter.setGoal(self._experiment.primary_goal())
             for i, obst in enumerate(self._experiment.obstacles()):
-                self._rosConverter.setObstacle(obst, i)
+                self._ros_converter.setObstacle(obst, i)
         else:
             ob = self._env.reset(pos=q0, vel=q0dot)
             t0 = 0.0
@@ -149,16 +178,32 @@ class Runner(object):
         """
         return
 
+    def modify_observation_for_urdf_env(self, ob: dict) -> dict:
+        ob = ob['robot_0']
+        for i, goal in enumerate(ob['goals']):
+            goal.append(np.zeros_like(goal[0]))
+            goal.append(self._experiment.goal().sub_goals()[i].is_primary_goal())
+            goal.append(self._experiment.goal().sub_goals()[i].weight())
+            goal.append(self._experiment.goal().sub_goals()[i].type())
+        return ob
+
+
     def run(self):
         logging.info("Starting runner...")
         completedRuns = 0
         while completedRuns < self._numberRuns:
+            self._experiment.restore_original_goal()
             self._experiment.shuffle(self._random_obst, self._random_init, self._random_goal)
             try:
                 self._experiment.checkFeasibility(checkGoalReachible=False)
+                if self._global_planning:
+                    self._experiment.compute_global_path()
                 completedRuns += 1
             except ExperimentInfeasible as e:
                 logging.warn(f"Case not feasible, {e}")
+                continue
+            except GlobalPlannerFoundNoSolution as e:
+                logging.warn(f"Could not find global path")
                 continue
             logging.info("Composing the planner")
             start=time.perf_counter()
@@ -175,36 +220,28 @@ class Runner(object):
                 logger = Logger(self._res_folder, timeStamp)
                 logger.setSetups(self._experiment, planner)
                 t = 0.0
+                ob, t_new = self.step(np.zeros(self._experiment.n()), t)
                 for i in range(self._experiment.T()):
                     if self._aborted:
                         break
                     if i % 1000 == 0:
                         logging.info(f"Timestep : {i}")
-                    if 'x' in ob:
-                        q = ob['x']
-                        qdot = ob['xdot']
-                    elif 'joint_state' in ob:
-                        q = ob['joint_state']['position']
-                        qdot = ob['joint_state']['velocity']
-                    if self._experiment.dynamic():
-                        envEval = self._experiment.evaluate(t)
-                        if not planner.config.dynamic:
-                            envEval[1] = np.zeros(envEval[1].size)
-                            envEval[2] = np.zeros(envEval[2].size)
-                        observation = [q, qdot] + envEval
-                    else:
-                        observation = [q, qdot]
-                    if self._experiment.robotType() in ['groundRobot', 'boxer', 'albert']:
+                    if 'robot_0' in ob:
+                        ob = self.modify_observation_for_urdf_env(ob)
+                    if self._experiment.robot_type() in ['groundRobot', 'boxer', 'albert']:
                         qudot = np.concatenate((ob['joint_state']['forward_velocity'], ob['joint_state']['velocity'][2:]))
-                        observation += [qudot]
+
+                        ob['joint_state']['forward'] = [qudot]
+
                     t_before = time.perf_counter()
-                    action = planner.computeAction(*observation)
+                    action = planner.computeAction(ob)
+                    if np.isnan(action).any():
+                        logging.warn(f"Action computed ignored because of nan value action: {action}")
+                        logging.warn(f"Observation in this time step {observation}")
+                        action = np.zeros(self._experiment.n())
                     solving_time = time.perf_counter() - t_before
-                    primeGoal = [self._experiment.evaluatePrimeGoal(t)]
-                    obsts = self._experiment.evaluateObstacles(t)
-                    obsts_cleaned = [obsts[i:i+3] for i in range(0, len(obsts), 3)]
-                    logger.addResultPoint(t, q, qdot, action, solving_time, primeGoal, obsts_cleaned)
-                    ob, t_new = self.applyAction(action, t)
+                    logger.add_result_point(t, ob, action, solving_time)
+                    ob, t_new = self.step(action, t)
                     t = t_new - t0
                 if self._save:
                     logger.save()
