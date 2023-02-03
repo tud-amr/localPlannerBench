@@ -1,0 +1,25 @@
+interval: 1
+name: dynamicFabric
+robot_type: pointRobot
+n: 2
+m_base: 0.5
+obst:
+  exp: 1.0
+  lam: 2.5
+selfCol:
+  exp: 1.0
+  lam: 2.0
+attractor:
+  k_psi: 0.5
+speed:
+  ex_factor: 1.0
+limits:
+  lam: 10.0
+  exp: 3.0
+damper:
+  r_d: 0.30
+  b: 
+   - 0.1
+   - 6.5
+dynamic: True
+
