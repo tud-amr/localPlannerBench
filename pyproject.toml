@@ -21,8 +21,8 @@ robotmpcs = {version = "^0.1.4", optional = true}
 motion-planning-scenes = "^0.3.0"
 urdfenvs = "^0.4.0"
 #acados-template = {path = "relative/path/to/acados/interface/acados-template", optional = true}
-fabrics = {path = "../../../../code/fabrics", optional = true}
 planarenvs = "^1.1.1"
+#fabrics = {path = "../fabrics"}
 
 [tool.poetry.extras]
 fabric = ['fabrics']
