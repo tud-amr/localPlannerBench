@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "plannerbenchmark"
-version = "1.0.0"
+version = "1.1.0"
 description = "Benchmark suite for local planner in dynamic environments. Multiple planners can be compared on different kinematic chains in different environment. The suite is highly extendable for new planners, robots and environments."
 authors = ["Max Spahn <m.spahn@tudelft.nl>"]
 maintainers = [
