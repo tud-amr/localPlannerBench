@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from mpscenes.goals.goal_composition import GoalComposition
 import numpy as np
 import logging
 
@@ -32,8 +33,8 @@ class PDPlanner(Planner):
     def setJointLimits(self, limits):
         pass
 
-    def setGoal(self, goal):
-        self._goal_position = goal.primeGoal().position()
+    def setGoal(self, goal: GoalComposition):
+        self._goal_position = goal.primary_goal().position()
         pass
 
     def concretize(self):
@@ -44,7 +45,9 @@ class PDPlanner(Planner):
         self._curErrorDot = (newError - self._curError) / self.dt()
         self._curError = newError
 
-    def computeAction(self, *args):
-        self.evalError(args[0])
-        return self.config.p * self._curError + self.config.k * self._curErrorDot
+    def computeAction(self, **kwargs):
+        self.evalError(kwargs['joint_state']['position'][0:2])
+        action = self.config.p * self._curError + self.config.k * self._curErrorDot
+        action = np.concatenate((action, np.zeros(1)))
+        return action
 

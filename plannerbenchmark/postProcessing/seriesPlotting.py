@@ -34,8 +34,9 @@ class SeriesPlotting(object):
             [
                 "./createPlot",
                 self._folder,
-            ] + plannerNames + 
-            [str(self._nbMetrics)],
+            ]
+            + [str(self._nbMetrics)]
+            + plannerNames,
             cwd=createPlotFolder,
             stdout=subprocess.PIPE,
         ).wait()

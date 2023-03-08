@@ -1,0 +1,14 @@
+time_horizon: 10
+time_step: 0.5
+interval: 10
+n: 3
+slack: false
+number_obstacles: 2
+name: forcesprompc
+model_name: 'boxer'
+weights:
+  ws: 1e10
+  wu: 0.2
+  wvel: 0.25
+  wx: 1.0
+  wobst: 0.5

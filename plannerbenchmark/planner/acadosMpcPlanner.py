@@ -1,15 +1,8 @@
-import numpy as np
-from acados_template import AcadosOcp, AcadosOcpSolver, acados_ocp_solver 
 from typing import List
-import matplotlib.pyplot as plt 
-import matplotlib.patches as mpatches 
-from matplotlib import markers
 import logging
-
-from forwardkinematics.fksCommon.fk_creator import FkCreator
 from dataclasses import dataclass, field
+
 import numpy as np
-import casadi as cd 
 
 from plannerbenchmark.generic.planner import Planner, PlannerConfig
 
@@ -74,8 +67,10 @@ class AcadosMpcPlanner(Planner):
     def concretize(self):
         pass
 
-    def computeAction(self, *args):
-        robot_state_current = np.array(args).flatten() # [x, y , vx, vy]
+    def computeAction(self, **kwargs):
+        q = kwargs['joint_state']['position']
+        qdot = kwargs['joint_state']['velocity']
+        robot_state_current = np.array([q,qdot]).flatten()
         logging.debug(f"STATE {robot_state_current}")
 
         # Force solver initial state to be the current robot state

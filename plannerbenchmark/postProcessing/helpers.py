@@ -41,21 +41,31 @@ def createMetricsFromNames(
     """
     metrics = []
     goal_indices = experiment.primeGoal().indices()
-    dimension_obstacle = experiment.obstacles()[0].dim()
+    dimension_obstacle = 3
     n = experiment.n()
     fksNames = []
+    fks_collision_link_names = []
+    obstacle_names = []
     eeNames = []
     goalNames = []
     r_obsts = []
+    for i_obstacle, _ in enumerate(experiment.obstacles()):
+        obstacle_names.append(f'obst_{i_obstacle}_radius')
+        for i_dimension in range(3):
+            obstacle_names.append(f'obst_{i_obstacle}_{i_dimension}_0')
     for obst in experiment.obstacles():
         if obst.type() != 'sphereObstacle':
             r_obsts.append(obst.radius())
-    for i in range(1, n + 1):
-        for j in goal_indices:
-            fksNames.append("fk" + str(i) + "_" + indexMap[j])
+    for link_name in experiment._fk.robot.link_names():
+        for j in range(3):
+            fksNames.append("fk" + link_name + "_" + indexMap[j])
+    for collision_link in experiment.collision_links():
+        for j in range(3):
+            fks_collision_link_names.append("fk" + collision_link + "_" + indexMap[j])
     for j in goal_indices:
-        eeNames.append("fk" + str(n) + "_" + indexMap[j])
-        goalNames.append("goal_" + str(j) + "_0")
+        eeNames.append("fk" + experiment.primeGoal().child_link() + "_" + indexMap[j])
+        goalNames.append("goal_0_" + str(j) + "_0")
+
     for name in names:
         if name == "solverTime":
             metrics.append(
@@ -65,10 +75,11 @@ def createMetricsFromNames(
             metrics.append(
                 ClearanceMetric(
                     name,
-                    fksNames,
+                    fks_collision_link_names + obstacle_names,
                     {
                         "obstacles": experiment.obstacles(),
-                        "n": experiment.n(),
+                        "number_obstacles": int(len(obstacle_names)/4),
+                        "number_collision_links": int(len(fks_collision_link_names)/3),
                         "r_body": experiment.rBody(),
                     },
                 )
@@ -77,10 +88,11 @@ def createMetricsFromNames(
             metrics.append(
                 InverseClearanceMetric(
                     name,
-                    fksNames,
+                    fks_collision_link_names + obstacle_names,
                     {
                         "obstacles": experiment.obstacles(),
-                        "n": experiment.n(),
+                        "number_obstacles": int(len(obstacle_names)/3),
+                        "number_collision_links": int(len(fks_collision_link_names)/3),
                         "r_body": experiment.rBody(),
                     },
                 )
@@ -89,12 +101,12 @@ def createMetricsFromNames(
             metrics.append(
                 InverseDynamicClearanceMetric(
                     "clearance", 
-                    fksNames + ['t'],
+                    fks_collision_link_names + ['t'],
                     {
                         'r_body': experiment.rBody(),
                         'r_obsts': r_obsts, 
                         'dimension_obstacle': dimension_obstacle,
-                        'n': experiment.n()
+                        "collision_links": experiment.collision_links(),
                     }
                 )
             )
@@ -102,12 +114,11 @@ def createMetricsFromNames(
             metrics.append(
                 DynamicClearanceMetric(
                     "clearance", 
-                    fksNames + ['t'],
+                    fks_collision_link_names + ['t'],
                     {
                         'r_body': experiment.rBody(),
                         'r_obsts': r_obsts, 
                         'dimension_obstacle': dimension_obstacle,
-                        'n': experiment.n()
                     }
                 )
             )

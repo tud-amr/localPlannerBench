@@ -1,19 +1,22 @@
 T: 500
 dynamic: False
 dt: 0.05
-env: point-robot-acc-v0
-robot_type: pointRobot
-n: 2
+root_link : "world"
+base_type: "holonomic"
+urdf_file_name : "point_robot.urdf"
+ee_links: 
+  - 'base_link'
+control_mode: 'acc'
+n: 3
 goal:
   subgoal0:
-    prime: True
-    m: 2
-    w: 1
+    is_primary_goal: True
+    weight: 1
     indices:
       - 0
       - 1
-    parent_link: 0
-    child_link: 1
+    parent_link: "world_link"
+    child_link: "base_link"
     desired_position:
       - 4.0
       - 0.2
@@ -27,59 +30,69 @@ goal:
     epsilon: 0.1
 initState:
   q0:
+    - 0.1
     - 0.0
     - 0.0
   q0dot:
+    - 0.0
     - 0.0
     - 0.0
 limits:
   low:
     - -5.0
     - -5.0
+    - -5.0
   high:
     - 5.0
     - 5.0
-r_body: 0.2
+    - 5.0
+r_body: 0.3
 randomObstacles:
-  number: 5
+  number: 1
 obstacles:
   obst0:
-    type: sphereObstacle
-    dim: 2
+    type: sphere
     geometry:
       position: 
         - 2.0
-        - 0.2
-      radius: 1.0
+        - 0.4
+        - 0.0
+      radius: 0.7
     low:
       position:
         - -5.0
         - -5.0
+        - 0.0
       radius: 0.0
     high:
       position:
         - 5.0
         - 5.0
+        - 0.0
       radius: 1.0
   obst1:
-    type: sphereObstacle
-    dim: 2
+    type: sphere
     geometry:
       position: 
-        - 2.4
+        - 20.4
         - 0.4
+        - 0.0
       radius: 1.0
     low:
       position:
         - -5.0
         - -5.0
-      radius: 0.0
+        - 0.0
+      radius: 0.1
     high:
       position:
         - 5.0
         - 5.0
+        - 0.0
       radius: 1.0
 selfCollision:
   pairs:
+collision_links:
+  - 'base_link'
     
 

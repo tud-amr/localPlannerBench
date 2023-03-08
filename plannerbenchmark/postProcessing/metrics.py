@@ -121,27 +121,29 @@ class ClearanceMetric(Metric):
     """
 
     def computeMetric(self, data):
-        obstacles = self._params["obstacles"]
-        m = obstacles[0].dim()
-        n = self._params["n"]
+        m = 3
         r_body = self._params["r_body"]
         rawData = np.stack([data[name] for name in self._measNames])
-        fks = rawData.T.reshape(-1, n, m)
+        number_collision_links = self._params['number_collision_links']
+        number_obstacles = self._params['number_obstacles']
+        fks = rawData[0:number_collision_links * 3].T.reshape(-1, number_collision_links, m)
+        obstacles = rawData[number_collision_links * 3:].T.reshape(-1, number_obstacles, 4)
         minDistances = []
         distanceToObsts = {}
-        for i, obst in enumerate(obstacles):
-            for i_fk in range(0, n):
-                distancesToObst = (
-                    computeDistances(fks[:, i_fk, :], np.array(obst.position()))
-                    - obst.radius()
-                    - r_body
+        for i_obst in range(number_obstacles):
+            for i_fk in range(number_collision_links):
+                collision_link = self._measNames[i_fk*3][:-2]
+                distances_to_obstacle = np.linalg.norm(
+                    fks[:, i_fk, :] - obstacles[:, i_obst, 1:4], axis=1
                 )
-                minDistToObst = float(np.min(distancesToObst)) + 1e-3  # make  MPC happy
+                distances_to_obstacle -= obstacles[:, i_obst, 0]
+                distances_to_obstacle -= r_body
+                minDistToObst = float(np.min(distances_to_obstacle)) + 1e-3  # make  MPC happy
                 minDistances.append(minDistToObst)
-                distanceToObsts["obst" + str(i) + "_fk" + str(i_fk)] = {
+                distanceToObsts["obst" + str(i_obst) + "_" + collision_link] = {
                     "dist": minDistToObst,
-                    "loc": list(obst.position()),
-                    "r": obst.radius(),
+                    "loc": obstacles[:, i_obst, 0:3][0].tolist(),
+                    "r": float(obstacles[:, i_obst, 3][0]),
                 }
         return {"short": float(min(minDistances)), "allMinDist": distanceToObsts}
 

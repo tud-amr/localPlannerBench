@@ -15,13 +15,11 @@ repository = "https://github.com/maxspahn/localPlannerBench"
 keywords = ["robotics", "motion-planning", "benchmark"]
 
 [tool.poetry.dependencies]
-python = "^3.6.5,<3.10"
-planarenvs = "^1.0.3" 
-urdfenvs = "^0.2.2"
-motion-planning-scenes= "^0.1.22"
-forwardkinematics = "^1.0.4"
-robotmpcs = {version = "^0.1.4", optional = true}
-#fabrics = {path = "../../../../code/fabrics", optional = true}
+python = "^3.8,<3.10"
+fabrics = {version = "^0.6.2", optional = true}
+urdfenvs = {git = "https://github.com/maxspahn/gym_envs_urdf.git", rev = "develop"}
+robotmpcs = {version = "^0.2.1", optional = true}
+forwardkinematics = "^1.1.1"
 
 [tool.poetry.extras]
 fabric = ['fabrics']

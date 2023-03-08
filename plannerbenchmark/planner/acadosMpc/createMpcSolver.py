@@ -1,4 +1,5 @@
 import numpy as np
+from plannerbenchmark.generic.experiment import Experiment
 from plannerbenchmark.planner.acadosMpc.models.nLinkModel import acados_n_link_model, n_link_params
 from plannerbenchmark.planner.acadosMpc.models.pandaArmModel import acados_panda_arm_model, panda_arm_params
 from plannerbenchmark.planner.acadosMpc.models.pointMassModel import acados_point_mass_model, point_mass_params
@@ -6,16 +7,13 @@ from acados_template import AcadosOcp, AcadosOcpSolver
 
 import os
 
-def create_mpc_solver(pr, exp):
+def create_mpc_solver(pr, exp: Experiment):
 
     # TODO: support more experiment envs
-    if exp.envName() == "point-robot-acc-v0":
+    if 'point' in exp.urdf_file():
         model_ac = acados_point_mass_model(pr, exp)
         extract_params = point_mass_params
-    elif exp.envName() == "nLink-reacher-acc-v0":
-        model_ac = acados_n_link_model(pr, exp)
-        extract_params = n_link_params
-    elif exp.envName() == "panda-reacher-acc-v0":
+    elif 'panda' in exp.urdf_file():
         model_ac = acados_panda_arm_model(pr, exp)
         extract_params = panda_arm_params
 

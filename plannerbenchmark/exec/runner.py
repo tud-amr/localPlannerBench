@@ -8,6 +8,8 @@ import numpy as np
 import signal
 import logging
 
+from urdfenvs.sensors.full_sensor import FullSensor
+
 from plannerbenchmark.generic.experiment import Experiment, ExperimentInfeasible
 from plannerbenchmark.generic.logger import Logger
 
@@ -61,7 +63,6 @@ class Runner(object):
         self._parser.add_argument("--random-goal", dest="random_goal", action="store_true")
         self._parser.add_argument("--random-obst", dest="random_obst", action="store_true")
         self._parser.add_argument("--random-init", dest="random_init", action="store_true")
-        self._parser.add_argument("--no-verbose", dest="verbose", action="store_false")
         self._parser.add_argument("--render", dest="render", action="store_true")
         self._parser.add_argument("--compare", dest="compare", action="store_true")
         self._parser.set_defaults(save=True)
@@ -69,7 +70,6 @@ class Runner(object):
         self._parser.set_defaults(random_goal=False)
         self._parser.set_defaults(random_obst=False)
         self._parser.set_defaults(random_init=False)
-        self._parser.set_defaults(verbose=True)
         self._parser.set_defaults(render=False)
         self._parser.set_defaults(compare=False)
 
@@ -81,7 +81,6 @@ class Runner(object):
         self._random_init = args.random_init
         self._random_goal = args.random_goal
         self._numberRuns = args.numberRuns
-        self._verbose = args.verbose
         logging.basicConfig()
         logging.getLogger().setLevel(log_levels[args.log_level])
         self._render = args.render
@@ -138,6 +137,13 @@ class Runner(object):
                 self._rosConverter.setObstacle(obst, i)
         else:
             ob = self._env.reset(pos=q0, vel=q0dot)
+            if not self._ros:
+                self._experiment.addScene(self._env)
+            full_sensor = FullSensor(
+                goal_mask=["position"],
+                obstacle_mask=["position", "velocity", "radius"]
+            )
+            self._env.add_sensor(full_sensor, robot_ids = [0])
             t0 = 0.0
         return ob, t0
 
@@ -170,8 +176,7 @@ class Runner(object):
                 timeStamp = self._compareTimeStamp
             for planner in self._planners:
                 ob, t0 = self.reset(q0, q0dot)
-                if not self._ros:
-                    self._experiment.addScene(self._env)
+                ob, t_new = self.applyAction(np.zeros(self._experiment.n()), 0)
                 logger = Logger(self._res_folder, timeStamp)
                 logger.setSetups(self._experiment, planner)
                 t = 0.0
@@ -180,36 +185,21 @@ class Runner(object):
                         break
                     if i % 1000 == 0:
                         logging.info(f"Timestep : {i}")
-                    if 'x' in ob:
-                        q = ob['x']
-                        qdot = ob['xdot']
-                    elif 'joint_state' in ob:
-                        q = ob['joint_state']['position']
-                        qdot = ob['joint_state']['velocity']
-                    if self._experiment.dynamic():
-                        envEval = self._experiment.evaluate(t)
-                        if not planner.config.dynamic:
-                            envEval[1] = np.zeros(envEval[1].size)
-                            envEval[2] = np.zeros(envEval[2].size)
-                        observation = [q, qdot] + envEval
-                    else:
-                        observation = [q, qdot]
-                    if self._experiment.robotType() in ['groundRobot', 'boxer', 'albert']:
-                        qudot = np.concatenate((ob['joint_state']['forward_velocity'], ob['joint_state']['velocity'][2:]))
-                        observation += [qudot]
                     t_before = time.perf_counter()
-                    action = planner.computeAction(*observation)
+                    if self._experiment.base_type() == 'diffdrive':
+                        ob['robot_0']['joint_state']['position'][2] -= np.pi/2
+                    action = planner.computeAction(**ob['robot_0'])
                     solving_time = time.perf_counter() - t_before
-                    primeGoal = [self._experiment.evaluatePrimeGoal(t)]
                     obsts = self._experiment.evaluateObstacles(t)
-                    obsts_cleaned = [obsts[i:i+3] for i in range(0, len(obsts), 3)]
-                    logger.addResultPoint(t, q, qdot, action, solving_time, primeGoal, obsts_cleaned)
+                    logger.addResultPoint(t, ob['robot_0'], action, solving_time)
                     ob, t_new = self.applyAction(action, t)
                     t = t_new - t0
                 if self._save:
                     logger.save()
             logging.info(f"Completed {completedRuns} runs")
             self.stopEnvironment()
+            if self._aborted:
+                break
 
 def main():
     myRunner = Runner()

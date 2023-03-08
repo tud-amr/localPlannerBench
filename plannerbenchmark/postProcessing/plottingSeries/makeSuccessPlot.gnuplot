@@ -2,9 +2,9 @@ set term postscript eps color size 2.0, 7.0 font "RomanSerif.ttf" 14
 seriesFolder=ARG1
 planner1Type=ARG2
 planner2Type=ARG3
-print planner1Type
-print planner2Type
 inFile=seriesFolder."successTable.csv"
+nbPlanner=2
+nbCases=40
 
 outFileHist=seriesFolder."/success.eps"
 
@@ -21,18 +21,16 @@ set border 9
 set boxwidth 0.5
 planner1 = ""
 planner2 = ""
-if (planner1Type eq 'fabric') planner1 = 'Static Fabric'
+if (planner1Type eq 'fabric') planner1 = 'Fabrics'
 if (planner1Type eq 'AcadosMpc') planner1 = 'Acados MPC'
 if (planner1Type eq 'dynamicFabric') planner1 = 'Dyn. Fabric'
-if (planner2Type eq 'fabric') planner2 = 'Static Fabric'
+if (planner2Type eq 'fabric') planner2 = 'Fabrics'
 if (planner2Type eq 'AcadosMpc') planner2 = 'Acados MPC'
 if (planner2Type eq 'dynamicFabric') planner2 = 'Dyn. Fabric'
-if (planner1Type eq 'mpc') planner1 = 'MPC'
-if (planner2Type eq 'mpc') planner2 = 'MPC'
+if (planner1Type eq 'forcesprompc') planner1 = 'Forces-MPC'
+if (planner2Type eq 'forcesprompc') planner2 = 'Forces-MPC'
 set xtics (planner1 0, planner2 1) scale 1.0 font ',35' rotate by 90 offset 0, -14.0 nomirror
 unset ytics
-nbPlanner=2
-nbCases=40
 set xrange [-0.5:nbPlanner - 0.5]
 set y2range [0:1.6 * nbCases]
 set y2tics nomirror font ',35'

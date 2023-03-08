@@ -1,0 +1,112 @@
+T: 500
+dynamic: False
+dt: 0.05
+urdf_file_name: "boxer.urdf"
+actuated_wheels: 
+  - 'wheel_right_joint'
+  - 'wheel_left_joint'
+castor_wheels: 
+  - 'rotacastor_right_joint'
+  - 'rotacastor_left_joint'
+wheel_radius: 0.08
+wheel_distance: 0.494
+spawn_offset:
+  - 0.0
+  - 0.0
+  - 0.15
+not_actuated_joints: []
+base_type: "diffdrive"
+root_link : "world"
+robot_type : "boxer"
+control_mode: 'acc'
+ee_links:
+  - "ee_link"
+n: 3
+goal:
+  subgoal0:
+    is_primary_goal: True
+    weight: 1
+    indices:
+      - 0
+      - 1
+    parent_link: "world"
+    child_link: "ee_link"
+    desired_position:
+      - 4.0
+      - -0.2
+    low:
+      - -4.0
+      - -4.0
+    high: 
+      - 4.0
+      - 4.0
+    type: staticSubGoal
+    epsilon: 0.1
+initState:
+  q0:
+    - -4.0
+    - 0.4
+    - 0.0
+  q0dot:
+    - 0.0
+    - 0.0
+    - 0.0
+limits:
+  low:
+    - -50.0
+    - -50.0
+    - -50.0
+  high:
+    - 50.0
+    - 50.0
+    - 50.0
+r_body: 0.3
+randomObstacles:
+  number: 1
+obstacles:
+  obst0:
+    type: sphere
+    geometry:
+      position: 
+        - 1.0
+        - 0.0
+        - 0.0
+      radius: 1.0
+    low:
+      position:
+        - -5.0
+        - -5.0
+        - 0.0
+      radius: 0.0
+    high:
+      position:
+        - 5.0
+        - 5.0
+        - 0.0
+      radius: 1.0
+  obst1:
+    type: sphere
+    geometry:
+      position: 
+        - 20.4
+        - 0.4
+        - 0.0
+      radius: 1.0
+    low:
+      position:
+        - -5.0
+        - -5.0
+        - 0.0
+      radius: 0.1
+    high:
+      position:
+        - 5.0
+        - 5.0
+        - 0.0
+      radius: 1.0
+selfCollision:
+  pairs:
+collision_links:
+  - 'ee_link'
+    
+

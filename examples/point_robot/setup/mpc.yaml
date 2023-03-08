@@ -1,10 +1,11 @@
-H: 10
-dt: 0.5
+time_horizon: 10
+time_step: 0.5
 interval: 10
-n: 2
-obst:
-  nbObst: 5
-name: mpc
+n: 3
+number_obstacles: 5
+name: forcesprompc
+model_name: po1nt_robot
+slack: False
 weights:
   ws: 1e10
   wu: 1.0

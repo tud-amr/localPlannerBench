@@ -1,3 +1,5 @@
+from mpscenes.goals.goal_composition import GoalComposition
+import dataclasses
 import numpy as np
 import yaml
 import os
@@ -10,6 +12,9 @@ from typing import Dict
 
 from plannerbenchmark.generic.planner import Planner, PlannerConfig
 from plannerbenchmark.planner.forcesProMpc.makeSolver import createSolver
+from robotmpcs.models.mpcModel import MpcModel
+from robotmpcs.models.diff_drive_mpc_model import MpcDiffDriveModel
+from robotmpcs.models.mpcModel import MpcConfiguration, RobotConfiguration
 
 path_name = (
     os.path.dirname(os.path.realpath(__file__))
@@ -25,8 +30,10 @@ class EmptyObstacle():
     def radius(self):
         return -100
 
-    def dim(self):
+    def dimension(self):
         return 3
+
+
 
 @dataclass
 class ForcesProMpcConfig(PlannerConfig):
@@ -42,24 +49,42 @@ class ForcesProMpcConfig(PlannerConfig):
 class ForcesProMpcPlanner(Planner):
     def __init__(self, exp, **kwargs):
         super().__init__(exp, **kwargs)
-        self._config = ForcesProMpcConfig(**kwargs)
-        """
-        self._paramMap, self._npar, self._nx, self._nu, self._ns = getParameterMap(
-            self.config.n, self.m(), self.nbObstacles(), self.m(), self.config.slack
-        )
-        """
-        dt_str = str(self.config.dt).replace(".", "")
-        debugFolder = ""
+        self._config = MpcConfiguration(**kwargs)
+        robot_config_dict = {
+            'collision_links': self._exp.collision_links(),
+            'selfCollision': {
+                'pairs': self._exp.selfCollisionPairs()
+            },
+            'urdf_file': self._exp.urdf_file(),
+            'root_link': self._exp.root_link(),
+            'end_link': self._exp.ee_links()[0],
+            'base_type': self._exp.base_type(),
+        }
+        self._robot_config = RobotConfiguration(**robot_config_dict)
+        dt_str = str(self._config.time_step).replace(".", "")
+        debug_folder = ""
+        if self._config.debug:
+            config = {
+                'mpc': dataclasses.asdict(self._config),
+                'robot': dataclasses.asdict(self._robot_config),
+            }
+            if config['robot']['base_type'] == 'holonomic':
+                self._mpc_model = MpcModel(initParamMap=True, **config)
+            elif config['robot']['base_type'] == 'diffdrive':
+                self._mpc_model = MpcDiffDriveModel(initParamMap=True, **config)
+            self._mpc_model.setModel()
+            debug_folder += "debug/"
         self._solverFile = (
             path_name
-            + self._exp.robotType()
-            + "_n" + str(self.config.n)
+            + debug_folder
+            + self.robot_identifier()
+            + "_n" + str(self._config.n)
             + "_"
             + dt_str
             + "_H"
-            + str(self.config.H)
+            + str(self._config.time_horizon)
         ).replace("int", "1nt")
-        if not self.config.slack:
+        if not self._config.slack:
             self._solverFile += "_noSlack"
         self.concretize()
 
@@ -84,13 +109,13 @@ class ForcesProMpcPlanner(Planner):
 
     def reset(self):
         logging.info("Resetting mpc planner.")
-        self._x0 = np.zeros(shape=(self.config.H, self._nx + self._nu + self._ns))
+        self._x0 = np.zeros(shape=(self._config.time_horizon, self._nx + self._nu + self._ns))
         self._xinit = np.zeros(self._nx)
         if self.config.slack:
             self._slack = 0.0
         self._x0[-1, -1] = 0.1
-        self._params = np.zeros(shape=(self._npar * self.config.H), dtype=float)
-        for i in range(self.config.H):
+        self._params = np.zeros(shape=(self._npar * self._config.time_horizon), dtype=float)
+        for i in range(self._config.time_horizon):
             self._params[
                 [self._npar * i + val for val in self._paramMap["w"]]
             ] = self.config.weights["wx"]
@@ -109,52 +134,43 @@ class ForcesProMpcPlanner(Planner):
                     [self._npar * i + val for val in self._paramMap["wobst"]]
                 ] = self.config.weights["wobst"]
 
-    def m(self):
-        if self._exp.robotType() == 'panda':
-            return 3
-        else:
-            return 2
-
     def setObstacles(self, obsts, r_body):
-        self._r = obsts[0].radius()
-        for i in range(self.config.H):
+        for i in range(self._config.time_horizon):
             self._params[self._npar * i + self._paramMap["r_body"][0]] = r_body
-            for j in range(self.config.obst['nbObst']):
-                if j < len(obsts):
+            for j in range(self._config.number_obstacles):
+                if j < len(self._exp.obstacles()):
                     obst = obsts[j]
                 else:
                     obst = EmptyObstacle()
-                for m_i in range(obst.dim()):
-                    paramsIndexObstX = self._npar * i + self._paramMap['obst'][j * (self.m() + 1) + m_i]
+                for m_i in range(obst.dimension()):
+                    paramsIndexObstX = self._npar * i + self._paramMap['obst'][j * (obst.dimension() + 1) + m_i]
                     self._params[paramsIndexObstX] = obst.position()[m_i]
-                paramsIndexObstR = self._npar * i + self._paramMap['obst'][j * (self.m() + 1) + self.m()]
+                paramsIndexObstR = self._npar * i + self._paramMap['obst'][j * (obst.dimension() + 1) + obst.dimension()]
                 self._params[paramsIndexObstR] = obst.radius()
 
-    def updateDynamicObstacles(self, obstArray):
-        nbDynamicObsts = int(obstArray.size / 3 / self.m())
-        for j in range(self.config.nbObst):
-            if j < nbDynamicObsts:
-                obstPos = obstArray[:self.m()]
-                obstVel = obstArray[self.m():2*self.m()]
-                obstAcc = obstArray[2*self.m():3*self.m()]
-            else:
-                obstPos = np.ones(self.m()) * -100
-                obstVel = np.zeros(self.m())
-                obstAcc = np.zeros(self.m())
-            for i in range(self.config.H):
-                for m_i in range(self.m()):
-                    paramsIndexObstX = self._npar * i + self._paramMap['obst'][j * (self.m() + 1) + m_i]
-                    predictedPosition = obstPos[m_i] + obstVel[m_i] * self.dt() * i + 0.5 * (self.dt() * i)**2 * obstAcc[m_i]
+    def update_obstacles(self, obst_array: np.ndarray):
+        j = -1
+        for obst in obst_array:
+            j += 1
+            obst_position = obst[0]
+            obst_velocity = obst[1]
+            obst_acceleration = np.zeros_like(obst[0])
+            obst_radius = obst[2]
+            for i in range(self._config.time_horizon):
+                for m_i in range(3):
+                    paramsIndexObstX = self._npar * i + self._paramMap['obst'][j * 4 + m_i]
+                    predictedPosition =obst_position[m_i] +obst_velocity[m_i] * self._config.time_step * i + 0.5 * (self._config.time_step * i)**2 *obst_acceleration[m_i]
                     self._params[paramsIndexObstX] = predictedPosition
-                paramsIndexObstR = self._npar * i + self._paramMap['obst'][j * (self.m() + 1) + self.m()]
-                self._params[paramsIndexObstR] = self._r
+                paramsIndexObstR = self._npar * i + self._paramMap['obst'][j * 4 + 3]
+                self._params[paramsIndexObstR] = obst_radius
+
 
     def setSelfCollisionAvoidance(self, r_body):
-        for i in range(self.config.H):
+        for i in range(self._config.time_horizon):
             self._params[self._npar * i + self._paramMap["r_body"][0]] = r_body
 
     def setJointLimits(self, limits):
-        for i in range(self.config.H):
+        for i in range(self._config.time_horizon):
             for j in range(self.config.n):
                 self._params[
                     self._npar * i + self._paramMap["lower_limits"][j]
@@ -163,41 +179,61 @@ class ForcesProMpcPlanner(Planner):
                     self._npar * i + self._paramMap["upper_limits"][j]
                 ] = limits[1][j]
 
-    def setGoal(self, goal):
-        if len(goal.subGoals()) > 1:
+    def setGoal(self, goal: GoalComposition):
+        if len(goal.sub_goals()) > 1:
             logging.warn("Only single goal supported in mpc")
-        primeGoal = goal.primeGoal()
-        for i in range(self.config.H):
-            for j in range(self.m()):
-                self._params[self._npar * i + self._paramMap["g"][j]] = primeGoal.position()[j]
+        primeGoal = goal.primary_goal()
+        for i in range(self._config.time_horizon):
+            for j, position in enumerate(primeGoal.position()):
+                self._params[self._npar * i + self._paramMap["g"][j]] = position
+
+    def update_goal(self, goal: np.ndarray):
+        for i in range(self._config.time_horizon):
+            for j in range(3):
+                self._params[self._npar * i + self._paramMap["g"][j]] = goal[0][0][j] 
+
+    def robot_identifier(self):
+        return self._exp.urdf_file().split('.')[0].split('/')[-1]
 
     def concretize(self):
         self._actionCounter = self.config.interval
         if not os.path.isdir(self._solverFile):
-            createSolver(N=self._config.H, dt=self._config.dt, robotType=self._exp.robotType(), slack=self._config.slack)
+            config = {
+                'mpc': dataclasses.asdict(self._config),
+                'robot': dataclasses.asdict(self._robot_config),
+            }
+            createSolver(**config)
 
         self.load_solver()
 
     def shiftHorizon(self, output, ob):
         for key in output.keys():
-            if self.config.H < 10:
+            if self._config.time_horizon < 10:
                 stage = int(key[-1])
-            elif self.config.H >= 10 and self.config.H < 100:
+            elif self._config.time_horizon >= 10 and self._config.time_horizon < 100:
                 stage = int(key[-2:])
-            elif self.config.H > 99:
+            elif self._config.time_horizon > 99:
                 stage = int(key[-3:])
             if stage == 1:
                 continue
             self._x0[stage - 2, 0 : len(output[key])] = output[key]
 
     def setX0(self, xinit):
-        for i in range(self.config.H):
+        for i in range(self._config.time_horizon):
             self._x0[i][0 : self._nx] = xinit
 
-    def solve(self, ob):
-        self._xinit = ob[0 : self._nx]
-        if ob.size > self._nx:
-            self.updateDynamicObstacles(ob[self._nx:])
+    def solve(self, **kwargs):
+        q = kwargs['joint_state']['position']
+        qdot = kwargs['joint_state']['velocity']
+        if self._robot_config.base_type == 'diffdrive':
+            vel = kwargs['joint_state']['forward_velocity']
+            velocity = np.concatenate((vel, qdot[2:]))
+            state = np.concatenate((q, qdot, velocity))
+        elif self._robot_config.base_type == 'holonomic':
+            state = np.concatenate((q, qdot))
+        self._xinit = state
+        self.update_goal(kwargs['FullSensor']['goals'])
+        self.update_obstacles(kwargs['FullSensor']['obstacles'])
         action = np.zeros(self._nu)
         problem = {}
         # problem["ToleranceStationarity"] = 1e-7
@@ -211,35 +247,27 @@ class ForcesProMpcPlanner(Planner):
         self.setX0(self._xinit)
         problem["x0"] = self._x0.flatten()[:]
         problem["all_parameters"] = self._params
-        # debug
-        debug = False
-        if debug:
-            nbPar = int(len(self._params)/self.config.H)
-            if self.config.slack:
-                z = np.concatenate((self._xinit, np.array([self._slack])))
-            else:
-                z = self._xinit
-            p = self._params[0:nbPar]
-            #J = eval_obj(z, p)
-            ineq = eval_ineq(z, p)
-            #print("ineq : ", ineq)
-            # __import__('pdb').set_trace()
-            """
-            for i in range(self.config.H):
-                z = self._x0[i]
-                ineq = eval_ineq(z, p)
-            """
-            #print("J : ", J)
-            #print('z : ', z)
-            #print('xinit : ', self._xinit)
         output, exitflag, info = self._solver.solve(problem)
+        if logging.root.level <= 10:
+            inequalities = self._mpc_model.eval_inequalities(self._xinit, self._params)
+            not_respected_inequalities = np.where(np.array(inequalities) < 0)
+            logging.debug(f"Inequality violations : {not_respected_inequalities}")
+            fk = self._mpc_model._fk.fk(
+                self._xinit[0:3],
+                self._robot_config.root_link, 
+                self._robot_config.end_link, 
+                positionOnly=True
+            )
+            obj = self._mpc_model.eval_objective(self._x0[0], self._params)
+            logging.debug(obj)
+
         if exitflag < 0:
             logging.warn(f"MPC solver raised an error flag {exitflag}")
-        if  self.config.H < 10:
+        if  self._config.time_horizon < 10:
             key1 = 'x1'
-        elif self.config.H > 9 and self.config.H < 100:
+        elif self._config.time_horizon > 9 and self._config.time_horizon < 100:
             key1 = 'x01'
-        elif self.config.H > 99:
+        elif self._config.time_horizon > 99:
             key1 = 'x001'
         action = output[key1][-self._nu :]
         if self.config.slack:
@@ -248,13 +276,12 @@ class ForcesProMpcPlanner(Planner):
                 logging.warn(f"Slack variable higher than safe threshold: {self._slack}")
         logging.debug(f"action : {action}")
         logging.debug(f"prediction : {output['x02'][0:self._nx]}")
-        self.shiftHorizon(output, ob)
+        self.shiftHorizon(output, state)
         return action, info
 
-    def computeAction(self, *args):
-        ob = np.concatenate(args)
+    def computeAction(self, **kwargs):
         if self._actionCounter >= self.config.interval:
-            self._action, info = self.solve(ob)
+            self._action, info = self.solve(**kwargs)
             self._actionCounter = 1
         else:
             self._actionCounter += 1

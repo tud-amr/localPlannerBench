@@ -27,10 +27,10 @@ set grid y2tics
 set border 9
 
 # Planner names
-if (planner1Type eq 'fabric') planner1 = 'Static Fabric'
-if (planner2Type eq 'fabric') planner2 = 'Static Fabric'
-if (planner1Type eq 'mpc') planner1 = 'MPC'
-if (planner2Type eq 'mpc') planner2 = 'MPC'
+if (planner1Type eq 'fabric') planner1 = 'Fabrics'
+if (planner2Type eq 'fabric') planner2 = 'Fabrics'
+if (planner1Type eq 'forcesprompc') planner1 = 'Forces-MPC'
+if (planner2Type eq 'forcesprompc') planner2 = 'Forces-MPC'
 if (planner1Type eq 'dynamicFabric') planner1 = 'Dynamic Fabric'
 if (planner1Type eq 'AcadosMpc') planner1 = 'Acados MPC'
 if (planner2Type eq 'AcadosMpc') planner2 = 'Acados MPC'

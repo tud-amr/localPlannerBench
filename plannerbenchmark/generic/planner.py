@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from dataclasses import dataclass, asdict
 import yaml
+from plannerbenchmark.generic.experiment import Experiment
 from plannerbenchmark.generic.planner_registry import PlannerRegistry
 
 class PlannerSettingIncomplete(Exception):
@@ -14,7 +15,7 @@ class PlannerConfig():
     robot_type: str = 'pointRobot'
 
 class Planner(metaclass=PlannerRegistry):
-    def __init__(self, exp, **kwargs):
+    def __init__(self, exp: Experiment, **kwargs):
         self._exp = exp
         self._config = PlannerConfig()
 
@@ -68,5 +69,5 @@ class Planner(metaclass=PlannerRegistry):
             yaml.dump(asdict(self.config), file)
 
     @abstractmethod
-    def computeAction(self, q, qdot):
+    def computeAction(self, **kwargs):
         pass

@@ -26,8 +26,11 @@ unset key
 unset xtics
 set xtics () scale 1.0 font ",35" rotate by 90 out offset -0.5, -18.0
 set xtics nomirror
+print("hi there")
+print(N)
 do for [i=2:(N+1)] {
   metricName = word(firstrow, i)
+  print(metricName)
   outFileBox=seriesFolder."/results_".planner."_".metricName.".eps"
   set output outFileBox
   if (metricName eq "solverTime"){

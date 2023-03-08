@@ -1,7 +1,6 @@
 interval: 1
 name: fabric
-robot_type: pointRobot
-n: 2
+n: 3
 m_base: 0.2
 obst:
   exp: 0.1

@@ -15,7 +15,9 @@ class Logger(object):
         self._exp = exp
         self._planner = planner
 
-    def addResultPoint(self, t, q, qdot, action, solving_time, goal, obsts):
+    def addResultPoint(self, t, observation, action, solving_time):
+        q = observation['joint_state']['position']
+        qdot = observation['joint_state']['velocity']
         resDict = {'t': t, 't_planning': solving_time}
         for a_i, a in enumerate(action):
             resDict['a' + str(a_i)] = a
@@ -23,22 +25,19 @@ class Logger(object):
             if n_i < self._exp.n():
                 resDict['q' + str(n_i)] = q[n_i]
                 resDict['q' + str(n_i) + 'dot'] = qdot[n_i]
-            if self._exp.robotType() in ['panda', 'mobilePanda', 'tiago', 'albert']:
-                fk = self._exp.fk(q, n_i, positionOnly=True)
-                resDict['fk' + str(n_i) + "_x"] = fk[0]
-                resDict['fk' + str(n_i) + "_y"] = fk[1]
-                resDict['fk' + str(n_i) + "_z"] = fk[2]
-            else:
-                fk = self._exp.fk(q, n_i, positionOnly=True)
-                resDict['fk' + str(n_i) + "_x"] = fk[0]
-                resDict['fk' + str(n_i) + "_y"] = fk[1]
-        for i_der, goal_der in enumerate(goal):
-            for j_dim, goal_dim in enumerate(goal_der):
-                resDict['goal_' + str(j_dim) + '_' + str(i_der)] = goal_dim
-        for k_obst, obst in enumerate(obsts):
-            for i_der, obst_der in enumerate(obst):
-                for j_dim in range(obst_der.size):
-                    resDict['obst_' + str(k_obst) + '_' + str(j_dim) + '_' + str(i_der)] = obst_der[j_dim]
+        for link_name in self._exp._fk.robot.link_names():
+            fk = self._exp.fk(q, link_name, positionOnly=True)
+            resDict['fk' + link_name + "_x"] = fk[0]
+            resDict['fk' + link_name + "_y"] = fk[1]
+            resDict['fk' + link_name + "_z"] = fk[2]
+        for i_goal, goal in enumerate(observation['FullSensor']['goals']):
+            for j_dim in range(3):
+                resDict['goal_' +str(i_goal) + "_" + str(j_dim) + '_0'] = goal[0][j_dim]
+        for i_obstacle, obstacle in enumerate(observation['FullSensor']['obstacles']):
+            for j_dim in range(3):
+                resDict['obst_' + str(i_obstacle) + '_' + str(j_dim) + '_0'] = obstacle[0][j_dim]
+                resDict['obst_' + str(i_obstacle) + '_' + str(j_dim) + '_1'] = obstacle[1][j_dim]
+            resDict['obst_' + str(i_obstacle) + '_radius'] = obstacle[2]
         self._res.append(resDict)
 
     def saveResult(self, folderPath):

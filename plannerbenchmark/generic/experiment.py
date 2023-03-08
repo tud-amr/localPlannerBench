@@ -1,24 +1,18 @@
+from mpscenes.goals.sub_goal_creator import StaticSubGoal
 import yaml
+import os
 import csv
 import gym
 import numpy as np
 import logging
 
-import planarenvs.point_robot
-import planarenvs.n_link_reacher
-import planarenvs.ground_robots
-import urdfenvs.tiago_reacher
-import urdfenvs.panda_reacher
-import urdfenvs.mobile_reacher
-import urdfenvs.albert_reacher
-import urdfenvs.boxer_robot
-import urdfenvs.point_robot_urdf
+from urdfenvs.robots.generic_urdf import GenericUrdfReacher
+from urdfenvs.robots.generic_urdf import GenericDiffDriveRobot
 
-from forwardkinematics.fksCommon.fk_creator import FkCreator
-from MotionPlanningEnv.obstacleCreator import ObstacleCreator
-from MotionPlanningGoal.staticSubGoal import StaticSubGoal
-from MotionPlanningGoal.goalComposition import GoalComposition
-
+from forwardkinematics.urdfFks.generic_urdf_fk import GenericURDFFk
+from mpscenes.goals.goal_composition import GoalComposition
+from mpscenes.obstacles.sphere_obstacle import SphereObstacle
+from mpscenes.obstacles.dynamic_sphere_obstacle import DynamicSphereObstacle
 
 
 class ExperimentIncompleteError(Exception):
@@ -39,39 +33,59 @@ class Experiment(object):
         self._required_keys = [
             "T",
             "dt",
-            "env",
             "n",
             "goal",
             "initState",
-            "robot_type",
+            "base_type",
             "limits",
+            "control_mode",
+            "urdf_file_name",
+            "root_link",
+            "ee_links",
             "obstacles",
             "r_body",
             "selfCollision",
-            "dynamic",
         ]
         self.parseSetup()
-        self._fk = FkCreator(self.robotType(), self.n()).fk()
+        self._fk = GenericURDFFk(
+            self.urdf(),
+            rootLink=self._setup['root_link'],
+            end_link = self._setup['ee_links'],
+            base_type=self.base_type(),
+        )
+
+    def urdf(self):
+        with open(self.urdf_file(), 'r') as file:
+            urdf = file.read()
+        return urdf
+    
+    def urdf_file(self):
+
+        abs_path_experiment = os.path.abspath(__file__)
+        asset_folder = abs_path_experiment[0:abs_path_experiment.rfind('k/')+2] + 'assets/'
+        return asset_folder+self._setup['urdf_file_name']
+
 
     def parseSetup(self):
         with open(self._setupFile, "r") as setupStream:
             self._setup = yaml.safe_load(setupStream)
         self.checkCompleteness()
-        self._motionPlanningGoal = GoalComposition(name="mpg", contentDict=self._setup['goal'])
+        self._motionPlanningGoal = GoalComposition(name="mpg", content_dict=self._setup['goal'])
         self.parseObstacles()
 
     def parseObstacles(self):
         self._obstacles = []
-        self._obstacleCreator = ObstacleCreator()
         if self._setup["obstacles"]:
             for obst in self._setup["obstacles"]:
                 obstData = self._setup["obstacles"][obst]
-                obstType = obstData['type']
-                obstName = obst
-                self._obstacles.append(self._obstacleCreator.createObstacle(obstType, obstName, obstData))
+                if 'position' in obstData['geometry']:
+                    obstacle = SphereObstacle(name=obst, content_dict=obstData)
+                elif 'trajectory' in obstData['geometry']:
+                    obstacle = DynamicSphereObstacle(name=obst, content_dict=obstData)
+                self._obstacles.append(obstacle)
 
     def dynamic(self):
-        return self._setup['dynamic']
+        return True
 
     def selfCollisionPairs(self):
         if self._setup['selfCollision']['pairs']:
@@ -79,11 +93,18 @@ class Experiment(object):
         else:
             return []
 
+    def collision_links(self) -> list:
+        if 'collision_links' in self._setup:
+            return self._setup['collision_links']
+        else:
+            logging.warning("No collision links provided.")
+            return []
+
     def rBody(self):
         return self._setup["r_body"]
 
     def fk(self, q, n, positionOnly=False):
-        return self._fk.fk(q, n, positionOnly=positionOnly)
+        return self._fk.fk(q, self._setup['root_link'], n, positionOnly=positionOnly)
 
     def evaluate(self, t):
         evalObsts = self.evaluateObstacles(t=t)
@@ -97,8 +118,14 @@ class Experiment(object):
                 evals += obst.traj().evaluate(t=t)
         return evals
 
-    def robotType(self):
-        return self._setup["robot_type"]
+    def base_type(self):
+        return self._setup["base_type"]
+
+    def root_link(self) -> str:
+        return self._setup['root_link']
+
+    def ee_links(self) -> list:
+        return self._setup['ee_links']
 
     def n(self):
         return self._setup["n"]
@@ -108,9 +135,6 @@ class Experiment(object):
 
     def dt(self):
         return self._setup["dt"]
-
-    def envName(self):
-        return self._setup["env"]
 
     def obstacles(self):
         return self._obstacles
@@ -135,12 +159,11 @@ class Experiment(object):
     def goal(self):
         return self._motionPlanningGoal
 
-    def primeGoal(self, **kwargs):
-        return self._motionPlanningGoal.primeGoal()
-        if 't' in kwargs:
-            return self._motionPlanningGoal.evaluatePrimeGoal(kwargs.get('t'))
-        else:
-            return self._motionPlanningGoal.primeGoal()
+    def control_mode(self):
+        return self._setup['control_mode']
+
+    def primeGoal(self, **kwargs) -> StaticSubGoal: 
+        return self._motionPlanningGoal.primary_goal()
 
     def evaluatePrimeGoal(self, t):
         return self.primeGoal().position(t=t)
@@ -149,16 +172,35 @@ class Experiment(object):
         return self._motionPlanningGoal.dynamicGoals()
 
     def env(self, render=False):
-        if self.robotType() == 'planarArm':
-            return gym.make(self.envName(), render=render, n=self.n(), dt=self.dt())
-        else:
-            return gym.make(self.envName(), render=render, dt=self.dt())
+        if self.base_type() == 'holonomic':
+            robot = GenericUrdfReacher(
+                self.urdf_file(),
+                mode = self.control_mode(),
+            )
+        elif self.base_type() == 'diffdrive':
+            robot = GenericDiffDriveRobot(
+                urdf=self.urdf_file(),
+                mode=self.control_mode(),
+                actuated_wheels=self._setup['actuated_wheels'],
+                castor_wheels=self._setup['castor_wheels'],
+                wheel_radius=self._setup['wheel_radius'],
+                wheel_distance=self._setup['wheel_distance'],
+                not_actuated_joints=self._setup['not_actuated_joints'],
+            )
+
+        env = gym.make(
+            "urdf-env-v0",
+            dt=self.dt(), robots=[robot], render=render
+        )
+        return env
+
 
     def addScene(self, env):
         for obst in self._obstacles:
             env.add_obstacle(obst)
         try:
-            env.add_goal(self.goal())
+            for sub_goal in self.goal().sub_goals():
+                env.add_goal(sub_goal)
         except Exception as e:
             logging.error(f"Error occured when adding goal to the scene, {e}")
 
@@ -172,9 +214,12 @@ class Experiment(object):
         obstType = obstData['type']
         for i in range(self._setup["randomObstacles"]["number"]):
             obstName = 'obst' + str(i)
-            randomObst = self._obstacleCreator.createObstacle(obstType, obstName, obstData)
-            randomObst.shuffle()
-            self._obstacles.append(randomObst)
+            if 'position' in obstData['geometry']:
+                obstacle = SphereObstacle(name=obstName, content_dict=obstData)
+            elif 'trajectory' in obstData['geometry']:
+                obstacle = DynamicSphereObstacle(name=obstName, content_dict=obstData)
+            obstacle.shuffle()
+            self._obstacles.append(obstacle)
 
     def shuffle(self, random_obst, random_init, random_goal):
         if random_goal:
@@ -197,10 +242,8 @@ class Experiment(object):
 
     def checkFeasibility(self, checkGoalReachible):
         for o in self.obstacles():
-            for i in range(1, self.n() + 1):
-                fk = self.fk(self.initState()[0], i, positionOnly=True)
-                if self.robotType() == 'boxer':
-                    fk = fk[0:2]
+            for collision_link in self.collision_links():
+                fk = self.fk(self.initState()[0], collision_link, positionOnly=True)
                 dist_initState = np.linalg.norm(np.array(o.position()) - fk)
                 if dist_initState < (o.radius() + self.rBody()):
                     raise ExperimentInfeasible("Initial configuration in collision")
@@ -216,18 +259,15 @@ class Experiment(object):
                 raise ExperimentInfeasible(
                     "Initial configuration in self collision"
                 )
-        if self.robotType() == "planarArm":
-            if np.linalg.norm(np.array(self.primeGoal().position())) > self.n():
-                raise ExperimentInfeasible("Goal unreachible")
 
     def save(self, folderPath):
-        self._setup["goal"] = self._motionPlanningGoal.toDict()
+        self._setup["goal"] = self._motionPlanningGoal.dict()
         obstsDict = {}
         obstFile = folderPath + "/obst"
         initStateFilename = folderPath + "/initState.csv"
         for i, obst in enumerate(self._obstacles):
-            obstsDict[obst.name()] = obst.toDict()
-            obst.toCSV(obstFile + "_" + str(i) + ".csv")
+            obstsDict[obst.name()] = obst.dict()
+            obst.csv(obstFile + "_" + str(i) + ".csv")
         self._setup["obstacles"] = obstsDict
         with open(folderPath + "/exp.yaml", "w") as file:
             yaml.dump(self._setup, file)
