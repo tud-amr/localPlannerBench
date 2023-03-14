@@ -159,13 +159,13 @@ class Experiment(object):
     def goal(self):
         return self._motionPlanningGoal
 
-    def control_mode(self):
+    def control_mode(self) -> str:
         return self._setup['control_mode']
 
     def primeGoal(self, **kwargs) -> StaticSubGoal: 
         return self._motionPlanningGoal.primary_goal()
 
-    def evaluatePrimeGoal(self, t):
+    def evaluatePrimeGoal(self, t) -> np.ndarray:
         return self.primeGoal().position(t=t)
 
     def getDynamicGoals(self):
