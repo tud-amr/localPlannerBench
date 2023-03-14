@@ -45,7 +45,7 @@ class Planner(metaclass=PlannerRegistry):
         pass
 
     @abstractmethod
-    def setJointLimits(self, lower_limits, upper_limits):
+    def setJointLimits(self, limits):
         pass
 
     @abstractmethod
