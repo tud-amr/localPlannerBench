@@ -179,7 +179,7 @@ class FabricPlanner(Planner):
     def computeAction(self, **kwargs):
         self.adapt_runtime_arguments(**kwargs)
         action = self._planner.compute_action(**self._runtime_arguments)
-        if np.linalg.norm(action) < 1e-5:
-            action *= 0
+        if self._exp.control_mode() == 'vel':
+            action = kwargs['joint_state']['velocity'] + action * self._exp.dt()
         logging.debug(f"Action computed by fabric: {action}")
         return action
