@@ -91,7 +91,7 @@ def createMetricsFromNames(
                     fks_collision_link_names + obstacle_names,
                     {
                         "obstacles": experiment.obstacles(),
-                        "number_obstacles": int(len(obstacle_names)/3),
+                        "number_obstacles": int(len(obstacle_names)/4),
                         "number_collision_links": int(len(fks_collision_link_names)/3),
                         "r_body": experiment.rBody(),
                     },
