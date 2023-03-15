@@ -2,58 +2,75 @@ import yaml
 import os
 import re
 import csv
+import subprocess
 import numpy as np
 
+pkg_path = os.path.dirname(__file__) + "/../postProcessing/"
+
 from plannerbenchmark.postProcessing.seriesEvaluation import SeriesEvaluation
+
+class BaselineNotFoundException(Exception):
+    pass
 
 
 class SeriesComparison(SeriesEvaluation):
     """Series comparison between two planners."""
 
+    def __init__(self, folder: str, baseline: str, recycle: bool = False):
+        self._baseline: str = baseline
+        super().__init__(folder, recycle=recycle)
+
     def getPlannerNames(self) -> list:
         """Gets planner names."""
         plannerNames = set()
         pattern = re.compile(r"(\D*)_\d{8}_\d{6}")
+        number_cases = 0
         for fname in os.listdir(self._folder):
             match = re.match(pattern, fname)
             if match:
                 plannerNames.add(match.group(1))
-        return sorted(list(plannerNames))
+                number_cases += 1
+        self._number_cases = number_cases/len(plannerNames)
+        if self._baseline not in plannerNames:
+            raise BaselineNotFoundException(f"Baseline {self._baseline} not evaluated. Evaluated planners are {plannerNames}")
+        self._planner_names =sorted(list(plannerNames))
 
     def process(self) -> None:
         """Process series, writes results and compares different planners."""
         super().process()
         super().writeResults()
-        self.compare()
+        self._comparisons = {}
+        for planner_name in filter(lambda name: name != self._baseline, self._planner_names):
+            self.compare(planner_name)
 
-    def compare(self) -> None:
+    def compare(self, planner_name: str) -> None:
         """Compares the performance of two planners.
 
         Two planners are compared by computing the ratio for all individual
         metrics for every experiment in the series.
         """
         self.readResults()
-        commonTimeStamps = self.getCasesSolvedByBoth()
+        commonTimeStamps = self.getCasesSolvedByBoth(planner_name)
         comparedResults = {}
         for timeStamp in commonTimeStamps:
-            comparedResults[timeStamp] = (
-                self._results[0][timeStamp] / self._results[1][timeStamp]
-            )
-        self._results.append(comparedResults)
-        self.writeComparison()
+            A = self._results[self._baseline][timeStamp]
+            B = self._results[planner_name][timeStamp]
+            #comparedResults[timeStamp] = (A - B)/(A + B)
+            comparedResults[timeStamp] = B/A
+        self._comparisons[planner_name] = comparedResults
+        self.writeComparison(planner_name)
 
-    def writeComparison(self) -> None:
+    def writeComparison(self, planner_name: str) -> None:
         """Writes comparison resultTable_comparison.csv-file."""
-        resultsTableFile = self._folder + "/resultsTable_comparison.csv"
+        resultsTableFile = f"{self._folder}/data/comparisons_{planner_name}.csv"
         with open(resultsTableFile, "w") as file:
             csv_writer = csv.writer(file, delimiter=" ")
             csv_header = self.filterMetricNames()
             csv_writer.writerow(csv_header)
-            for timeStampKey in self._results[2]:
-                kpis_timeStamp = self._results[2][timeStampKey].tolist()
-                csv_writer.writerow([timeStampKey] + kpis_timeStamp)
+            for time_stamp, kpis in self._comparisons[planner_name].items():
+                csv_writer.writerow([time_stamp] + kpis.tolist())
 
-    def getCasesSolvedByBoth(self) -> list:
+    def getCasesSolvedByBoth(self, planner_name: str) -> list:
         """Gets timestamps of all cases that were solved by both solvers.
 
         Returns
@@ -62,8 +79,8 @@ class SeriesComparison(SeriesEvaluation):
             List containing all time stamps as strings that were solved by both methods.
 
         """
-        res0 = set(self._results[0])
-        res1 = set(self._results[1])
+        res0 = set(self._results[self._baseline])
+        res1 = set(self._results[planner_name])
         commonTimeStamps = []
         for timeStamp in res0.intersection(res1):
             commonTimeStamps.append(timeStamp)
@@ -71,12 +88,11 @@ class SeriesComparison(SeriesEvaluation):
 
     def readResults(self):
         """Reads results from previous evaluations."""
-        plannerNames = self.getPlannerNames()
-        self._results = []
-        for i in range(2):
+        self._results = {}
+        for planner_name in self._planner_names:
             plannerDict = {}
             resultsTableFile = (
-                self._folder + "/resultsTable_" + plannerNames[i] + ".csv"
+                self._folder + "/data/resultsTable_" + planner_name + ".csv"
             )
             with open(resultsTableFile, mode="r") as inp:
                 reader = csv.reader(inp, delimiter=" ")
@@ -84,4 +100,41 @@ class SeriesComparison(SeriesEvaluation):
                 for rows in reader:
                     values = np.array([float(x) for x in rows[1:]])
                     plannerDict[rows[0]] = values
-            self._results.append(plannerDict)
+            self._results[planner_name] = plannerDict
+
+    def plot(self) -> None:
+        """Call the correct gnuplot script.
+
+        The gnuplot scripts are called using subprocess.Popen to avoid
+        additional libraries. Depending on the robot type, the gnuplot scripts
+        take a different number of arguments. Output from the gnuplot scripts
+        is passed to the subprocess.PIPE.
+        """
+        super().plot()
+        curPath = os.path.dirname(os.path.abspath(__file__)) + "/"
+        curPath = pkg_path
+        createPlotFolder = curPath + "plottingSeries"
+        for planner_name in filter(lambda name: name != self._baseline, self._planner_names):
+            subprocess.Popen(
+                [
+                    "gnuplot",
+                    "-c",
+                    "makeComparisonPlot.gpi",
+                    f"{self._folder}/",
+                    self._baseline,
+                    planner_name,
+                ],
+                cwd=createPlotFolder,
+                stdout=subprocess.PIPE,
+            ).wait()
+        subprocess.Popen(
+            [
+                "gnuplot",
+                "-c",
+                "makeSuccessPlot.gpi",
+                f"{self._folder}/",
+                str(self._number_cases),
+            ],
+            cwd=createPlotFolder,
+            stdout=subprocess.PIPE,
+        ).wait()

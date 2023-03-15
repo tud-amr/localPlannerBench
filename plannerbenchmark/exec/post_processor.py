@@ -8,9 +8,7 @@ from plannerbenchmark.postProcessing.caseEvaluation import CaseEvaluation
 from plannerbenchmark.postProcessing.seriesEvaluation import SeriesEvaluation
 from plannerbenchmark.postProcessing.seriesComparison import SeriesComparison
 from plannerbenchmark.postProcessing.casePlotting import CasePlotting
-from plannerbenchmark.postProcessing.seriesPlotting import SeriesPlotting
 from plannerbenchmark.postProcessing.helpers import createMetricsFromNames
-from plannerbenchmark.postProcessing.seriesComparisonPlotting import SeriesComparisonPlotting
 
 log_levels = {"WARNING": 30, "INFO": 20, "DEBUG": 10, "QUIET": 100}
 
@@ -49,7 +47,7 @@ class SlimPostProcessor(object):
         self._parser.add_argument("--series", dest="series", action="store_true")
         self._parser.add_argument("--plot", dest="plot", action="store_true")
         self._parser.add_argument("--recycle", dest="recycle", action="store_true")
-        self._parser.add_argument("--compare", dest="compare", action="store_true")
+        self._parser.add_argument("--compare", type=str)
         self._parser.add_argument("--open", dest="open", action="store_true")
         self._parser.set_defaults(series=False, plot=False, recycle=False, compare=False, open=False)
 
@@ -69,9 +67,10 @@ class SlimPostProcessor(object):
 
 
         if args.series:
-            evaluator = SeriesEvaluation(folder, recycle=args.recycle)
             if args.compare:
-                evaluator = SeriesComparison(folder, recycle=args.recycle)
+                evaluator = SeriesComparison(folder, args.compare, recycle=args.recycle)
+            else:
+                evaluator = SeriesEvaluation(folder, recycle=args.recycle)
         else:
             evaluator = CaseEvaluation(folder, recycle=args.recycle)
         evaluator.setMetrics(kpis)
@@ -81,11 +80,7 @@ class SlimPostProcessor(object):
             plotter = CasePlotting(folder)
             plotter.plot()
         if args.plot and args.series:
-            plotter = SeriesPlotting(folder, nbMetrics)
-            plotter.plot()
-            if args.compare:
-                comparePlotter = SeriesComparisonPlotting(folder, nbMetrics)
-                comparePlotter.plot()
+            evaluator.plot()
         if args.open:
             subprocess.Popen(["xdg-open", folder], stdout=subprocess.PIPE)
 

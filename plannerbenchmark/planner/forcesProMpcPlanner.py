@@ -286,6 +286,6 @@ class ForcesProMpcPlanner(Planner):
         else:
             self._actionCounter += 1
         if self._exp.control_mode() == 'vel':
-            action = kwargs['joint_state']['velocity'] + self._action * self._exp.dt()
-        return action
+            return kwargs['joint_state']['velocity'] + self._action * self._exp.dt()
+        return self._action
 

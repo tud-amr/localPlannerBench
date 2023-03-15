@@ -1,0 +1,52 @@
+set term postscript eps color size 2.0, 7.0 font "RomanSerif.ttf" 14
+seriesFolder=ARG1
+inFile=seriesFolder."data/successTable.csv"
+nb_cases=ARG2
+
+outFileHist=seriesFolder."/plot/success.eps"
+
+set output outFileHist
+set datafile separator ' '
+set bmargin at screen 0.26
+
+# General setup
+set style fill solid 0.5 border -1
+set style data histogram
+set style histogram rowstacked
+set border 9
+set boxwidth 0.5
+
+# Get names and number of planner
+planner_names_awk_command="awk 'BEGIN{getline}{printf \"%s \",$1}' ".inFile
+planner_names=system(planner_names_awk_command)
+# Function to get planner name by index n
+planner_name(n)=word(planner_names, n)
+nb_planners=words(planner_names)
+
+# Set tics and ranges
+set xtics (planner_name(1) 0) scale 1.0 font ',35' rotate by 90 offset 0, -14.0 nomirror
+do for [i=0:nb_planners] {
+  set xtics add (planner_name(i+1) i)
+}
+unset ytics
+set xrange [-0.5:nb_planners- 0.5]
+set y2range [0:1.7 *nb_cases]
+set y2tics nomirror font ',35'
+set y2tics 0,nb_cases/5,nb_cases rotate by 90 offset 0.5,-2.0
+set y2label '#Cases' font ',35'
+
+
+set key autotitle columnhead
+unset key
+
+
+set label 2 'Success' at graph 0.25,0.72 rotate by 90 font ',35'
+set object rectangle from graph 0.2,0.65 to graph 0.3,0.7 fc rgb 'white' fs transparent solid 0.5
+set label 3 'Collision' at graph 0.4,0.72 rotate by 90 font ',35'
+set object rectangle from graph 0.35,0.65 to graph 0.45,0.7 fc rgb 'black' fs transparent solid 0.5
+set label 4 'Not Reached' at graph 0.55,0.72 rotate by 90 font ',35'
+set object rectangle from graph 0.50,0.65 to graph 0.6,0.7 fc rgb 'gray' fs transparent solid 0.5
+plot inFile using 4 notitle lc rgbcolor 'white' axes x1y2, \
+   '' using 3 notitle lc rgb 'black' axes x1y2, \
+   '' using 2 notitle lc rgb 'gray' axes x1y2
+set object 1 rect from 0,0 to 1,4 fc lt 2 front

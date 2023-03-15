@@ -145,6 +145,8 @@ class ClearanceMetric(Metric):
                     "loc": obstacles[:, i_obst, 0:3][0].tolist(),
                     "r": float(obstacles[:, i_obst, 3][0]),
                 }
+        if np.any(np.isnan(minDistances)):
+            return {"short": -1, "allMinDist": distanceToObsts}
         return {"short": float(min(minDistances)), "allMinDist": distanceToObsts}
 
 class InverseClearanceMetric(ClearanceMetric):

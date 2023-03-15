@@ -1,9 +1,13 @@
-import yaml
 import os
+import re
 import logging
+import subprocess
 import csv
+import yaml
 
 from plannerbenchmark.postProcessing.caseEvaluation import CaseEvaluation
+
+pkg_path = os.path.dirname(__file__) + "/../postProcessing/"
 
 
 class SeriesEvaluation(object):
@@ -23,6 +27,19 @@ class SeriesEvaluation(object):
     def __init__(self, folder: str, recycle: bool = False):
         self._folder: str = folder
         self._recycle: bool = recycle
+        os.makedirs(f"{self._folder}/plot", exist_ok=True)
+        os.makedirs(f"{self._folder}/data", exist_ok=True)
+        self.getPlannerNames()
+
+    def getPlannerNames(self) -> list:
+        """Extracts the different planners present in the series."""
+        plannerNames = set()
+        pattern = re.compile(r"(\D*)_\d{8}_\d{6}")
+        for fname in os.listdir(self._folder):
+            match = re.match(pattern, fname)
+            if match:
+                plannerNames.add(match.group(1))
+        self._planner_names = sorted(plannerNames)
 
     def setMetrics(self, metricNames: list) -> None:
         self._metricNames = metricNames
@@ -40,6 +57,8 @@ class SeriesEvaluation(object):
         self._kpis = {}
         for fullPath in fullPaths:
             if not os.path.isdir(fullPath):
+                continue
+            if fullPath[-4:] in ['data', 'plot']:
                 continue
             logging.info(f"Evaluating experiment from folder : {fullPath}")
             totalExps += 1
@@ -90,7 +109,7 @@ class SeriesEvaluation(object):
         successes = {}
         for plannerKey in self._kpis:
             success = {-2: 0, -1: 0, 1: 0}
-            resultsTableFile = self._folder + "/resultsTable_" + plannerKey + ".csv"
+            resultsTableFile = self._folder + "/data/resultsTable_" + plannerKey + ".csv"
             with open(resultsTableFile, "w") as file:
                 csv_writer = csv.writer(file, delimiter=" ")
                 csv_header = self.filterMetricNames()
@@ -103,7 +122,7 @@ class SeriesEvaluation(object):
                         )
                         csv_writer.writerow([timeStampKey] + kpis_timeStamp)
             successes[plannerKey] = success
-        successTableFile = self._folder + "/successTable.csv"
+        successTableFile = self._folder + "/data/successTable.csv"
         with open(successTableFile, "w") as file:
             csv_writer = csv.writer(file, delimiter=" ")
             csv_header = ["planner", -2, -1, 1]
@@ -117,3 +136,21 @@ class SeriesEvaluation(object):
                         successes[planner][1],
                     ]
                 )
+
+    def plot(self) -> None:
+        """Calls the script to generate the series plots."""
+        curPath = os.path.dirname(os.path.abspath(__file__)) + "/"
+        curPath = pkg_path
+        createPlotFolder = curPath + "plottingSeries"
+        for planner_name in self._planner_names:
+            subprocess.Popen(
+                [
+                    "gnuplot",
+                    "-c",
+                    "makeSeriesPlot.gpi",
+                    f"{self._folder}/",
+                    planner_name,
+                ],
+                cwd=createPlotFolder,
+                stdout=subprocess.PIPE,
+            ).wait()
