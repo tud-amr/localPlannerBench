@@ -8,6 +8,7 @@ import logging
 
 from urdfenvs.robots.generic_urdf import GenericUrdfReacher
 from urdfenvs.robots.generic_urdf import GenericDiffDriveRobot
+from urdfenvs.sensors.full_sensor import FullSensor
 
 from forwardkinematics.urdfFks.generic_urdf_fk import GenericURDFFk
 from mpscenes.goals.goal_composition import GoalComposition
@@ -192,6 +193,7 @@ class Experiment(object):
             "urdf-env-v0",
             dt=self.dt(), robots=[robot], render=render
         )
+        self.addScene(env)
         return env
 
 
@@ -203,6 +205,13 @@ class Experiment(object):
                 env.add_goal(sub_goal)
         except Exception as e:
             logging.error(f"Error occured when adding goal to the scene, {e}")
+        full_sensor = FullSensor(
+            goal_mask=["position"],
+            obstacle_mask=["position", "velocity", "size"],
+            variance=0,
+        )
+        env.add_sensor(full_sensor, robot_ids = [0])
+        env.set_spaces()
 
     def shuffleInitConfiguration(self):
         q0_new = np.random.uniform(low=self.limits()[0], high=self.limits()[1])

@@ -17,9 +17,9 @@ keywords = ["robotics", "motion-planning", "benchmark"]
 [tool.poetry.dependencies]
 python = "^3.8,<3.10"
 fabrics = {version = "^0.6.2", optional = true}
-urdfenvs = {git = "https://github.com/maxspahn/gym_envs_urdf.git", rev = "develop"}
 robotmpcs = {version = "^0.2.1", optional = true}
 forwardkinematics = "^1.1.1"
+urdfenvs = "^0.7.1"
 
 [tool.poetry.extras]
 fabric = ['fabrics']

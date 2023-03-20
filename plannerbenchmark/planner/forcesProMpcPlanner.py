@@ -148,14 +148,14 @@ class ForcesProMpcPlanner(Planner):
                 paramsIndexObstR = self._npar * i + self._paramMap['obst'][j * (obst.dimension() + 1) + obst.dimension()]
                 self._params[paramsIndexObstR] = obst.radius()
 
-    def update_obstacles(self, obst_array: np.ndarray):
+    def update_obstacles(self, obst_array: dict):
         j = -1
-        for obst in obst_array:
+        for _, obst in obst_array.items():
             j += 1
-            obst_position = obst[0]
-            obst_velocity = obst[1]
-            obst_acceleration = np.zeros_like(obst[0])
-            obst_radius = obst[2]
+            obst_position = obst['position']
+            obst_velocity = obst['velocity']
+            obst_acceleration = np.zeros_like(obst_position)
+            obst_radius = obst['size']
             for i in range(self._config.time_horizon):
                 for m_i in range(3):
                     paramsIndexObstX = self._npar * i + self._paramMap['obst'][j * 4 + m_i]
@@ -187,10 +187,11 @@ class ForcesProMpcPlanner(Planner):
             for j, position in enumerate(primeGoal.position()):
                 self._params[self._npar * i + self._paramMap["g"][j]] = position
 
-    def update_goal(self, goal: np.ndarray):
+    def update_goal(self, goal: dict):
+        goal_key = list(goal.keys())[0]
         for i in range(self._config.time_horizon):
             for j in range(3):
-                self._params[self._npar * i + self._paramMap["g"][j]] = goal[0][0][j] 
+                self._params[self._npar * i + self._paramMap["g"][j]] = goal[goal_key]['position'][j] 
 
     def robot_identifier(self):
         return self._exp.urdf_file().split('.')[0].split('/')[-1]

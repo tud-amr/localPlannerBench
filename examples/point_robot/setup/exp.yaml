@@ -48,7 +48,7 @@ limits:
     - 5.0
 r_body: 0.3
 randomObstacles:
-  number: 1
+  number: 2
 obstacles:
   obst0:
     type: sphere
@@ -60,34 +60,22 @@ obstacles:
       radius: 0.7
     low:
       position:
-        - -5.0
-        - -5.0
+        - 1.0
+        - -2.0
         - 0.0
-      radius: 0.0
+      radius: 0.1
     high:
       position:
-        - 5.0
-        - 5.0
+        - 3.0
+        - 2.0
         - 0.0
-      radius: 1.0
+      radius: 0.5
   obst1:
     type: sphere
     geometry:
       position: 
         - 20.4
         - 0.4
-        - 0.0
-      radius: 1.0
-    low:
-      position:
-        - -5.0
-        - -5.0
-        - 0.0
-      radius: 0.1
-    high:
-      position:
-        - 5.0
-        - 5.0
         - 0.0
       radius: 1.0
 selfCollision:

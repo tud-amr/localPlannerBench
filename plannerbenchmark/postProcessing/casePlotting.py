@@ -24,53 +24,21 @@ class CasePlotting(object):
         """
         curPath = os.path.dirname(os.path.abspath(__file__)) + "/"
         curPath = pkg_path
-        if self._experiment.robotType() == "planarArm":
-            createPlotFolder = curPath + "plottingPlanarArm"
-            subprocess.Popen(
-                [
-                    "./createPlot",
-                    self._folder,
-                    str(self._experiment.n())
-                ],
-                cwd=createPlotFolder,
-                stdout=subprocess.PIPE,
-            ).wait()
-        elif self._experiment.robotType() == "pointRobot":
+        if 'point' in self._experiment.urdf_file():
             createPlotFolder = curPath + "plottingPointMass/"
             subprocess.Popen(
                 ["./createPlot", self._folder],
                 cwd=createPlotFolder,
                 stdout=subprocess.PIPE,
             ).wait()
-        elif self._experiment.robotType() == "pointRobotUrdf":
-            createPlotFolder = curPath + "plottingPointMassUrdf/"
-            subprocess.Popen(
-                ["./createPlot", self._folder],
-                cwd=createPlotFolder,
-                stdout=subprocess.PIPE,
-            ).wait()
-        elif self._experiment.robotType() == "panda":
+        elif 'panda' in self._experiment.urdf_file():
             createPlotFolder = curPath + "plottingPanda/"
             subprocess.Popen(
                 ["./createPlot", self._folder],
                 cwd=createPlotFolder,
             ).wait()
-        elif self._experiment.robotType() == 'groundRobot':
+        elif 'boxer' in self._experiment.urdf_file():
             createPlotFolder = curPath + 'plottingGroundRobot/'
-            subprocess.Popen(
-                ["./createPlot", self._folder],
-                cwd=createPlotFolder,
-                stdout=subprocess.PIPE,
-            ).wait()
-        elif self._experiment.robotType() == 'boxer':
-            createPlotFolder = curPath + 'plottingGroundRobot/'
-            subprocess.Popen(
-                ["./createPlot", self._folder],
-                cwd=createPlotFolder,
-                stdout=subprocess.PIPE,
-            ).wait()
-        elif self._experiment.robotType() == 'albert':
-            createPlotFolder = curPath + 'plottingAlbert/'
             subprocess.Popen(
                 ["./createPlot", self._folder],
                 cwd=createPlotFolder,

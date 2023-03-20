@@ -165,20 +165,26 @@ class FabricPlanner(Planner):
         if self._exp.base_type() == 'diffdrive':
             vel = np.concatenate((kwargs['joint_state']['forward_velocity'] , kwargs['joint_state']['velocity'][2:]))
             self._runtime_arguments['qudot'] = vel
-        for i, obstacle in enumerate(kwargs['FullSensor']['obstacles']):
-            self._runtime_arguments[f'radius_obst_{i}'] = obstacle[2]
-            self._runtime_arguments[f'x_obst_{i}'] = obstacle[0]
+        i = -1
+        for _ , obstacle in kwargs['FullSensor']['obstacles'].items():
+            i += 1
+            self._runtime_arguments[f'radius_obst_{i}'] = obstacle['size']
+            self._runtime_arguments[f'x_obst_{i}'] = obstacle['position']
             for collision_link in self._exp.collision_links():
-                self._runtime_arguments[f'x_ref_dynamic_obst_{i}_{collision_link}_leaf'] = obstacle[0]
-                self._runtime_arguments[f'xdot_ref_dynamic_obst_{i}_{collision_link}_leaf'] = obstacle[1]
+                self._runtime_arguments[f'x_ref_dynamic_obst_{i}_{collision_link}_leaf'] = obstacle['position']
+                self._runtime_arguments[f'xdot_ref_dynamic_obst_{i}_{collision_link}_leaf'] = obstacle['velocity']
                 self._runtime_arguments[f'xddot_ref_dynamic_obst_{i}_{collision_link}_leaf'] = np.zeros(3)
         for i, sub_goal in enumerate(self._goal.sub_goals()):
+            goal_key = list(kwargs['FullSensor']['goals'].keys())[i]
             self._runtime_arguments[f'weight_goal_{i}'] = sub_goal.weight() * self.config.attractor['k_psi']
-            self._runtime_arguments[f'x_goal_{i}'] = kwargs['FullSensor']['goals'][i][0][sub_goal.indices()]
+            self._runtime_arguments[f'x_goal_{i}'] = kwargs['FullSensor']['goals'][goal_key]['position'][sub_goal.indices()]
 
     def computeAction(self, **kwargs):
         self.adapt_runtime_arguments(**kwargs)
         action = self._planner.compute_action(**self._runtime_arguments)
+        if np.any(np.isnan(action)):
+            action = np.zeros_like(action)
+            logging.warning(f"Action computed by fabric contained nan.")
         if self._exp.control_mode() == 'vel':
             action = kwargs['joint_state']['velocity'] + action * self._exp.dt()
         logging.debug(f"Action computed by fabric: {action}")

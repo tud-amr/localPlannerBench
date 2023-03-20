@@ -2142,30 +2142,23 @@ pyyaml = "*"
 
 [[package]]
 name = "urdfenvs"
-version = "0.6.1"
+version = "0.7.1"
 description = "Simple simulation environment for robots, based on the urdf files."
 category = "main"
 optional = false
-python-versions = "^3.8"
-files = []
-develop = false
+python-versions = ">=3.8,<4.0"
+files = [
+    {file = "urdfenvs-0.7.1-py3-none-any.whl", hash = "sha256:30842636aa3d639a19b0e17fabd947b7e644009ef924e5068a5fd971e97be855"},
+    {file = "urdfenvs-0.7.1.tar.gz", hash = "sha256:b18a8d10b914c2fa681f758088d3420868812100e35ac5bfd8c5e68c978ab22b"},
+]
 
 [package.dependencies]
-deprecation = "^2.1.0"
-gym = "^0.22"
-mpscenes = "^0.3.1"
-numpy = "^1.19,<1.24"
-pybullet = "^3.2.1"
-yourdfpy = "^0.0.52"
-
-[package.extras]
-keyboard = []
-
-[package.source]
-type = "git"
-url = "https://github.com/maxspahn/gym_envs_urdf.git"
-reference = "develop"
-resolved_reference = "05db237e1068278d2692bf2022ade37fdc137ddb"
+deprecation = ">=2.1.0,<3.0.0"
+gym = ">=0.22,<0.23"
+mpscenes = ">=0.3.1,<0.4.0"
+numpy = ">=1.19,<1.24"
+pybullet = ">=3.2.1,<4.0.0"
+yourdfpy = ">=0.0.52,<0.0.53"
 
 [[package]]
 name = "urllib3"
@@ -2421,4 +2414,4 @@ mpc = ["robotmpcs"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8,<3.10"
-content-hash = "25f33917671fbbb422f6825dc4871655a8656d7127fcb4749e8ccf2dd2213cd6"
+content-hash = "4d45215b3344d55bca07dc6b97ea4a5cc1bf2a8f1a8ac9f628fef206bf3baf99"

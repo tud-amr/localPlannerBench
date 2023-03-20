@@ -30,14 +30,16 @@ class Logger(object):
             resDict['fk' + link_name + "_x"] = fk[0]
             resDict['fk' + link_name + "_y"] = fk[1]
             resDict['fk' + link_name + "_z"] = fk[2]
-        for i_goal, goal in enumerate(observation['FullSensor']['goals']):
+        i_goal = -1
+        for _, goal in observation['FullSensor']['goals'].items():
+            i_goal += 1
             for j_dim in range(3):
-                resDict['goal_' +str(i_goal) + "_" + str(j_dim) + '_0'] = goal[0][j_dim]
-        for i_obstacle, obstacle in enumerate(observation['FullSensor']['obstacles']):
+                resDict['goal_' +str(i_goal) + "_" + str(j_dim) + '_0'] = goal['position'][j_dim]
+        for i_obstacle, obstacle in enumerate(list(observation['FullSensor']['obstacles'].values())):
             for j_dim in range(3):
-                resDict['obst_' + str(i_obstacle) + '_' + str(j_dim) + '_0'] = obstacle[0][j_dim]
-                resDict['obst_' + str(i_obstacle) + '_' + str(j_dim) + '_1'] = obstacle[1][j_dim]
-            resDict['obst_' + str(i_obstacle) + '_radius'] = obstacle[2]
+                resDict['obst_' + str(i_obstacle) + '_' + str(j_dim) + '_0'] = obstacle['position'][j_dim]
+                resDict['obst_' + str(i_obstacle) + '_' + str(j_dim) + '_1'] = obstacle['velocity'][j_dim]
+            resDict['obst_' + str(i_obstacle) + '_radius'] = obstacle['size'][0]
         self._res.append(resDict)
 
     def saveResult(self, folderPath):

@@ -8,7 +8,6 @@ import numpy as np
 import signal
 import logging
 
-from urdfenvs.sensors.full_sensor import FullSensor
 
 from plannerbenchmark.generic.experiment import Experiment, ExperimentInfeasible
 from plannerbenchmark.generic.logger import Logger
@@ -136,14 +135,10 @@ class Runner(object):
             for i, obst in enumerate(self._experiment.obstacles()):
                 self._rosConverter.setObstacle(obst, i)
         else:
+            self._env.empty_scene()
             ob = self._env.reset(pos=q0, vel=q0dot)
             if not self._ros:
                 self._experiment.addScene(self._env)
-            full_sensor = FullSensor(
-                goal_mask=["position"],
-                obstacle_mask=["position", "velocity", "radius"]
-            )
-            self._env.add_sensor(full_sensor, robot_ids = [0])
             t0 = 0.0
         return ob, t0
 
