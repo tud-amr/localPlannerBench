@@ -194,7 +194,7 @@ class ForcesProMpcPlanner(Planner):
                 self._params[self._npar * i + self._paramMap["g"][j]] = goal[goal_key]['position'][j] 
 
     def robot_identifier(self):
-        return self._exp.urdf_file().split('.')[0].split('/')[-1]
+        return self._exp.urdf_file().split('.')[-2].split('/')[-1]
 
     def concretize(self):
         self._actionCounter = self.config.interval
